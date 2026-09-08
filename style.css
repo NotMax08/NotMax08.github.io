@@ -99,8 +99,8 @@ img,video{max-width:100%}
 
 .hero-portrait{
   margin:0 0 1.5rem;
-  width:128px;
-  height:128px;
+  width:180px;
+  height:180px;
   border-radius:50%;
   overflow:hidden;
   background:var(--viewport);
