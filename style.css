@@ -379,7 +379,7 @@ footer{
 
 .graph-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
   gap:1.25rem;
   margin:0 0 clamp(2rem,5vw,3.5rem);
 }

@@ -45,18 +45,14 @@
 
   <div class="wrap">
     <div class="case-extra-media" style="text-align:center;">
-      <img src="../assets/rico/picture.jpg" alt="RICO robotic arm portrait" style="max-width:220px;margin:0 auto;border-radius:8px;">
+      <img src="../assets/rico/picture.jpg" alt="RICO robotic arm portrait" style="max-width:380px;margin:0 auto;border-radius:8px;">
     </div>
   </div>
 
   <div class="wrap case-body">
     <div>
-      <h2>What it is</h2>
-      <p>A natural language request is sent to a Groq LLM which outputs a series of actions that help the robot accomplish the requested task. At the same time, an OpenCV pipeline runs and on each frame computes a homography transformation to produce a bird's-eye view. When an object is detected using a trained YOLOv8 model, the detection coordinates are multiplied by the transformation matrix to get the object's position in workspace coordinates. That position is then fed into an inverse kinematics calculator, which the arm uses to reach and grasp the object.</p>
-
       <h2>How the pipeline runs</h2>
-      <p>Speech goes to a Groq-hosted language model, which parses the natural language into a structured action rather than trying to control the arm directly. That keeps the model in the role it is actually good at, turning ambiguous human phrasing into a specific target, and leaves motion planning to code that is deterministic.</p>
-      <p>A fine-tuned YOLOv8 model then locates the requested tool in the camera frame, and inverse kinematics solves the joint angles needed to reach it.</p>
+      <p>A natural language request is sent to a Groq LLM which outputs a series of actions that help the robot accomplish the requested task. At the same time, an OpenCV pipeline runs and on each frame computes a homography transformation to produce a bird's-eye view. When an object is detected using a trained YOLOv8 model, the detection coordinates are multiplied by the transformation matrix to get the object's position in workspace coordinates. That position is then fed into an inverse kinematics calculator, which the arm uses to reach and grasp the object.</p>
 
       <div class="hard">
         <span class="hard-label">Bridging vision and motion</span>
