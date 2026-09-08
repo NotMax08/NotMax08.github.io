@@ -66,8 +66,7 @@
       <p>A complete ROS2 autonomy stack running on a Nova Carter inside Isaac Sim. The robot enters a maze it has never seen, builds a map of it with SLAM, localizes itself against that map with AMCL, and uses Nav2 to plan and follow a path to a goal. No human input at any point after the goal is set.</p>
 
       <h2>Building the transform tree</h2>
-      <p>I built the TF tree from a minimal set of frames to ensure each relationship was explicit and debuggable. That discipline helped when diagnosing transform-related issues in the Nav2 stack.</p>
-
+      <p>To initialize Nav2, we need to publish to both /tf and /tf_static. To accomplish this, I used Isaac Sim's action graph editor, publishing transformations between important sensory functions.
       <h2>System architecture</h2>
       <p>The simulated robot in Isaac Sim and the ROS2/Nav2 stack communicate over standard ROS2 topics and transforms. Each platform both publishes and subscribes where appropriate so the pipeline looks like a set of cooperating producers and consumers:</p>
       <ul>
@@ -84,14 +83,9 @@
 
       <div class="hard">
         <span class="hard-label">The bug worth writing down</span>
-        <p>The SLAM map came out warped. Walls that were straight in the maze appeared as curves in the occupancy grid. Every symptom pointed at scan matching, so that is where I looked first, and tuning it changed nothing.</p>
-        <p>The actual cause was a publish rate mismatch between the LiDAR and the odometry. Scans were arriving faster than the pose estimates they were being fused against, so each scan was registered against a slightly stale pose. Over a lap of the maze those small errors accumulated into visible curvature. Aligning the publish rates fixed the map geometry completely.</p>
+        <p>The SLAM map came out warped. Walls that were straight in the maze appeared as curves in the occupancy grid.</p>
+        <p>The issue was caused by a noticeable difference in topic rate between the lidar (slower) and the odometry (fast). Low loop time of lidar compared to higher loop time of odom creates conflict where robot moves and updates position half-way between a lidar time, placing each scan at a slightly rotated pose. This overall creates an inconsistent and buggy SLAM map. Fixed by raising the RTX LiDAR's scanRateBaseHz in Isaac Sim to 20 Hz. </p>
       </div>
-
-      
-
-      <h2>Why that mattered</h2>
-      <p>It is a good reminder that in a pipeline, a bad output does not mean the last stage is broken. The map looked wrong, but the mapper was fine. The data it was being fed was not.</p>
 
       <h2>Result</h2>
       <p>End to end navigation through an unmapped maze, including the mapping and localization stages, running entirely in simulation on the Nova Carter platform.</p>

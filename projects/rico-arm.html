@@ -60,7 +60,7 @@
 
       <div class="hard">
         <span class="hard-label">Bridging vision and motion</span>
-        <p>Detections live in pixel space and the arm lives in millimetres. A bounding box centre at pixel (412, 260) means nothing to an IK solver.</p>
+        <p>To accurately localize the object, we need to convert the detection coordinate (in pixels) into a scalable quantity(mm). A bounding box centre at pixel (412, 260) means nothing to an IK solver.</p>
         <p>I used a homography transform to map the camera plane onto the workspace plane, which turns any detection into a real coordinate on the bench that the solver can reach for. This is the piece that makes the whole thing work with tools placed anywhere, rather than at memorised positions.</p>
         <h3>Homography examples</h3>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
