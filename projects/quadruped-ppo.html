@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quadruped locomotion with PPO — Max Yuan</title>
+<meta name="description" content="Training a Unitree Go2 to walk in Isaac Lab with PPO, no reference gait, through reward shaping and curriculum learning.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="../index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#toolkit">Toolkit</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+  <a class="back" href="../index.html#work">Back to all work</a>
+</div>
+
+<main>
+
+  <header class="wrap case-head">
+    <h1>Quadruped locomotion from scratch with PPO</h1>
+    <p class="case-stack"><span>Isaac Lab</span><span>rsl_rl</span><span>PyTorch</span><span>PPO</span><span>Python</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video autoplay muted loop playsinline poster="../assets/go2-cover.jpg" aria-label="Trained Go2 gait in Isaac Lab">
+        <source src="../assets/go2.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+      <h2>What it is</h2>
+      <p>A Unitree Go2 trained to walk inside a custom ManagerBased reinforcement learning environment in Isaac Lab. The policy learns velocity tracking from proprioception alone. There is no reference gait, no motion capture data, and nothing for it to imitate. It has to discover walking.</p>
+
+      <h2>The approach</h2>
+      <p>Almost all of the engineering here was reward design rather than algorithm selection. PPO is efficient at finding whatever the reward function actually pays for, which is rarely what you meant. It converges fast onto degenerate strategies, so the job becomes making those strategies unattractive without hand-specifying the behaviour you want.</p>
+
+      <div class="hard">
+        <span class="hard-label">The part that took the longest</span>
+        <p>Early policies learned to crawl. Crawling tracks the commanded velocity perfectly well and scores highly, but it is useless on real terrain. I wrote a custom height reward that priced crawling out of the solution space.</p>
+        <p>That created a second problem. Once the robot was penalised for staying low, it was being asked to learn balance and foot clearance at the same time, and it learned neither. I used curriculum learning to gate the foot-lifting rewards until the policy could hold itself upright, so it solved one problem before being handed the next.</p>
+      </div>
+
+      <h2>Regularization</h2>
+      <p>Raw policies twitch. A squared penalty on action rate smoothed joint motion considerably, and it also acted as regularization, keeping the policy from overfitting to simulator-specific noise that would not survive a transfer to hardware.</p>
+
+      <h2>Result and what is next</h2>
+      <p>Stable directional locomotion across a range of commanded velocities, with a gait that lifts its feet properly rather than dragging. Next steps are getup recovery policies for when the robot falls, and the domain randomization work needed for sim-to-real transfer.</p>
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Platform</dt>
+        <dd>Unitree Go2</dd>
+        <dt>Simulator</dt>
+        <dd>NVIDIA Isaac Lab</dd>
+        <dt>Algorithm</dt>
+        <dd>PPO via rsl_rl</dd>
+        <dt>Role</dt>
+        <dd>Solo project</dd>
+      </dl>
+      <a class="btn btn-solid" href="https://github.com/NotMax08/unitree_go2_ppo_isaaclab">Read the code</a>
+    </aside>
+  </div>
+
+  <div class="wrap">
+    <div class="next">
+      Next project: <a href="maze-nav2.html">Autonomous maze navigation on a Nova Carter</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RICO, a voice-controlled robotic arm — Max Yuan</title>
+<meta name="description" content="A 4-DOF robotic arm that retrieves tools from natural language voice commands using an LLM, a fine-tuned YOLOv8 model, and inverse kinematics.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="../index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#toolkit">Toolkit</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+  <a class="back" href="../index.html#work">Back to all work</a>
+</div>
+
+<main>
+
+  <header class="wrap case-head">
+    <h1>RICO, a robotic arm that fetches tools when you ask</h1>
+    <p class="case-stack"><span>Inverse kinematics</span><span>YOLOv8</span><span>OpenCV</span><span>Groq LLM</span><span>Python</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video autoplay muted loop playsinline poster="../assets/rico-cover.jpg" aria-label="RICO robotic arm retrieving a tool">
+        <source src="../assets/rico.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+      <h2>What it is</h2>
+      <p>Built at Eureka Hacks. A 4 degree of freedom arm that takes a spoken request, finds the right tool somewhere on the bench, and hands it over. Nothing about the tool positions is fixed in advance. You can move the tools between requests and it still works.</p>
+
+      <h2>How the pipeline runs</h2>
+      <p>Speech goes to a Groq-hosted language model, which parses the natural language into a structured action rather than trying to control the arm directly. That keeps the model in the role it is actually good at, turning ambiguous human phrasing into a specific target, and leaves motion planning to code that is deterministic.</p>
+      <p>A fine-tuned YOLOv8 model then locates the requested tool in the camera frame, and inverse kinematics solves the joint angles needed to reach it.</p>
+
+      <div class="hard">
+        <span class="hard-label">Bridging vision and motion</span>
+        <p>Detections live in pixel space and the arm lives in millimetres. A bounding box centre at pixel (412, 260) means nothing to an IK solver.</p>
+        <p>I used a homography transform to map the camera plane onto the workspace plane, which turns any detection into a real coordinate on the bench that the solver can reach for. This is the piece that makes the whole thing work with tools placed anywhere, rather than at memorised positions.</p>
+      </div>
+
+      <h2>Result</h2>
+      <p>Voice command to grasp, with no fixed tool positions and no per-tool calibration. Built and demonstrated inside a hackathon weekend.</p>
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Built at</dt>
+        <dd>Eureka Hacks</dd>
+        <dt>Hardware</dt>
+        <dd>4-DOF arm, single overhead camera</dd>
+        <dt>Perception</dt>
+        <dd>Fine-tuned YOLOv8, homography transform</dd>
+        <dt>Role</dt>
+        <dd>Team project</dd>
+      </dl>
+      <!-- Point this at the real repo, or delete this line entirely. -->
+      <a class="btn btn-solid" href="https://github.com/NotMax08">Read the code</a>
+    </aside>
+  </div>
+
+  <div class="wrap">
+    <div class="next">
+      Next project: <a href="ftc-18844.html">FIRST Tech Challenge 18844</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

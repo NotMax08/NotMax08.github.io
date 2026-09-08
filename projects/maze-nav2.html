@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Autonomous maze navigation on a Nova Carter — Max Yuan</title>
+<meta name="description" content="A full ROS2 Nav2 autonomy stack on a Nova Carter in Isaac Sim, with SLAM mapping, AMCL localization, and a TF tree built from scratch.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="../index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#toolkit">Toolkit</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+  <a class="back" href="../index.html#work">Back to all work</a>
+</div>
+
+<main>
+
+  <header class="wrap case-head">
+    <h1>Autonomous maze navigation on a Nova Carter</h1>
+    <p class="case-stack"><span>ROS2</span><span>Nav2</span><span>SLAM Toolbox</span><span>AMCL</span><span>Isaac Sim</span><span>RViz</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video autoplay muted loop playsinline poster="../assets/nav2-cover.jpg" aria-label="Nova Carter navigating a maze in Isaac Sim">
+        <source src="../assets/nav2.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+      <h2>What it is</h2>
+      <p>A complete ROS2 autonomy stack running on a Nova Carter inside Isaac Sim. The robot enters a maze it has never seen, builds a map of it with SLAM, localizes itself against that map with AMCL, and uses Nav2 to plan and follow a path to a goal. No human input at any point after the goal is set.</p>
+
+      <h2>Building the transform tree</h2>
+      <p>I built the TF tree from scratch rather than starting from a working configuration. That is slower, but it means every frame relationship in the system is one I can justify, and when something breaks I know where the frames come from. Nav2 is a large stack with a lot of assumptions baked in, and most of the debugging pain in it traces back to transforms.</p>
+
+      <div class="hard">
+        <span class="hard-label">The bug worth writing down</span>
+        <p>The SLAM map came out warped. Walls that were straight in the maze appeared as curves in the occupancy grid. Every symptom pointed at scan matching, so that is where I looked first, and tuning it changed nothing.</p>
+        <p>The actual cause was a publish rate mismatch between the LiDAR and the odometry. Scans were arriving faster than the pose estimates they were being fused against, so each scan was registered against a slightly stale pose. Over a lap of the maze those small errors accumulated into visible curvature. Aligning the publish rates fixed the map geometry completely.</p>
+      </div>
+
+      <h2>Why that mattered</h2>
+      <p>It is a good reminder that in a pipeline, a bad output does not mean the last stage is broken. The map looked wrong, but the mapper was fine. The data it was being fed was not.</p>
+
+      <h2>Result</h2>
+      <p>End to end navigation through an unmapped maze, including the mapping and localization stages, running entirely in simulation on the Nova Carter platform.</p>
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Platform</dt>
+        <dd>NVIDIA Nova Carter</dd>
+        <dt>Simulator</dt>
+        <dd>NVIDIA Isaac Sim</dd>
+        <dt>Stack</dt>
+        <dd>ROS2, Nav2, SLAM Toolbox, AMCL</dd>
+        <dt>Role</dt>
+        <dd>Solo project</dd>
+      </dl>
+      <a class="btn btn-solid" href="https://github.com/NotMax08/isaac-sim-maze-slam-nav2">Read the code</a>
+    </aside>
+  </div>
+
+  <div class="wrap">
+    <div class="next">
+      Next project: <a href="rico-arm.html">RICO, a robotic arm that fetches tools when you ask</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

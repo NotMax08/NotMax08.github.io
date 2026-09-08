@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FIRST Tech Challenge 18844 — Max Yuan</title>
+<meta name="description" content="Co-captain and lead programmer for FTC team 18844. PID point-to-point movement, two-wheel odometry with IMU heading, and CNN-driven automated pickup. 2025 World Championships.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="../index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#toolkit">Toolkit</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+  <a class="back" href="../index.html#work">Back to all work</a>
+</div>
+
+<main>
+
+  <header class="wrap case-head">
+    <h1>FIRST Tech Challenge 18844, co-captain and lead programmer</h1>
+    <p class="case-stack"><span>PID control</span><span>Odometry</span><span>CNN</span><span>Java</span><span>OpenCV</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video autoplay muted loop playsinline poster="../assets/ftc-cover.jpg" aria-label="FTC team 18844 competition robot">
+        <source src="../assets/ftc.mp4" type="video/mp4">
+      </video>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+      <h2>What it is</h2>
+      <p>Competitive robotics with team 18844, ending at the 2025 FIRST World Championships. I was co-captain and owned the software side, which meant everything from the autonomous routines to the driver-assist code used during matches.</p>
+
+      <h2>Localization</h2>
+      <p>Autonomous scoring is entirely dependent on the robot knowing where it is. I built two-wheel odometry using dead wheels for translation, fused with IMU data for heading.</p>
+
+      <div class="hard">
+        <span class="hard-label">Where the constraint was</span>
+        <p>Dead wheel encoders are accurate over short distances but their heading estimate drifts badly across a full match, because small wheel slip integrates into a large angular error. The IMU has the opposite profile, its heading is stable but it is useless for translation.</p>
+        <p>So each sensor was used only for what it is actually good at. Heading from the IMU, translation from the encoders. That split is what kept the autonomous routines repeatable late in a match rather than only in the first thirty seconds.</p>
+      </div>
+
+      <h2>Movement and pickup</h2>
+      <p>On top of localization sat a point to point PID movement system, letting the autonomous routines be written as a sequence of field coordinates rather than timed motor commands. I also trained a custom CNN to drive an automated pickup system, so the robot could identify and collect game elements without precise driver alignment.</p>
+
+      <h2>Result</h2>
+      <p>1st place Connect Award, Ochoa Division, at the 2025 FIRST World Championships.</p>
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Team</dt>
+        <dd>FTC 18844</dd>
+        <dt>Role</dt>
+        <dd>Co-captain, lead programmer</dd>
+        <dt>Award</dt>
+        <dd>1st Connect Award, Ochoa Division</dd>
+        <dt>Event</dt>
+        <dd>2025 FIRST World Championships</dd>
+      </dl>
+    </aside>
+  </div>
+
+  <div class="wrap">
+    <div class="next">
+      Back to the start: <a href="quadruped-ppo.html">Quadruped locomotion from scratch with PPO</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

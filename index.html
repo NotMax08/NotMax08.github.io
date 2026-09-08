@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Max Yuan — Robotics &amp; Reinforcement Learning</title>
+<meta name="description" content="Mechatronics Engineering student at the University of Waterloo. Quadruped locomotion with PPO in Isaac Lab, ROS2 Nav2 autonomy, and vision-guided manipulation.">
+<meta property="og:title" content="Max Yuan — Robotics &amp; Reinforcement Learning">
+<meta property="og:description" content="Quadruped locomotion with PPO in Isaac Lab, ROS2 Nav2 autonomy, and vision-guided manipulation.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#work">Work</a>
+      <a href="#toolkit">Toolkit</a>
+      <a href="#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+</div>
+
+<main>
+
+  <!-- ============ INTRO ============ -->
+  <section class="wrap intro">
+    <figure class="portrait">
+      <img src="assets/portrait.jpg" alt="Max Yuan">
+    </figure>
+    <div>
+      <h1>I build robots that learn how to move.</h1>
+      <p>Mechatronics Engineering at the University of Waterloo. I work in high fidelity simulators, mostly NVIDIA Isaac Sim and Isaac Lab, using ROS2 for communication and a mix of reinforcement learning and classical control. Right now I am focused on quadruped locomotion policies and what it takes to get them off the simulator and onto real hardware.</p>
+      <div class="actions">
+        <a class="btn btn-solid" href="#work">See the work</a>
+        <a class="btn" href="assets/resume.pdf">Resume</a>
+        <a class="btn" href="https://github.com/NotMax08">GitHub</a>
+        <a class="btn" href="https://linkedin.com/in/max-yuan-a0b34b36b">LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROJECTS ============ -->
+  <section class="wrap band" id="work">
+    <h2 class="band-head">Selected work</h2>
+
+    <div class="grid">
+
+      <a class="card" href="projects/quadruped-ppo.html">
+        <div class="card-shot">
+          <img src="assets/go2-cover.jpg" alt="Unitree Go2 quadruped walking in Isaac Lab">
+        </div>
+        <div class="card-text">
+          <h3>Quadruped locomotion from scratch with PPO</h3>
+          <p>A Unitree Go2 trained to walk with no reference gait to imitate. Most of the work was reward shaping, not algorithm choice.</p>
+          <p class="card-stack"><span>Isaac Lab</span><span>PPO</span><span>PyTorch</span></p>
+        </div>
+      </a>
+
+      <a class="card" href="projects/maze-nav2.html">
+        <div class="card-shot">
+          <img src="assets/nav2-cover.jpg" alt="Nova Carter robot navigating a maze in Isaac Sim">
+        </div>
+        <div class="card-text">
+          <h3>Autonomous maze navigation on a Nova Carter</h3>
+          <p>A full ROS2 autonomy stack. SLAM maps the maze, AMCL localizes, Nav2 plans and drives it, with no human input.</p>
+          <p class="card-stack"><span>ROS2</span><span>Nav2</span><span>SLAM</span></p>
+        </div>
+      </a>
+
+      <a class="card" href="projects/rico-arm.html">
+        <div class="card-shot">
+          <img src="assets/rico-cover.jpg" alt="RICO robotic arm retrieving a tool">
+        </div>
+        <div class="card-text">
+          <h3>RICO, a robotic arm that fetches tools when you ask</h3>
+          <p>Speak a request, the arm finds the tool on the bench and hands it over. Language model, object detection, and inverse kinematics.</p>
+          <p class="card-stack"><span>YOLOv8</span><span>OpenCV</span><span>Inverse kinematics</span></p>
+        </div>
+      </a>
+
+      <a class="card" href="projects/ftc-18844.html">
+        <div class="card-shot">
+          <img src="assets/ftc-cover.jpg" alt="FIRST Tech Challenge team 18844 competition robot">
+        </div>
+        <div class="card-text">
+          <h3>FIRST Tech Challenge 18844</h3>
+          <p>Co-captain and lead programmer. PID point-to-point movement, odometry with IMU heading, and CNN-driven automated pickup.</p>
+          <p class="card-stack"><span>PID control</span><span>Odometry</span><span>Java</span></p>
+        </div>
+      </a>
+
+    </div>
+  </section>
+
+  <!-- ============ TOOLKIT ============ -->
+  <section class="wrap band" id="toolkit">
+    <h2 class="band-head">Toolkit</h2>
+    <div class="kit">
+      <div>
+        <h3>Languages</h3>
+        <ul><li>Python</li><li>Java</li><li>C++</li></ul>
+      </div>
+      <div>
+        <h3>Simulation and robotics</h3>
+        <ul><li>Isaac Sim</li><li>Isaac Lab</li><li>ROS2</li><li>RViz</li><li>Onshape</li></ul>
+      </div>
+      <div>
+        <h3>Learning and vision</h3>
+        <ul><li>PyTorch</li><li>rsl_rl</li><li>OpenCV</li><li>YOLOv8</li></ul>
+      </div>
+      <div>
+        <h3>Focus areas</h3>
+        <ul><li>Reinforcement learning</li><li>PID control</li><li>Inverse kinematics</li><li>Odometry and SLAM</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="wrap band" id="contact">
+    <div class="contact">
+      <h2>Looking for a robotics or ML co-op.</h2>
+      <p>Happy to talk about locomotion policies, sim-to-real, or anything that involves getting a robot to do something it could not do yesterday.</p>
+      <div class="actions">
+        <a class="btn btn-solid" href="mailto:maxyuan081205@gmail.com">Email me</a>
+        <a class="btn" href="https://linkedin.com/in/max-yuan-a0b34b36b">LinkedIn</a>
+        <a class="btn" href="assets/resume.pdf">Resume</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <footer>Built and hosted on GitHub Pages.</footer>
+  </div>
+
+</main>
+
+</body>
+</html>
