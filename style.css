@@ -11,7 +11,7 @@
   --ink-soft:#5c6462;
   --ink-invert:#e6e9e4;
   --rule:#c6cbc2;
-  --signal:#b23a2b;
+  --signal:#707a74;
   --measure:66ch;
   --pad:clamp(1.25rem,5vw,4.5rem);
 }
@@ -149,7 +149,7 @@ img,video{max-width:100%}
   transition:border-color .15s ease,color .15s ease;
 }
 
-.pill:hover{border-color:var(--signal);color:var(--signal)}
+.pill:hover{border-color:var(--signal);color:var(--signal);box-shadow:0 4px 14px rgba(22,25,26,.08)}
 
 .actions{
   display:flex;
@@ -165,7 +165,7 @@ img,video{max-width:100%}
   text-decoration:none;
   padding:.65rem 1.25rem;
   border:1px solid var(--ink);
-  border-radius:2px;
+  border-radius:10px;
   background:transparent;
   transition:background .15s ease,color .15s ease;
 }
@@ -205,13 +205,14 @@ img,video{max-width:100%}
   text-decoration:none;
   color:inherit;
   border:1px solid var(--rule);
-  border-radius:3px;
+  border-radius:16px;
   overflow:hidden;
   background:var(--raised);
-  transition:border-color .15s ease;
+  box-shadow:0 2px 10px rgba(22,25,26,.04);
+  transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease;
 }
 
-.card:hover{border-color:var(--signal)}
+.card:hover{border-color:var(--signal);box-shadow:0 10px 26px rgba(22,25,26,.09);transform:translateY(-2px)}
 
 .card-shot{
   aspect-ratio:16/10;
@@ -278,7 +279,7 @@ img,video{max-width:100%}
 
 .contact{
   background:var(--raised);
-  border-radius:3px;
+  border-radius:20px;
   padding:clamp(2rem,5vw,3.5rem);
 }
 
@@ -340,7 +341,7 @@ footer{
 
 .case-media{
   background:var(--viewport);
-  border-radius:3px;
+  border-radius:16px;
   overflow:hidden;
   aspect-ratio:16/9;
   margin-bottom:clamp(2rem,5vw,3.5rem);
@@ -362,8 +363,47 @@ footer{
 
 .case-extra-media img{
   width:100%;
-  border-radius:3px;
+  border-radius:14px;
   display:block;
+}
+
+/* ---------- image + subheading grid (project pages) ---------- */
+
+.case-section-head{
+  font-size:1.05rem;
+  font-weight:600;
+  letter-spacing:-.01em;
+  color:var(--ink-soft);
+  margin:0 0 1.1rem;
+}
+
+.graph-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:1.25rem;
+  margin:0 0 clamp(2rem,5vw,3.5rem);
+}
+
+.graph-item{
+  margin:0;
+  background:var(--raised);
+  border:1px solid var(--rule);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(22,25,26,.04);
+}
+
+.graph-item img{
+  width:100%;
+  display:block;
+}
+
+.graph-item figcaption{
+  font-family:Archivo,sans-serif;
+  font-size:.88rem;
+  font-weight:600;
+  color:var(--ink-soft);
+  padding:.75rem 1rem;
 }
 
 .case-body{
@@ -386,8 +426,9 @@ footer{
 .case-body p{margin:0 0 1.15rem;max-width:var(--measure)}
 
 .hard{
-  border-left:2px solid var(--signal);
-  padding-left:1.15rem;
+  background:var(--raised);
+  border-radius:14px;
+  padding:1.15rem 1.35rem;
   margin:1.75rem 0;
 }
 
@@ -449,14 +490,14 @@ footer{
   max-width:980px;
   margin:2.25rem auto;
   padding:1.25rem 1.5rem;
-  border-radius:10px;
+  border-radius:20px;
   box-shadow:0 10px 30px rgba(16,20,19,0.06);
   color:var(--ink);
 }
 
 .project-card .case-media{
   background:transparent;
-  border-radius:8px;
+  border-radius:14px;
   overflow:hidden;
   aspect-ratio:16/9;
 }
