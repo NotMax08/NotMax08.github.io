@@ -87,45 +87,69 @@ img,video{max-width:100%}
 
 .topnav a:hover{color:var(--ink);border-bottom-color:var(--signal)}
 
-/* ---------- intro (home) ---------- */
+/* ---------- hero (home) ---------- */
 
-.intro{
-  display:grid;
-  grid-template-columns:minmax(0,300px) minmax(0,1fr);
-  gap:clamp(2rem,5vw,4rem);
+.hero{
+  display:flex;
+  flex-direction:column;
   align-items:center;
-  padding-block:clamp(3rem,7vw,5.5rem);
+  text-align:center;
+  padding-block:clamp(3rem,7vw,5rem) clamp(2rem,5vw,3rem);
 }
 
-.portrait{
-  margin:0;
-  aspect-ratio:4/5;
-  background:var(--viewport);
-  border-radius:3px;
+.hero-portrait{
+  margin:0 0 1.5rem;
+  width:128px;
+  height:128px;
+  border-radius:50%;
   overflow:hidden;
+  background:var(--viewport);
+  border:1px solid var(--rule);
 }
 
-.portrait img{
+.hero-portrait img{
   width:100%;
   height:100%;
   object-fit:cover;
   display:block;
 }
 
-.intro h1{
+.hero h1{
   margin:0;
-  font-size:clamp(2.25rem,5.5vw,3.75rem);
+  font-size:clamp(2rem,5vw,2.75rem);
   font-weight:800;
-  line-height:1.02;
-  letter-spacing:-.032em;
-  max-width:16ch;
+  letter-spacing:-.03em;
 }
 
-.intro p{
-  margin:1.25rem 0 0;
-  max-width:var(--measure);
-  font-size:clamp(1.05rem,1.6vw,1.2rem);
+.hero-tagline{
+  margin:.6rem 0 0;
+  max-width:48ch;
+  color:var(--ink-soft);
+  font-size:clamp(1rem,1.6vw,1.1rem);
 }
+
+.hero-actions{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.6rem;
+  margin-top:1.75rem;
+}
+
+.pill{
+  font-family:Archivo,sans-serif;
+  font-size:.88rem;
+  font-weight:600;
+  text-decoration:none;
+  padding:.55rem 1.35rem;
+  border:1px solid var(--rule);
+  border-radius:999px;
+  background:var(--raised);
+  color:var(--ink);
+  transition:border-color .15s ease,color .15s ease;
+}
+
+.pill:hover{border-color:var(--signal);color:var(--signal)}
 
 .actions{
   display:flex;
@@ -329,6 +353,19 @@ footer{
   display:block;
 }
 
+.case-extra-media{
+  display:flex;
+  flex-direction:column;
+  gap:1rem;
+  margin-bottom:clamp(2rem,5vw,3.5rem);
+}
+
+.case-extra-media img{
+  width:100%;
+  border-radius:3px;
+  display:block;
+}
+
 .case-body{
   display:grid;
   grid-template-columns:minmax(0,1fr) minmax(0,260px);
@@ -439,8 +476,6 @@ footer{
 /* ---------- responsive ---------- */
 
 @media (max-width:860px){
-  .intro{grid-template-columns:1fr;gap:2rem}
-  .portrait{max-width:260px;aspect-ratio:1/1}
   .case-body{grid-template-columns:1fr}
   .facts{position:static}
 }
