@@ -35,17 +35,18 @@
 
   <div class="wrap">
     <div class="case-media">
-      <video autoplay muted loop playsinline poster="../assets/ftc-cover.jpg" aria-label="FTC team 18844 competition robot">
-        <source src="../assets/ftc.mov" type="video/mov">
+      <video autoplay muted loop playsinline poster="../assets/ftc/render.png" aria-label="FTC team 18844 competition robot">
+        <source src="../assets/ftc/ftc.mp4" type="video/mp4">
       </video>
-      <img src="../assets/render.png" alt="Robot render" style="width:100%;margin-top:12px;">
+      <img src="../assets/ftc/render.png" alt="Robot render" style="width:100%;margin-top:12px;">
+      <img src="../assets/ftc/award.jpeg" alt="Team award" style="width:100%;max-width:600px;margin-top:8px;">
     </div>
   </div>
 
   <div class="wrap case-body">
     <div>
       <h2>What it is</h2>
-      <p>Competitive robotics with team 18844, ending at the 2025 FIRST World Championships. I was co-captain and owned the software side, which meant everything from the autonomous routines to the driver-assist code used during matches.</p>
+      <p>Competitive robotics with team 18844, ending at the 2025 FIRST World Championships. I was Co-Captain, Lead Software, and Main Driver</p>
 
       <h2>Localization</h2>
       <p>Autonomous scoring is entirely dependent on the robot knowing where it is. I built two-wheel odometry using dead wheels for translation, fused with IMU data for heading.</p>
@@ -59,17 +60,17 @@
 
       <h3>Robot positioning</h3>
       <p>Precise and controlled movements are needed for sample and specimen scoring during autonomous. Solution: Three positional PID controllers are used in order to control the robot’s x, y, and heading powers. These local powers are converted to a global power which are then simplified into individual motor powers in order to move the robot to its target position.</p>
-      <p><img src="../assets/pid.png" alt="PID output graphs" style="width:100%;max-width:520px;margin-top:8px;"></p>
+      <p><img src="../assets/ftc/pid.png" alt="PID output graphs" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h3>Integral control</h3>
       <p>Robot fails to reach target position due to inadequate corrective force from kP and kD alone. Solution: To prevent overshooting, set the integral gain to only activate within a small activation range (10-20cm). This way, it helps make quick, minor adjustments with consistent kI proportions. Since the integral term adds up over time, it gives a strong push towards the target and then stops once reached</p>
-      <p><img src="../assets/integral_control.png" alt="Integral control PID push" style="width:100%;max-width:520px;margin-top:8px;"></p>
+      <p><img src="../assets/ftc/integral_control.png" alt="Integral control PID push" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h2>Camera vision</h2>
       <p>A camera and a custom trained neural detector model is used to calculate the respective x and y distances with the raw camera angles. Additionally, a custom-python snap-script is used to power an open-cv pipeline to determine sample angles with HSV thresholds.</p>
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
-        <img src="../assets/cv1.png" alt="Camera vision 1" style="width:48%;max-width:260px;">
-        <img src="../assets/cv2.png" alt="Camera vision 2" style="width:48%;max-width:260px;">
+        <img src="../assets/ftc/cv1.png" alt="Camera vision 1" style="width:48%;max-width:260px;">
+        <img src="../assets/ftc/cv2.png" alt="Camera vision 2" style="width:48%;max-width:260px;">
       </div>
 
       <h2>Result</h2>

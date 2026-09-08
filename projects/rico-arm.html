@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RICO, a voice-controlled robotic arm — Max Yuan</title>
-<meta name="description" content="A 4-DOF robotic arm that retrieves tools from natural language voice commands using an LLM, a fine-tuned YOLOv8 model, and inverse kinematics.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<meta name="description" content="A natural language request is sent to a Groq LLM which outputs structured actions; While the LLM parses the command, an OpenCV pipeline computes a bird's eye homography matrix, which is used transform the coordinates of a designated object location, provided by a yolov8 object detection model. These coordinates are then fed to an inverse kinematics solver.">
+<link rel="preconnect" href="https://fonts.googleapis.com">                                                              
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../style.css">
@@ -33,8 +33,15 @@
     <p class="case-stack"><span>Inverse kinematics</span><span>YOLOv8</span><span>OpenCV</span><span>Groq LLM</span><span>Python</span></p>
   </header>
 
+  <div class="wrap" style="text-align:center;margin-top:8px;">
+    <h3>Portrait</h3>
+    <img src="../assets/rico/picture.png" alt="Showcase!" style="width:180px;border-radius:6px;">
+  </div>
+
   <div class="wrap">
     <div class="case-media">
+      <h3>Demonstration</h3>
+      <img src="../assets/rico/rico_demo.png" alt="RICO demo" style="width:100%;margin-bottom:12px;">
       <video autoplay muted loop playsinline poster="../assets/rico-cover.jpg" aria-label="RICO robotic arm retrieving a tool">
         <source src="../assets/rico.mp4" type="video/mp4">
       </video>
@@ -44,7 +51,7 @@
   <div class="wrap case-body">
     <div>
       <h2>What it is</h2>
-      <p>Built at Eureka Hacks. A 4 degree of freedom arm that takes a spoken request, finds the right tool somewhere on the bench, and hands it over. Nothing about the tool positions is fixed in advance. You can move the tools between requests and it still works.</p>
+      <p>A natural language request is sent to a Groq LLM which outputs a series of actions that help the robot accomplish the requested task. At the same time, an OpenCV pipeline runs and on each frame computes a homography transformation to produce a bird's-eye view. When an object is detected using a trained YOLOv8 model, the detection coordinates are multiplied by the transformation matrix to get the object's position in workspace coordinates. That position is then fed into an inverse kinematics calculator, which the arm uses to reach and grasp the object.</p>
 
       <h2>How the pipeline runs</h2>
       <p>Speech goes to a Groq-hosted language model, which parses the natural language into a structured action rather than trying to control the arm directly. That keeps the model in the role it is actually good at, turning ambiguous human phrasing into a specific target, and leaves motion planning to code that is deterministic.</p>
@@ -54,6 +61,10 @@
         <span class="hard-label">Bridging vision and motion</span>
         <p>Detections live in pixel space and the arm lives in millimetres. A bounding box centre at pixel (412, 260) means nothing to an IK solver.</p>
         <p>I used a homography transform to map the camera plane onto the workspace plane, which turns any detection into a real coordinate on the bench that the solver can reach for. This is the piece that makes the whole thing work with tools placed anywhere, rather than at memorised positions.</p>
+        <h3>Homography examples</h3>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
+          <img src="../assets/rico/homography_examples.png" alt="Homography examples" style="width:100%;max-width:520px;">
+        </div>
       </div>
 
       <h2>Result</h2>
