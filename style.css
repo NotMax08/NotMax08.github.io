@@ -112,11 +112,11 @@ img,video{max-width:100%}
   position:absolute;
   top:50%;
   left:50%;
-  width:280%;
-  height:280%;
+  width:380%;
+  height:380%;
   transform:translate(-50%,-50%);
   object-fit:cover;
-  object-position:center 25%;
+  object-position:center 22%;
   display:block;
 }
 
