@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Quadruped locomotion with PPO — Max Yuan</title>
+<title>Quadruped locomotion with PPO (IN PROGRESS) — Max Yuan</title>
 <meta name="description" content="Training a Unitree Go2 to walk in Isaac Lab with PPO, no reference gait, through reward shaping and curriculum learning.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -43,11 +43,13 @@
 
   <div class="wrap case-body">
     <div>
-      <h2>What it is</h2>
-      <p>A Unitree Go2 trained to walk inside a custom ManagerBased reinforcement learning environment in Isaac Lab. The policy learns velocity tracking from proprioception alone. There is no reference gait, no motion capture data, and nothing for it to imitate. It has to discover walking.</p>
+      <h2>Description</h2>
+      <p>This project entails training a Unitree Go2 quadruped with PPO using a custom ManagerBased RL environment in Isaac Lab. </p>
 
-      <h2>The approach</h2>
-      <p>Almost all of the engineering here was reward design rather than algorithm selection. PPO is efficient at finding whatever the reward function actually pays for, which is rarely what you meant. It converges fast onto degenerate strategies, so the job becomes making those strategies unattractive without hand-specifying the behaviour you want.</p>
+      <h2>Reward Tuning</h2>
+      <p>
+      To achieve stable locomotion, I focused heavily on tuning rewards, penalties and regularization terms. For example, I created a custom height reward function to eliminate crawling gaits, used curriculum learning to gate foot-lifting rewards after the robot learned to balance to aid training progress, and much more. I also focused on regularization terms, applying a squared penalty on penalties like action_rate to smooth joint movement while also preventing model overfitting.
+      </p>
 
       <div class="hard">
         <span class="hard-label">The part that took the longest</span>
@@ -55,11 +57,8 @@
         <p>That created a second problem. Once the robot was penalised for staying low, it was being asked to learn balance and foot clearance at the same time, and it learned neither. I used curriculum learning to gate the foot-lifting rewards until the policy could hold itself upright, so it solved one problem before being handed the next.</p>
       </div>
 
-      <h2>Regularization</h2>
-      <p>Raw policies twitch. A squared penalty on action rate smoothed joint motion considerably, and it also acted as regularization, keeping the policy from overfitting to simulator-specific noise that would not survive a transfer to hardware.</p>
-
-      <h2>Result and what is next</h2>
-      <p>Stable directional locomotion across a range of commanded velocities, with a gait that lifts its feet properly rather than dragging. Next steps are getup recovery policies for when the robot falls, and the domain randomization work needed for sim-to-real transfer.</p>
+      <h2>Next Steps</h2>
+      <p>Next steps are getup recovery policies for when the robot falls, and the domain randomization work needed for sim-to-real transfer.</p>
     </div>
 
     <aside class="facts">
