@@ -34,9 +34,13 @@
   <div class="project-card">
 
   <header class="wrap case-head">
-    <p class="eyebrow">Bracket Bot · Hackathon build</p>
+    <p class="eyebrow">Bracket Bot · Battle of the Schools, UMIST</p>
     <h1>The Brackey Way</h1>
     <p class="lede">A dual-arm Bracket Bot that assembles a sandwich end to end. It pulls a toasted slice out of the toaster, sets it on a plate, adds a leaf of lettuce, and closes the sandwich with a second slice — no teleoperation, no human in the loop once it starts.</p>
+    <div class="award">
+      <span class="award-place">1st</span>
+      <p><b>1st place at Battle of the Schools, UMIST</b> — UofT AI vs. WAT.ai (Waterloo AI club). Won four Bambu Lab P1S 3D printers.</p>
+    </div>
     <p class="case-stack"><span>π₀ VLA</span><span>Fine-tuning</span><span>Imitation learning</span><span>OpenCV</span><span>Inverse kinematics</span><span>Finite state machine</span><span>Meta Quest teleop</span></p>
   </header>
 
@@ -178,10 +182,16 @@
 
       <p>We teleoperated the Bracket Bot's arm through a Meta Quest, driving the gripper by hand to grasp a slice and set it on the plate, and recorded 100+ episodes. Crucially, we moved the toaster, the plate, and the bread's orientation between episodes. A dataset collected from one fixed arrangement teaches a policy the trajectory; a dataset collected across many teaches it the task. That variance is the difference between a demo that works on the table it was recorded on and one that survives being nudged.</p>
 
-      <figure class="case-figure">
-        <img src="../assets/brackey/teleop.jpg" alt="Operator wearing a Meta Quest headset, teleoperating the Bracket Bot's arms toward the toaster">
-        <figcaption><b>Teleoperated collection.</b> The operator's hand motion is retargeted onto the arm; every frame of camera plus every joint command is logged as a training episode.</figcaption>
-      </figure>
+      <div class="two-up">
+        <figure>
+          <img src="../assets/brackey/teleop.jpg" alt="Operator wearing a Meta Quest headset, teleoperating the Bracket Bot's arms toward the toaster">
+          <figcaption><b>Teleoperated collection.</b> The operator's hand motion is retargeted onto the arm; every frame of camera plus every joint command is logged as a training episode.</figcaption>
+        </figure>
+        <figure>
+          <video src="../assets/brackey/teleop_loop.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Operator in a Meta Quest headset guiding the robot to set a slice of toast on the plate"></video>
+          <figcaption><b>One demonstration, live.</b> Guiding the gripper to set a slice on the plate — the exact motion the policy learns to reproduce.</figcaption>
+        </figure>
+      </div>
 
       <h3>Supervised fine-tuning, then aggregation</h3>
 
@@ -196,7 +206,7 @@
       <p>We resampled both streams onto a shared, fixed time grid instead. Every grid point carries the frame observed at that instant and the action chunk that followed it, so each observation is paired with the control that genuinely came after it rather than one that happened to land nearby in the log.</p>
 
       <figure class="case-figure">
-        <img src="../assets/brackey/telemetry.png" alt="Telemetry dashboard showing left and right arm joint position channels at about 65 Hz alongside a URDF viewer playing back the episode">
+        <img src="../assets/brackey/telemetry.jpg" alt="Telemetry dashboard showing left and right arm joint position channels at about 65 Hz alongside a URDF viewer playing back the episode">
         <figcaption><b>Episode inspection.</b> Per-joint position traces for both arms next to a URDF playback of the same episode. Scrubbing the recording against the joint traces is how bad takes got caught before they reached the training set.</figcaption>
       </figure>
 
@@ -229,9 +239,11 @@
 
       <p>A complete sandwich, start to finish, with nobody touching the controls: toast out of the toaster onto the plate, lettuce on top of it, second slice to close. The state machine drives the whole sequence and recovers into the correct state when a step does not take.</p>
 
+      <p>It took <strong>1st place</strong> at Battle of the Schools at UMIST, a head-to-head between UofT AI and WAT.ai, Waterloo's AI club. The prize was four Bambu Lab P1S 3D printers.</p>
+
       <figure class="case-figure">
-        <img src="../assets/brackey/team.jpg" alt="The four-person team standing with the Bracket Bot, which is holding the finished sandwich on a plate">
-        <figcaption><b>The robot serving its own output.</b> Built over a single hackathon weekend.</figcaption>
+        <img src="../assets/brackey/still_close.jpg" alt="The robot's gripper pressing the top slice of toast onto lettuce on the plate, finishing the sandwich">
+        <figcaption><b>Closing the sandwich.</b> The VLA sets the second slice on top of the lettuce, the last state before the plate is checked and the run ends.</figcaption>
       </figure>
 
       <h2>What I took away</h2>
@@ -256,6 +268,8 @@
         <dd>Finite state machine with home-pose transition guards</dd>
         <dt>Teleoperation</dt>
         <dd>Meta Quest</dd>
+        <dt>Result</dt>
+        <dd>1st place, Battle of the Schools at UMIST (UofT AI vs. WAT.ai)</dd>
         <dt>Team</dt>
         <dd>Four people, one hackathon weekend</dd>
       </dl>

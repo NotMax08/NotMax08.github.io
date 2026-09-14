@@ -835,3 +835,60 @@ body{background-image:radial-gradient(1200px 600px at 50% -10%,rgba(255,255,255,
 .case-body{grid-template-columns:minmax(0,1fr) minmax(0,230px)}
 
 .fsm svg{min-width:600px}
+
+/* ---------- awards ---------- */
+
+.award{
+  display:flex;
+  align-items:center;
+  gap:1rem;
+  max-width:60ch;
+  margin:1.4rem 0 0;
+  padding:.85rem 1.1rem;
+  background:#f6ecdc;
+  border:1px solid #a97a3c;
+  border-radius:12px;
+}
+
+.award-place{
+  flex:none;
+  display:grid;
+  place-items:center;
+  width:2.9rem;
+  height:2.9rem;
+  border-radius:50%;
+  background:#a97a3c;
+  color:#fff;
+  font-family:Archivo,sans-serif;
+  font-size:1rem;
+  font-weight:800;
+  letter-spacing:-.02em;
+}
+
+.award p{
+  margin:0;
+  font-family:Archivo,sans-serif;
+  font-size:.92rem;
+  line-height:1.45;
+  color:#5a4526;
+}
+
+.award b{color:var(--ink);font-weight:600}
+
+.card-text p.card-award{
+  display:inline-block;
+  margin:0 0 .7rem;
+  font-family:Archivo,sans-serif;
+  font-size:.74rem;
+  font-weight:700;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+  color:#7d5a2b;
+  background:#f6ecdc;
+  border:1px solid #a97a3c;
+  border-radius:999px;
+  padding:.28rem .75rem;
+  line-height:1.2;
+}
+
+.two-up video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#0d100f}
