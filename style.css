@@ -892,3 +892,11 @@ body{background-image:radial-gradient(1200px 600px at 50% -10%,rgba(255,255,255,
 }
 
 .two-up video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#0d100f}
+
+/* images with different shapes: columns sized by aspect ratio so neither is cropped */
+.two-up-fit{grid-template-columns:.811fr 1.89fr;align-items:start}
+.two-up-fit img{flex:none;height:auto;object-fit:contain}
+
+@media (max-width:620px){
+  .two-up-fit{grid-template-columns:1fr}
+}

@@ -161,7 +161,7 @@
 
       <p>The order of steps is not hard-coded. Before each transition, the head camera checks the plate to see what is missing: no bread, bread but no lettuce, or lettuce but no top slice. The result picks the next state. If a grasp fails and the plate is still empty, the machine runs the same state again.</p>
 
-      <div class="two-up">
+      <div class="two-up two-up-fit">
         <figure>
           <img src="../assets/brackey/bread_detect.png" alt="Head camera view with a detected bread slice boxed in green, showing distance, pixel size, and camera- and base-frame coordinates">
           <figcaption><b>Scene check.</b> The head camera uses stereo depth and color segmentation to find the bread. The overlay shows its distance and its position in the camera frame and the robot base frame. The state machine uses this to check what is on the plate.</figcaption>
