@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Brackey Way — autonomous sandwich assembly — Max Yuan</title>
+<meta name="description" content="A Bracket Bot that builds a sandwich end to end: a fine-tuned pi0 VLA grasps toast out of a toaster, an OpenCV + IK pipeline picks lettuce, and a finite state machine sequences the whole thing with no human in the loop.">
+<meta property="og:title" content="The Brackey Way — autonomous sandwich assembly">
+<meta property="og:description" content="A fine-tuned pi0 VLA for the hard grasps, an OpenCV + IK pipeline for the easy ones, and a state machine that decides which to run.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../style.css">
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="topbar">
+    <a class="mark" href="../index.html">Max Yuan</a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#toolkit">Toolkit</a>
+      <a href="../index.html#contact">Contact</a>
+      <a href="https://github.com/NotMax08">GitHub</a>
+    </nav>
+  </div>
+  <a class="back" href="../index.html#work">Back to all work</a>
+</div>
+
+<main>
+
+  <div class="project-card">
+
+  <header class="wrap case-head">
+    <p class="eyebrow">Bracket Bot · Hackathon build</p>
+    <h1>The Brackey Way</h1>
+    <p class="lede">A dual-arm Bracket Bot that assembles a sandwich end to end. It pulls a toasted slice out of the toaster, sets it on a plate, adds a leaf of lettuce, and closes the sandwich with a second slice — no teleoperation, no human in the loop once it starts.</p>
+    <p class="case-stack"><span>π₀ VLA</span><span>Fine-tuning</span><span>Imitation learning</span><span>OpenCV</span><span>Inverse kinematics</span><span>Finite state machine</span><span>Meta Quest teleop</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video controls playsinline preload="metadata" poster="../assets/brackey/poster.jpg" aria-label="Bracket Bot assembling a sandwich autonomously">
+        <source src="../assets/brackey/brackey_demo.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p class="media-note">Full uncut run, played back at 1.5×.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="stat-row">
+      <div class="stat"><b>100+</b><span>teleop episodes collected</span></div>
+      <div class="stat"><b>2</b><span>control strategies, one router</span></div>
+      <div class="stat"><b>4</b><span>manipulation states, fully autonomous</span></div>
+      <div class="stat"><b>65 Hz / 5 fps</b><span>arm state vs. vision, resampled</span></div>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+
+      <h2>Architecture: one state machine, two kinds of controller</h2>
+
+      <p>The interesting decision in this project was not <em>how</em> to grasp something — it was deciding, per sub-task, which kind of controller deserved the effort. A learned policy is expensive to collect data for and expensive to run. A hand-written vision-plus-IK pipeline is cheap, but it only works when the target is easy to describe geometrically. So the system uses both, and a finite state machine decides which one is driving at any moment.</p>
+
+      <div class="fsm">
+        <svg viewBox="0 0 1000 300" role="img" aria-label="State machine: scan the scene, grasp bread with the fine-tuned VLA, pick lettuce with OpenCV and inverse kinematics, close the sandwich with the VLA, done. After each manipulation state the machine advances only once the arm has settled back at its home pose.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#5c6462"></path>
+            </marker>
+            <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="#a97a3c"></path>
+            </marker>
+          </defs>
+          <g font-family="Archivo, sans-serif">
+
+            <!-- states -->
+            <g>
+              <rect x="10" y="70" width="140" height="72" rx="12" fill="#e2ece6" stroke="#3f6f5c" stroke-width="1.5"></rect>
+              <text x="80" y="100" text-anchor="middle" font-size="14.5" font-weight="600" fill="#16191a">Scan scene</text>
+              <text x="80" y="121" text-anchor="middle" font-size="12" fill="#3f6f5c">what is missing?</text>
+            </g>
+            <g>
+              <rect x="218" y="70" width="140" height="72" rx="12" fill="#f6ecdc" stroke="#a97a3c" stroke-width="1.5"></rect>
+              <text x="288" y="100" text-anchor="middle" font-size="14.5" font-weight="600" fill="#16191a">Grasp bread</text>
+              <text x="288" y="121" text-anchor="middle" font-size="12" fill="#a97a3c">fine-tuned π₀ VLA</text>
+            </g>
+            <g>
+              <rect x="426" y="70" width="140" height="72" rx="12" fill="#e2ece6" stroke="#3f6f5c" stroke-width="1.5"></rect>
+              <text x="496" y="100" text-anchor="middle" font-size="14.5" font-weight="600" fill="#16191a">Pick lettuce</text>
+              <text x="496" y="121" text-anchor="middle" font-size="12" fill="#3f6f5c">HSV mask + IK</text>
+            </g>
+            <g>
+              <rect x="634" y="70" width="140" height="72" rx="12" fill="#f6ecdc" stroke="#a97a3c" stroke-width="1.5"></rect>
+              <text x="704" y="100" text-anchor="middle" font-size="14.5" font-weight="600" fill="#16191a">Close sandwich</text>
+              <text x="704" y="121" text-anchor="middle" font-size="12" fill="#a97a3c">fine-tuned π₀ VLA</text>
+            </g>
+            <g>
+              <rect x="842" y="70" width="140" height="72" rx="12" fill="#ffffff" stroke="#c6cbc2" stroke-width="1.5"></rect>
+              <text x="912" y="100" text-anchor="middle" font-size="14.5" font-weight="600" fill="#16191a">Done</text>
+              <text x="912" y="121" text-anchor="middle" font-size="12" fill="#5c6462">plate verified</text>
+            </g>
+
+            <!-- scan hands straight off to the first grasp -->
+            <line x1="150" y1="106" x2="212" y2="106" stroke="#5c6462" stroke-width="1.6" marker-end="url(#ah)"></line>
+
+            <!-- transition guards -->
+            <g>
+              <line x1="358" y1="106" x2="372" y2="106" stroke="#5c6462" stroke-width="1.6"></line>
+              <path d="M392 86 L412 106 L392 126 L372 106 z" fill="#ffffff" stroke="#5c6462" stroke-width="1.5"></path>
+              <text x="392" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#5c6462">home?</text>
+              <line x1="412" y1="106" x2="420" y2="106" stroke="#5c6462" stroke-width="1.6" marker-end="url(#ah)"></line>
+            </g>
+            <g>
+              <line x1="566" y1="106" x2="580" y2="106" stroke="#5c6462" stroke-width="1.6"></line>
+              <path d="M600 86 L620 106 L600 126 L580 106 z" fill="#ffffff" stroke="#5c6462" stroke-width="1.5"></path>
+              <text x="600" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#5c6462">home?</text>
+              <line x1="620" y1="106" x2="628" y2="106" stroke="#5c6462" stroke-width="1.6" marker-end="url(#ah)"></line>
+            </g>
+            <g>
+              <line x1="774" y1="106" x2="788" y2="106" stroke="#5c6462" stroke-width="1.6"></line>
+              <path d="M808 86 L828 106 L808 126 L788 106 z" fill="#ffffff" stroke="#5c6462" stroke-width="1.5"></path>
+              <text x="808" y="72" text-anchor="middle" font-size="11" font-weight="600" fill="#5c6462">home?</text>
+              <line x1="828" y1="106" x2="836" y2="106" stroke="#5c6462" stroke-width="1.6" marker-end="url(#ah)"></line>
+            </g>
+
+            <!-- guard fails: stay in the state that is running -->
+            <path d="M392 126 C 392 192, 288 184, 288 146" fill="none" stroke="#a97a3c" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahb)"></path>
+            <path d="M600 126 C 600 192, 496 184, 496 146" fill="none" stroke="#a97a3c" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahb)"></path>
+            <path d="M808 126 C 808 192, 704 184, 704 146" fill="none" stroke="#a97a3c" stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ahb)"></path>
+            <text x="340" y="211" text-anchor="middle" font-size="11.5" fill="#a97a3c">not settled yet</text>
+            <text x="548" y="211" text-anchor="middle" font-size="11.5" fill="#a97a3c">not settled yet</text>
+            <text x="756" y="211" text-anchor="middle" font-size="11.5" fill="#a97a3c">not settled yet</text>
+
+            <!-- the guard itself -->
+            <text x="500" y="254" text-anchor="middle" font-size="14" font-weight="600" fill="#16191a">transition guard  ‖ q − q<tspan font-size="10" dy="4">home</tspan><tspan dy="-4"> ‖ &lt; ε</tspan></text>
+            <text x="500" y="276" text-anchor="middle" font-size="12.5" fill="#5c6462">advance only once the arm has settled back at the home pose</text>
+          </g>
+        </svg>
+        <div class="fsm-legend">
+          <span><i style="background:#f6ecdc;border:1px solid #a97a3c"></i>learned policy (π₀ VLA)</span>
+          <span><i style="background:#e2ece6;border:1px solid #3f6f5c"></i>classical vision + IK</span>
+          <span><i style="background:#fff;border:1px solid #5c6462"></i>transition guard</span>
+        </div>
+      </div>
+
+      <h3>How a state ends</h3>
+
+      <p>Each manipulation state runs until the arm comes back to a known home pose. The guard is a joint-space distance check: the machine compares the current joint vector against the home configuration and only advances once the error falls under a threshold and stays there. Returning to home is the last thing every skill does, so "I am back at home and settled" is a cheap, reliable proxy for "I finished the thing I was asked to do."</p>
+
+      <p>That is what lets the two controller types compose. After the VLA finishes placing the bread, the machine does not need to understand anything about what the policy did internally — it just waits for the arm to settle at home, then hands control to the lettuce pipeline. Each state is self-contained, and the guard is the only interface between them.</p>
+
+      <h3>How the next state is chosen</h3>
+
+      <p>The machine is not a fixed script. Before each transition it re-reads the scene from the head camera and asks what the sandwich is still missing — no bread on the plate, bread but no lettuce, lettuce but no top slice. The answer selects the next state. If a grasp fails and the plate still looks empty, the machine re-enters the same state instead of marching on to a step that would not make sense.</p>
+
+      <div class="two-up">
+        <figure>
+          <img src="../assets/brackey/bread_detect.png" alt="Head camera view with a detected bread slice boxed in green, showing distance, pixel size, and camera- and base-frame coordinates">
+          <figcaption><b>Scene check.</b> Stereo depth plus colour segmentation on the head camera. The overlay reports the slice's distance and its position in both camera and base frames — the same numbers the state machine reads to decide what is missing.</figcaption>
+        </figure>
+        <figure>
+          <img src="../assets/brackey/lettuce_mask.png" alt="Side by side: detected lettuce boxed in red, and the binary green mask produced by HSV thresholding, with tuning sliders">
+          <figcaption><b>HSV tuning rig.</b> Live sliders over hue, saturation, value, and minimum blob area. Calibrating against the actual room light was faster than making a learned detector robust to it.</figcaption>
+        </figure>
+      </div>
+
+      <h2>The hard grasp: fine-tuning a π₀ VLA</h2>
+
+      <p>Pulling a slice out of a toaster is a genuinely awkward manipulation problem. The slot constrains the approach angle, the bread is compliant and sits at a different height and lean every time, and the surrounding metal gives depth sensing a hard time. Writing that as a geometric pipeline means enumerating cases forever.</p>
+
+      <p>So we fine-tuned <strong>π₀</strong>, a Vision-Language-Action model, on our own demonstrations. A VLA takes camera frames plus a language instruction and emits actions directly, which means the "how" is learned from examples rather than specified by hand.</p>
+
+      <h3>Collecting the demonstrations</h3>
+
+      <p>We teleoperated the Bracket Bot's arm through a Meta Quest, driving the gripper by hand to grasp a slice and set it on the plate, and recorded 100+ episodes. Crucially, we moved the toaster, the plate, and the bread's orientation between episodes. A dataset collected from one fixed arrangement teaches a policy the trajectory; a dataset collected across many teaches it the task. That variance is the difference between a demo that works on the table it was recorded on and one that survives being nudged.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/brackey/teleop.jpg" alt="Operator wearing a Meta Quest headset, teleoperating the Bracket Bot's arms toward the toaster">
+        <figcaption><b>Teleoperated collection.</b> The operator's hand motion is retargeted onto the arm; every frame of camera plus every joint command is logged as a training episode.</figcaption>
+      </figure>
+
+      <h3>Supervised fine-tuning, then aggregation</h3>
+
+      <p>The training objective is imitation: for each recorded observation, the action the human took is the label, and the model is trained to reproduce it. That is <em>supervised fine-tuning</em> — behavioural cloning on top of π₀'s pretrained weights rather than learning from scratch.</p>
+
+      <p>Behavioural cloning on its own has a well-known weakness. The model only ever sees states a competent human visited, so the first small error takes it somewhere the dataset never covered, and errors compound from there. The fix is <em>data aggregation</em> (DAgger): let the current policy run, record the states it actually reaches — including the mediocre ones it drifts into — have the human supply the correct action for those states, and fold that new data back into the training set before retraining. Each round the dataset shifts from covering only the expert's path to covering the policy's own distribution, which is what it will face at test time.</p>
+
+      <h3>Lining up frames with actions</h3>
+
+      <p>The two halves of a training pair arrive at completely different rates. Joint state streams off the arms at roughly 65 Hz; the cameras deliver frames at a handful per second, and neither is perfectly periodic. Pairing them naively — nearest sample, or index-to-index — smears the label, and a policy trained on actions attributed to the wrong frame learns a blurred version of the task.</p>
+
+      <p>We resampled both streams onto a shared, fixed time grid instead. Every grid point carries the frame observed at that instant and the action chunk that followed it, so each observation is paired with the control that genuinely came after it rather than one that happened to land nearby in the log.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/brackey/telemetry.png" alt="Telemetry dashboard showing left and right arm joint position channels at about 65 Hz alongside a URDF viewer playing back the episode">
+        <figcaption><b>Episode inspection.</b> Per-joint position traces for both arms next to a URDF playback of the same episode. Scrubbing the recording against the joint traces is how bad takes got caught before they reached the training set.</figcaption>
+      </figure>
+
+      <h2>The easy grasp: why lettuce did not get a model</h2>
+
+      <p>Lettuce is the opposite kind of problem. It is a large, bright green mass on a wooden table, and nothing else in the scene is that colour. Spending an afternoon of data collection on it would have bought nothing that thirty lines of OpenCV did not already give us.</p>
+
+      <p>The head camera frame is converted to HSV and thresholded against hue, saturation, and value bounds calibrated to the lettuce in that room's lighting, producing a binary mask. The largest blob's centroid becomes the target, gets projected out to a 3D point, and inverse kinematics solves for the joint angles that put the gripper there.</p>
+
+      <p>An open-loop move to that target is not quite accurate enough — small calibration error in the head camera turns into a centimetre or two at the gripper, which is the difference between grabbing lettuce and grabbing table. So as the arm rises toward the target, the wrist-mounted camera takes over and runs closed-loop correction, nudging the gripper's angle and position frame by frame until the leaf is centred. Coarse targeting from the head camera, fine correction from the wrist.</p>
+
+      <div class="two-up">
+        <figure>
+          <img src="../assets/brackey/still_bread.jpg" alt="The robot lifting a toasted slice clear of the toaster">
+          <figcaption><b>VLA state.</b> The slice clear of the slot, on its way to the plate.</figcaption>
+        </figure>
+        <figure>
+          <img src="../assets/brackey/still_lettuce.jpg" alt="The robot placing lettuce onto the bread on the plate">
+          <figcaption><b>CV + IK state.</b> Lettuce centred by the wrist camera and released onto the slice.</figcaption>
+        </figure>
+      </div>
+
+      <div class="hard">
+        <span class="hard-label">What actually slowed us down</span>
+        <p>Neither bottleneck was the ML. The first was bandwidth: uploading 100+ recorded episodes over venue WiFi kept dropping partway through, and a half-uploaded dataset is a dataset you have to babysit and restart rather than train on.</p>
+        <p>The second was latency. The GPU we trained and ran inference on was remote, so every control step paid a network round trip. The robot moved sluggishly and, worse, every iteration of "change something, see if it helped" cost far more wall-clock than it should have. On a deadline, iteration speed <em>is</em> the constraint.</p>
+      </div>
+
+      <h2>Result</h2>
+
+      <p>A complete sandwich, start to finish, with nobody touching the controls: toast out of the toaster onto the plate, lettuce on top of it, second slice to close. The state machine drives the whole sequence and recovers into the correct state when a step does not take.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/brackey/team.jpg" alt="The four-person team standing with the Bracket Bot, which is holding the finished sandwich on a plate">
+        <figcaption><b>The robot serving its own output.</b> Built over a single hackathon weekend.</figcaption>
+      </figure>
+
+      <h2>What I took away</h2>
+
+      <p><strong>Match the tool to the variance.</strong> The VLA earned its cost on the toaster grasp, where the situation is different every time. It would have been a waste on lettuce. Deciding that split early is what made the whole thing fit in a weekend.</p>
+
+      <p><strong>Collect data adversarially against yourself.</strong> The instinct during teleop is to keep the setup identical so the demonstrations look clean. That produces a policy that memorises a trajectory. Deliberately moving the toaster and plate between episodes felt like sabotaging the dataset and was the single highest-leverage thing we did.</p>
+
+      <p><strong>Infrastructure is part of the robot.</strong> WiFi throughput and GPU round-trip time shaped this project more than any architectural choice. On real hardware they are not someone else's problem.</p>
+
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Platform</dt>
+        <dd>Bracket Bot — dual arm, head camera, wrist cameras</dd>
+        <dt>Learned policy</dt>
+        <dd>π₀ VLA, fine-tuned on 100+ teleop episodes</dd>
+        <dt>Classical stack</dt>
+        <dd>OpenCV HSV segmentation, stereo depth, inverse kinematics</dd>
+        <dt>Orchestration</dt>
+        <dd>Finite state machine with home-pose transition guards</dd>
+        <dt>Teleoperation</dt>
+        <dd>Meta Quest</dd>
+        <dt>Team</dt>
+        <dd>Four people, one hackathon weekend</dd>
+      </dl>
+      <span class="no-repo">No public repository — the Bracket Bot stack this was built on is private.</span>
+    </aside>
+  </div>
+
+  </div> <!-- /.project-card -->
+
+  <div class="wrap">
+    <div class="next">
+      Next project: <a href="quadruped-ppo.html">Quadruped locomotion from scratch with PPO</a>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

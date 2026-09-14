@@ -567,3 +567,271 @@ footer{
   html{scroll-behavior:auto}
   *{animation:none !important;transition:none !important}
 }
+
+/* =========================================================
+   UI refresh + components used by project pages
+   (appended: later rules win on equal specificity)
+   ========================================================= */
+
+:root{
+  --accent:#3f6f5c;
+  --accent-soft:#e2ece6;
+  --shadow-sm:0 1px 2px rgba(22,25,26,.05),0 4px 14px rgba(22,25,26,.05);
+  --shadow-md:0 2px 6px rgba(22,25,26,.05),0 14px 34px rgba(22,25,26,.09);
+}
+
+/* ---------- sticky, blurred top bar ---------- */
+
+body{background-image:radial-gradient(1200px 600px at 50% -10%,rgba(255,255,255,.75),transparent 70%)}
+
+.topbar{
+  position:sticky;
+  top:0;
+  z-index:50;
+  margin-inline:calc(var(--pad) * -1);
+  padding-inline:var(--pad);
+  background:color-mix(in srgb,var(--paper) 88%,transparent);
+  backdrop-filter:saturate(1.4) blur(10px);
+  -webkit-backdrop-filter:saturate(1.4) blur(10px);
+}
+
+.topnav a{transition:color .15s ease,border-color .15s ease}
+.topnav a:hover{border-bottom-color:var(--accent);color:var(--ink)}
+
+/* ---------- card polish ---------- */
+
+.card{box-shadow:var(--shadow-sm)}
+.card:hover{border-color:var(--accent);box-shadow:var(--shadow-md)}
+.card-shot img,.card-shot video{transition:transform .5s cubic-bezier(.2,.7,.3,1)}
+.card:hover .card-shot img,.card:hover .card-shot video{transform:scale(1.035)}
+
+.pill:hover{border-color:var(--accent);color:var(--accent)}
+.btn-solid{background:var(--accent);border-color:var(--accent)}
+
+/* ---------- project page shell ---------- */
+
+.project-card{
+  background:#fff;
+  max-width:1020px;
+  padding:clamp(1.25rem,3vw,2.5rem);
+  border:1px solid var(--rule);
+  box-shadow:var(--shadow-md);
+}
+
+.case-head{padding-block:.5rem clamp(1.5rem,3vw,2.25rem)}
+
+.eyebrow{
+  font-family:Archivo,sans-serif;
+  font-size:.78rem;
+  font-weight:600;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 .7rem;
+}
+
+.lede{
+  font-size:clamp(1.08rem,1.9vw,1.25rem);
+  line-height:1.55;
+  color:var(--ink-soft);
+  max-width:60ch;
+  margin:1.1rem 0 0;
+}
+
+/* ---------- stat row ---------- */
+
+.stat-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:.85rem;
+  margin:clamp(1.5rem,3vw,2.25rem) 0;
+}
+
+.stat{
+  background:var(--raised);
+  border:1px solid var(--rule);
+  border-radius:12px;
+  padding:.9rem 1.1rem;
+}
+
+.stat b{
+  display:block;
+  font-family:Archivo,sans-serif;
+  font-size:1.5rem;
+  font-weight:800;
+  letter-spacing:-.03em;
+  line-height:1.1;
+}
+
+.stat span{
+  display:block;
+  font-family:Archivo,sans-serif;
+  font-size:.8rem;
+  font-weight:500;
+  color:var(--ink-soft);
+  margin-top:.2rem;
+}
+
+/* ---------- media + figures ---------- */
+
+.case-media{box-shadow:var(--shadow-sm)}
+
+.project-card .case-media{
+  aspect-ratio:auto;
+  background:#0d100f;
+  border:1px solid var(--rule);
+}
+
+.project-card .case-media video{
+  height:auto;
+  aspect-ratio:16/9;
+  object-fit:contain;
+}
+
+.case-figure{
+  margin:0 0 clamp(1.75rem,4vw,2.75rem);
+  background:var(--raised);
+  border:1px solid var(--rule);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+
+.case-figure img{width:100%;display:block}
+
+.case-figure figcaption,
+.two-up figcaption{
+  font-family:Archivo,sans-serif;
+  font-size:.86rem;
+  line-height:1.45;
+  color:var(--ink-soft);
+  padding:.8rem 1.1rem;
+  border-top:1px solid var(--rule);
+}
+
+.case-figure figcaption b,
+.two-up figcaption b,
+.graph-item figcaption b{color:var(--ink);font-weight:600}
+
+.two-up{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:1.1rem;
+  margin:0 0 clamp(1.75rem,4vw,2.75rem);
+}
+
+.two-up figure{
+  margin:0;
+  background:var(--raised);
+  border:1px solid var(--rule);
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+  display:flex;
+  flex-direction:column;
+}
+
+.two-up img{width:100%;display:block;flex:1 1 auto;object-fit:cover}
+
+.media-note{
+  font-family:Archivo,sans-serif;
+  font-size:.82rem;
+  color:var(--ink-soft);
+  margin:-.75rem 0 clamp(1.75rem,4vw,2.75rem);
+}
+
+/* ---------- finite state machine diagram ---------- */
+
+.fsm{
+  background:var(--raised);
+  border:1px solid var(--rule);
+  border-radius:14px;
+  padding:1.25rem 1.25rem .5rem;
+  margin:0 0 clamp(1.75rem,4vw,2.75rem);
+  box-shadow:var(--shadow-sm);
+  overflow-x:auto;
+}
+
+.fsm svg{display:block;width:100%;min-width:640px;height:auto}
+
+.fsm-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:1.1rem;
+  font-family:Archivo,sans-serif;
+  font-size:.82rem;
+  color:var(--ink-soft);
+  padding:.9rem .1rem 1rem;
+}
+
+.fsm-legend i{
+  display:inline-block;
+  width:.7rem;
+  height:.7rem;
+  border-radius:3px;
+  margin-right:.4rem;
+  vertical-align:baseline;
+}
+
+/* ---------- body typography ---------- */
+
+.case-body h2{
+  margin:2.75rem 0 .8rem;
+  font-size:1.3rem;
+  padding-top:1.1rem;
+  border-top:1px solid var(--rule);
+}
+
+.case-body h2:first-child{margin-top:0;padding-top:0;border-top:0}
+
+.case-body h3{
+  margin:1.9rem 0 .5rem;
+  font-size:1.02rem;
+  font-weight:600;
+  letter-spacing:-.01em;
+}
+
+.case-body ul,.case-body ol{max-width:var(--measure);margin:0 0 1.15rem;padding-left:1.15rem}
+.case-body li{margin-bottom:.5rem}
+
+.case-body code{
+  font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-size:.88em;
+  background:var(--accent-soft);
+  color:#2c4c40;
+  border-radius:5px;
+  padding:.1em .38em;
+}
+
+.hard{border-left:3px solid var(--accent)}
+.hard-label{color:var(--accent)}
+
+.facts{border-top-color:var(--accent)}
+
+.facts .no-repo{
+  display:block;
+  margin-top:1.75rem;
+  font-family:Archivo,sans-serif;
+  font-size:.82rem;
+  line-height:1.5;
+  color:var(--ink-soft);
+  background:var(--raised);
+  border:1px dashed var(--rule);
+  border-radius:10px;
+  padding:.8rem .9rem;
+}
+
+.next a{border-bottom-color:var(--accent)}
+.next a:hover{color:var(--accent)}
+
+@media (max-width:620px){
+  .project-card{margin-inline:0;border-radius:16px}
+}
+
+/* ---------- wider reading column so diagrams and figures breathe ---------- */
+
+.project-card{max-width:1120px}
+
+.case-body{grid-template-columns:minmax(0,1fr) minmax(0,230px)}
+
+.fsm svg{min-width:600px}
