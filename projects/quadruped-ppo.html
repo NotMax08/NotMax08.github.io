@@ -44,17 +44,15 @@
   <div class="wrap case-body">
     <div>
       <h2>Description</h2>
-      <p>This project entails training a Unitree Go2 quadruped with PPO using a custom ManagerBased RL environment in Isaac Lab. </p>
+      <p>I am training a Unitree Go2 quadruped to walk with PPO, using a custom manager-based RL environment in Isaac Lab.</p>
 
       <h2>Reward Tuning</h2>
-      <p>
-      To achieve stable locomotion, I focused heavily on tuning rewards, penalties and regularization terms. For example, I created a custom height reward function to eliminate crawling gaits, used curriculum learning to gate foot-lifting rewards after the robot learned to balance to aid training progress, and much more. I also focused on regularization terms, applying a squared penalty on penalties like action_rate to smooth joint movement while also preventing model overfitting.
-      </p>
+      <p>Most of the work to get stable walking was tuning the rewards, penalties, and regularization terms. I wrote a custom height reward to stop the robot from crawling, and used curriculum learning to turn on the foot-lifting rewards only after the robot learned to balance. I also added squared penalties on terms like action_rate, which penalize large changes between actions and make the joint movement smoother.</p>
 
       <div class="hard">
         <span class="hard-label">The part that took the longest</span>
-        <p>Early policies learned to crawl. Crawling tracks the commanded velocity perfectly well and scores highly, but it is useless on real terrain. I wrote a custom height reward that priced crawling out of the solution space.</p>
-        <p>That created a second problem. Once the robot was penalised for staying low, it was being asked to learn balance and foot clearance at the same time, and it learned neither. I used curriculum learning to gate the foot-lifting rewards until the policy could hold itself upright, so it solved one problem before being handed the next.</p>
+        <p>Early policies learned to crawl. Crawling still follows the commanded velocity and gets a high reward, but it would not work on real terrain. I added a custom height reward that penalizes the body being too low, so crawling no longer scores well.</p>
+        <p>This caused a second problem. With the height penalty, the robot had to learn balance and foot clearance at the same time, and it failed to learn either. I used curriculum learning to turn on the foot-lifting rewards only after the policy could stay upright, so it learned one skill at a time.</p>
       </div>
 
       <h2>Next Steps</h2>

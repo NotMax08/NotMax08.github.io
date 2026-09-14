@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>The Brackey Way — autonomous sandwich assembly — Max Yuan</title>
-<meta name="description" content="A Bracket Bot that builds a sandwich end to end: a fine-tuned pi0 VLA grasps toast out of a toaster, an OpenCV + IK pipeline picks lettuce, and a finite state machine sequences the whole thing with no human in the loop.">
+<meta name="description" content="A Bracket Bot that makes a sandwich on its own: a fine-tuned pi0 VLA takes toast out of a toaster, an OpenCV + IK pipeline picks up lettuce, and a finite state machine runs the steps in order.">
 <meta property="og:title" content="The Brackey Way — autonomous sandwich assembly">
-<meta property="og:description" content="A fine-tuned pi0 VLA for the hard grasps, an OpenCV + IK pipeline for the easy ones, and a state machine that decides which to run.">
+<meta property="og:description" content="A fine-tuned pi0 VLA for the difficult grasps, OpenCV + inverse kinematics for the simple ones, and a state machine that switches between them.">
 <meta property="og:type" content="article">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,10 +36,10 @@
   <header class="wrap case-head">
     <p class="eyebrow">Bracket Bot · Battle of the Schools, UMIST</p>
     <h1>The Brackey Way</h1>
-    <p class="lede">A dual-arm Bracket Bot that assembles a sandwich end to end. It pulls a toasted slice out of the toaster, sets it on a plate, adds a leaf of lettuce, and closes the sandwich with a second slice — no teleoperation, no human in the loop once it starts.</p>
+    <p class="lede">A dual-arm Bracket Bot that makes a sandwich on its own. It takes a slice of toast out of the toaster, puts it on a plate, adds lettuce, and places a second slice on top. Once it starts, nobody controls it.</p>
     <div class="award">
       <span class="award-place">1st</span>
-      <p><b>1st place at Battle of the Schools, UMIST</b> — UofT AI vs. WAT.ai (Waterloo AI club). Won four Bambu Lab P1S 3D printers.</p>
+      <p><b>1st place at Battle of the Schools, UMIST.</b> UofT AI vs. WAT.ai (Waterloo AI club). Won four Bambu Lab P1S 3D printers.</p>
     </div>
     <p class="case-stack"><span>π₀ VLA</span><span>Fine-tuning</span><span>Imitation learning</span><span>OpenCV</span><span>Inverse kinematics</span><span>Finite state machine</span><span>Meta Quest teleop</span></p>
   </header>
@@ -56,18 +56,18 @@
   <div class="wrap">
     <div class="stat-row">
       <div class="stat"><b>100+</b><span>teleop episodes collected</span></div>
-      <div class="stat"><b>2</b><span>control strategies, one router</span></div>
-      <div class="stat"><b>4</b><span>manipulation states, fully autonomous</span></div>
-      <div class="stat"><b>65 Hz / 5 fps</b><span>arm state vs. vision, resampled</span></div>
+      <div class="stat"><b>2</b><span>controller types: learned and classical</span></div>
+      <div class="stat"><b>3</b><span>manipulation steps: bread, lettuce, top slice</span></div>
+      <div class="stat"><b>65 Hz / 5 fps</b><span>joint data vs. camera rate</span></div>
     </div>
   </div>
 
   <div class="wrap case-body">
     <div>
 
-      <h2>Architecture: one state machine, two kinds of controller</h2>
+      <h2>System overview</h2>
 
-      <p>The interesting decision in this project was not <em>how</em> to grasp something — it was deciding, per sub-task, which kind of controller deserved the effort. A learned policy is expensive to collect data for and expensive to run. A hand-written vision-plus-IK pipeline is cheap, but it only works when the target is easy to describe geometrically. So the system uses both, and a finite state machine decides which one is driving at any moment.</p>
+      <p>The robot uses two types of controllers. For grasps where the object's position changes a lot, like taking toast out of a toaster, it uses a π₀ VLA model fine-tuned on our own demonstrations. For grasps where the object is easy to find by color, like lettuce, it uses OpenCV and inverse kinematics. A learned policy needs a lot of training data and a GPU to run. A classical pipeline is quick to build, but only works when the object is easy to detect. A finite state machine decides which controller runs at each step.</p>
 
       <div class="fsm">
         <svg viewBox="0 0 1000 300" role="img" aria-label="State machine: scan the scene, grasp bread with the fine-tuned VLA, pick lettuce with OpenCV and inverse kinematics, close the sandwich with the VLA, done. After each manipulation state the machine advances only once the arm has settled back at its home pose.">
@@ -151,121 +151,121 @@
         </div>
       </div>
 
-      <h3>How a state ends</h3>
+      <h3>When a state ends</h3>
 
-      <p>Each manipulation state runs until the arm comes back to a known home pose. The guard is a joint-space distance check: the machine compares the current joint vector against the home configuration and only advances once the error falls under a threshold and stays there. Returning to home is the last thing every skill does, so "I am back at home and settled" is a cheap, reliable proxy for "I finished the thing I was asked to do."</p>
+      <p>Every manipulation state ends with the arm moving back to a home pose. To check this, the state machine compares the current joint angles to the home joint angles. Once the difference stays below a small threshold, the state is done and the machine moves on.</p>
 
-      <p>That is what lets the two controller types compose. After the VLA finishes placing the bread, the machine does not need to understand anything about what the policy did internally — it just waits for the arm to settle at home, then hands control to the lettuce pipeline. Each state is self-contained, and the guard is the only interface between them.</p>
+      <p>Because every state ends at the same home pose, the two controllers do not need to share any information. After the VLA places the bread, the state machine waits for the arm to reach home, then starts the lettuce pipeline.</p>
 
-      <h3>How the next state is chosen</h3>
+      <h3>Choosing the next state</h3>
 
-      <p>The machine is not a fixed script. Before each transition it re-reads the scene from the head camera and asks what the sandwich is still missing — no bread on the plate, bread but no lettuce, lettuce but no top slice. The answer selects the next state. If a grasp fails and the plate still looks empty, the machine re-enters the same state instead of marching on to a step that would not make sense.</p>
+      <p>The order of steps is not hard-coded. Before each transition, the head camera checks the plate to see what is missing: no bread, bread but no lettuce, or lettuce but no top slice. The result picks the next state. If a grasp fails and the plate is still empty, the machine runs the same state again.</p>
 
       <div class="two-up">
         <figure>
           <img src="../assets/brackey/bread_detect.png" alt="Head camera view with a detected bread slice boxed in green, showing distance, pixel size, and camera- and base-frame coordinates">
-          <figcaption><b>Scene check.</b> Stereo depth plus colour segmentation on the head camera. The overlay reports the slice's distance and its position in both camera and base frames — the same numbers the state machine reads to decide what is missing.</figcaption>
+          <figcaption><b>Scene check.</b> The head camera uses stereo depth and color segmentation to find the bread. The overlay shows its distance and its position in the camera frame and the robot base frame. The state machine uses this to check what is on the plate.</figcaption>
         </figure>
         <figure>
           <img src="../assets/brackey/lettuce_mask.png" alt="Side by side: detected lettuce boxed in red, and the binary green mask produced by HSV thresholding, with tuning sliders">
-          <figcaption><b>HSV tuning rig.</b> Live sliders over hue, saturation, value, and minimum blob area. Calibrating against the actual room light was faster than making a learned detector robust to it.</figcaption>
+          <figcaption><b>HSV tuning tool.</b> Sliders for hue, saturation, value, and minimum blob area. Tuning these for the room's lighting was faster than training a detector.</figcaption>
         </figure>
       </div>
 
-      <h2>The hard grasp: fine-tuning a π₀ VLA</h2>
+      <h2>Grasping toast: fine-tuning a π₀ VLA</h2>
 
-      <p>Pulling a slice out of a toaster is a genuinely awkward manipulation problem. The slot constrains the approach angle, the bread is compliant and sits at a different height and lean every time, and the surrounding metal gives depth sensing a hard time. Writing that as a geometric pipeline means enumerating cases forever.</p>
+      <p>Taking toast out of a toaster is a hard grasp. The slot limits the angle the gripper can come in from, the bread sits at a different height and angle each time, and the metal toaster makes depth readings noisy. Handling all of these cases with hand-written code would take too long.</p>
 
-      <p>So we fine-tuned <strong>π₀</strong>, a Vision-Language-Action model, on our own demonstrations. A VLA takes camera frames plus a language instruction and emits actions directly, which means the "how" is learned from examples rather than specified by hand.</p>
+      <p>Instead, we fine-tuned <strong>π₀</strong>, a Vision-Language-Action (VLA) model, on our own demonstrations. A VLA takes camera images and a text instruction as input and outputs robot actions. It learns the motion from examples instead of hand-written rules.</p>
 
-      <h3>Collecting the demonstrations</h3>
+      <h3>Collecting demonstrations</h3>
 
-      <p>We teleoperated the Bracket Bot's arm through a Meta Quest, driving the gripper by hand to grasp a slice and set it on the plate, and recorded 100+ episodes. Crucially, we moved the toaster, the plate, and the bread's orientation between episodes. A dataset collected from one fixed arrangement teaches a policy the trajectory; a dataset collected across many teaches it the task. That variance is the difference between a demo that works on the table it was recorded on and one that survives being nudged.</p>
+      <p>We controlled the robot's arm with a Meta Quest headset and recorded over 100 episodes of grabbing a slice and placing it on the plate. Between episodes, we moved the toaster and the plate and changed the angle of the bread. If every episode uses the same setup, the model only learns one fixed path and fails when anything moves. Changing the setup helps the model work with new positions.</p>
 
       <div class="two-up">
         <figure>
           <img src="../assets/brackey/teleop.jpg" alt="Operator wearing a Meta Quest headset, teleoperating the Bracket Bot's arms toward the toaster">
-          <figcaption><b>Teleoperated collection.</b> The operator's hand motion is retargeted onto the arm; every frame of camera plus every joint command is logged as a training episode.</figcaption>
+          <figcaption><b>Teleoperation.</b> The operator's hand movements are mapped onto the robot arm. Camera images and joint commands are recorded for each training episode.</figcaption>
         </figure>
         <figure>
           <video src="../assets/brackey/teleop_loop.mp4" autoplay muted loop playsinline preload="metadata" aria-label="Operator in a Meta Quest headset guiding the robot to set a slice of toast on the plate"></video>
-          <figcaption><b>One demonstration, live.</b> Guiding the gripper to set a slice on the plate — the exact motion the policy learns to reproduce.</figcaption>
+          <figcaption><b>A demonstration.</b> Placing a slice on the plate with the Meta Quest. The policy is trained to copy motions like this one.</figcaption>
         </figure>
       </div>
 
-      <h3>Supervised fine-tuning, then aggregation</h3>
+      <h3>Supervised fine-tuning and DAgger</h3>
 
-      <p>The training objective is imitation: for each recorded observation, the action the human took is the label, and the model is trained to reproduce it. That is <em>supervised fine-tuning</em> — behavioural cloning on top of π₀'s pretrained weights rather than learning from scratch.</p>
+      <p>Training uses imitation learning. For each recorded camera frame, the action the human took is the label, and the model learns to predict it. This is <em>supervised fine-tuning</em> (behavior cloning), starting from π₀'s pretrained weights instead of training from scratch.</p>
 
-      <p>Behavioural cloning on its own has a well-known weakness. The model only ever sees states a competent human visited, so the first small error takes it somewhere the dataset never covered, and errors compound from there. The fix is <em>data aggregation</em> (DAgger): let the current policy run, record the states it actually reaches — including the mediocre ones it drifts into — have the human supply the correct action for those states, and fold that new data back into the training set before retraining. Each round the dataset shifts from covering only the expert's path to covering the policy's own distribution, which is what it will face at test time.</p>
+      <p>Behavior cloning has a known problem. The model only sees states from good human demonstrations, so when it makes a small mistake it ends up in a state it has never seen, and the errors add up. <em>DAgger</em> (Dataset Aggregation) helps with this. We run the current policy, record the states it reaches, have a human label the correct action for those states, add that data to the training set, and retrain. After a few rounds, the dataset also covers the states the policy reaches on its own.</p>
 
-      <h3>Lining up frames with actions</h3>
+      <h3>Syncing camera frames with actions</h3>
 
-      <p>The two halves of a training pair arrive at completely different rates. Joint state streams off the arms at roughly 65 Hz; the cameras deliver frames at a handful per second, and neither is perfectly periodic. Pairing them naively — nearest sample, or index-to-index — smears the label, and a policy trained on actions attributed to the wrong frame learns a blurred version of the task.</p>
+      <p>The joint data and camera frames are recorded at different rates. Joint states arrive at about 65 Hz, the cameras run at about 5 frames per second, and neither rate is perfectly steady. If each frame is paired with the nearest joint reading or matched by index, some actions get paired with the wrong frame, and the model trains on incorrect labels.</p>
 
-      <p>We resampled both streams onto a shared, fixed time grid instead. Every grid point carries the frame observed at that instant and the action chunk that followed it, so each observation is paired with the control that genuinely came after it rather than one that happened to land nearby in the log.</p>
+      <p>To fix this, we resampled both streams onto the same fixed time grid. Each time step holds the camera frame at that time and the chunk of actions that came right after it.</p>
 
       <figure class="case-figure">
         <img src="../assets/brackey/telemetry.jpg" alt="Telemetry dashboard showing left and right arm joint position channels at about 65 Hz alongside a URDF viewer playing back the episode">
-        <figcaption><b>Episode inspection.</b> Per-joint position traces for both arms next to a URDF playback of the same episode. Scrubbing the recording against the joint traces is how bad takes got caught before they reached the training set.</figcaption>
+        <figcaption><b>Episode viewer.</b> Joint position plots for both arms next to a 3D URDF replay of the same episode. We used this to find and remove bad recordings before training.</figcaption>
       </figure>
 
-      <h2>The easy grasp: why lettuce did not get a model</h2>
+      <h2>Grasping lettuce: OpenCV and inverse kinematics</h2>
 
-      <p>Lettuce is the opposite kind of problem. It is a large, bright green mass on a wooden table, and nothing else in the scene is that colour. Spending an afternoon of data collection on it would have bought nothing that thirty lines of OpenCV did not already give us.</p>
+      <p>Lettuce is much easier to find. It is the only large, bright green object on the table, so a simple color filter works and there was no need to train a model for it.</p>
 
-      <p>The head camera frame is converted to HSV and thresholded against hue, saturation, and value bounds calibrated to the lettuce in that room's lighting, producing a binary mask. The largest blob's centroid becomes the target, gets projected out to a 3D point, and inverse kinematics solves for the joint angles that put the gripper there.</p>
+      <p>The head camera image is converted to HSV and filtered with hue, saturation, and value ranges tuned for the room's lighting. This gives a binary mask. The center of the largest blob is converted to a 3D point, and inverse kinematics calculates the joint angles needed to move the gripper there.</p>
 
-      <p>An open-loop move to that target is not quite accurate enough — small calibration error in the head camera turns into a centimetre or two at the gripper, which is the difference between grabbing lettuce and grabbing table. So as the arm rises toward the target, the wrist-mounted camera takes over and runs closed-loop correction, nudging the gripper's angle and position frame by frame until the leaf is centred. Coarse targeting from the head camera, fine correction from the wrist.</p>
+      <p>Moving straight to that point (open loop) was not accurate enough. Small errors in the head camera calibration made the gripper miss by 1–2 cm. To correct this, the wrist camera takes over as the arm gets close and adjusts the gripper's position and angle every frame until the lettuce is centered (closed loop). The head camera gives a rough target, and the wrist camera does the fine adjustment.</p>
 
       <div class="two-up">
         <figure>
           <img src="../assets/brackey/still_bread.jpg" alt="The robot lifting a toasted slice clear of the toaster">
-          <figcaption><b>VLA state.</b> The slice clear of the slot, on its way to the plate.</figcaption>
+          <figcaption><b>VLA state.</b> Lifting the toast out of the toaster.</figcaption>
         </figure>
         <figure>
           <img src="../assets/brackey/still_lettuce.jpg" alt="The robot placing lettuce onto the bread on the plate">
-          <figcaption><b>CV + IK state.</b> Lettuce centred by the wrist camera and released onto the slice.</figcaption>
+          <figcaption><b>OpenCV + IK state.</b> Placing lettuce on the toast after centering it with the wrist camera.</figcaption>
         </figure>
       </div>
 
       <div class="hard">
-        <span class="hard-label">What actually slowed us down</span>
-        <p>Neither bottleneck was the ML. The first was bandwidth: uploading 100+ recorded episodes over venue WiFi kept dropping partway through, and a half-uploaded dataset is a dataset you have to babysit and restart rather than train on.</p>
-        <p>The second was latency. The GPU we trained and ran inference on was remote, so every control step paid a network round trip. The robot moved sluggishly and, worse, every iteration of "change something, see if it helped" cost far more wall-clock than it should have. On a deadline, iteration speed <em>is</em> the constraint.</p>
+        <span class="hard-label">Main challenges</span>
+        <p>The biggest problems were not with the ML. First, uploading 100+ episodes over the venue WiFi kept failing partway through, so we had to restart the upload several times before we could train.</p>
+        <p>Second, the GPU for training and inference was remote, so every control step had network delay. The robot moved slowly, and testing each change took much longer than it should have. With a short deadline, this slowed us down the most.</p>
       </div>
 
       <h2>Result</h2>
 
-      <p>A complete sandwich, start to finish, with nobody touching the controls: toast out of the toaster onto the plate, lettuce on top of it, second slice to close. The state machine drives the whole sequence and recovers into the correct state when a step does not take.</p>
+      <p>The robot made a full sandwich with no human control: toast from the toaster onto the plate, lettuce on the toast, then the top slice. The state machine ran the whole sequence and repeated a step when it failed.</p>
 
-      <p>It took <strong>1st place</strong> at Battle of the Schools at UMIST, a head-to-head between UofT AI and WAT.ai, Waterloo's AI club. The prize was four Bambu Lab P1S 3D printers.</p>
+      <p>The project won <strong>1st place</strong> at Battle of the Schools at UMIST, a competition between UofT AI and WAT.ai (Waterloo's AI club). The prize was four Bambu Lab P1S 3D printers.</p>
 
       <figure class="case-figure">
         <img src="../assets/brackey/still_close.jpg" alt="The robot's gripper pressing the top slice of toast onto lettuce on the plate, finishing the sandwich">
-        <figcaption><b>Closing the sandwich.</b> The VLA sets the second slice on top of the lettuce, the last state before the plate is checked and the run ends.</figcaption>
+        <figcaption><b>Placing the top slice.</b> The last step before the state machine checks the plate and finishes.</figcaption>
       </figure>
 
-      <h2>What I took away</h2>
+      <h2>What I learned</h2>
 
-      <p><strong>Match the tool to the variance.</strong> The VLA earned its cost on the toaster grasp, where the situation is different every time. It would have been a waste on lettuce. Deciding that split early is what made the whole thing fit in a weekend.</p>
+      <p><strong>Only use a learned model where it is needed.</strong> The VLA was worth the effort for the toaster grasp, where the setup is different every time. For the lettuce, a color filter was enough. Deciding this early let us finish in one weekend.</p>
 
-      <p><strong>Collect data adversarially against yourself.</strong> The instinct during teleop is to keep the setup identical so the demonstrations look clean. That produces a policy that memorises a trajectory. Deliberately moving the toaster and plate between episodes felt like sabotaging the dataset and was the single highest-leverage thing we did.</p>
+      <p><strong>Add variation to the training data.</strong> During teleoperation it is tempting to keep the setup the same so the demonstrations look clean, but then the policy only learns one path. Moving the toaster and plate between episodes made the biggest difference in how well the policy worked.</p>
 
-      <p><strong>Infrastructure is part of the robot.</strong> WiFi throughput and GPU round-trip time shaped this project more than any architectural choice. On real hardware they are not someone else's problem.</p>
+      <p><strong>Plan for infrastructure early.</strong> WiFi speed and GPU latency affected this project more than any design choice. When working with real hardware, they need to be considered from the start.</p>
 
     </div>
 
     <aside class="facts">
       <dl>
         <dt>Platform</dt>
-        <dd>Bracket Bot — dual arm, head camera, wrist cameras</dd>
+        <dd>Bracket Bot with two arms, a head camera, and wrist cameras</dd>
         <dt>Learned policy</dt>
         <dd>π₀ VLA, fine-tuned on 100+ teleop episodes</dd>
         <dt>Classical stack</dt>
         <dd>OpenCV HSV segmentation, stereo depth, inverse kinematics</dd>
         <dt>Orchestration</dt>
-        <dd>Finite state machine with home-pose transition guards</dd>
+        <dd>Finite state machine that moves on when the arm returns to its home pose</dd>
         <dt>Teleoperation</dt>
         <dd>Meta Quest</dd>
         <dt>Result</dt>
@@ -273,7 +273,7 @@
         <dt>Team</dt>
         <dd>Four people, one hackathon weekend</dd>
       </dl>
-      <span class="no-repo">No public repository — the Bracket Bot stack this was built on is private.</span>
+      <span class="no-repo">No public repository. The Bracket Bot software this was built on is private.</span>
     </aside>
   </div>
 

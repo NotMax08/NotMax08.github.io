@@ -52,28 +52,27 @@
   <div class="wrap case-body">
     <div>
       <h2>What it is</h2>
-      <p>Competitive robotics with team 18844, ending at the 2025 FIRST World Championships. I was Co-Captain, Lead Software, and Main Driver</p>
+      <p>Competitive robotics with team 18844, ending at the 2025 FIRST World Championships. I was co-captain, lead software, and main driver.</p>
 
       <h2>Localization</h2>
-      <p>Autonomous scoring is entirely dependent on the robot knowing where it is. I built two-wheel odometry using dead wheels for translation, fused with IMU data for heading.</p>
+      <p>Autonomous scoring depends on the robot knowing where it is on the field. I built two-wheel odometry using dead wheels (unpowered tracking wheels) to measure movement, combined with an IMU for heading.</p>
 
       <div class="hard">
-        <span class="hard-label">Where the constraint was</span>
-        <p>We combined an IMU gyro sensor, two odometry wheels to determine the location of the robot on a cartesian coordinate plane. </p>
-        <p>To achieve full field locaization, we applied a matrix transformation to rotate our position vector according to its heading. This means that the local coordinates that were originally relative to the robot are now relative to the field (global position)</p>
-        
+        <span class="hard-label">How it works</span>
+        <p>The two odometry wheels and the IMU gyro are combined to track the robot's position on an x-y coordinate plane.</p>
+        <p>The wheels measure movement relative to the robot. To get the robot's position on the field, we rotate each movement by the robot's heading using a rotation matrix. This converts robot-relative (local) coordinates into field-relative (global) coordinates.</p>
       </div>
 
       <h3>Robot positioning</h3>
-      <p>Precise and controlled movements are needed for sample and specimen scoring during autonomous. Solution: Three positional PID controllers are used in order to control the robot’s x, y, and heading powers. These local powers are converted to a global power which are then simplified into individual motor powers in order to move the robot to its target position.</p>
+      <p>Scoring samples and specimens in autonomous needs precise, controlled movement. I used three PID controllers, one each for x, y, and heading. Their outputs are rotated by the robot's heading and converted into individual motor powers to drive the robot to its target position.</p>
       <p><img src="../assets/ftc/pid.png" alt="PID output graphs" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h3>Integral control</h3>
-      <p>Robot fails to reach target position due to inadequate corrective force from kP and kD alone. Solution: To prevent overshooting, set the integral gain to only activate within a small activation range (10-20cm). This way, it helps make quick, minor adjustments with consistent kI proportions. Since the integral term adds up over time, it gives a strong push towards the target and then stops once reached</p>
+      <p>With only kP and kD, the robot stopped slightly short of the target because the correction became too small near the end. To fix this, I only turned on the integral term within a small range of the target (10–20 cm). This prevents the integral from building up during long moves and causing overshoot. Near the target, the integral term grows over time and pushes the robot the last small distance, then stops once the target is reached.</p>
       <p><img src="../assets/ftc/integral_control.png" alt="Integral control PID push" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h2>Camera vision</h2>
-      <p>A camera and a custom trained neural detector model is used to calculate the respective x and y distances with the raw camera angles. Additionally, a custom-python snap-script is used to power an open-cv pipeline to determine sample angles with HSV thresholds.</p>
+      <p>A camera and a custom-trained neural network detector find the samples, and the camera angles are used to calculate each sample's x and y distance from the robot. A custom Python script also runs an OpenCV pipeline that uses HSV thresholds to find each sample's angle.</p>
       <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
         <img src="../assets/ftc/cv1.png" alt="Camera vision 1" style="width:48%;max-width:260px;">
         <img src="../assets/ftc/cv2.png" alt="Camera vision 2" style="width:48%;max-width:260px;">

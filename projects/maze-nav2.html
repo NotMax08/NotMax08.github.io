@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Autonomous maze navigator in Isaac Sim (Nova Carter)— Max Yuan</title>
+<title>Autonomous maze navigator in Isaac Sim (Nova Carter) — Max Yuan</title>
 <meta name="description" content="A full ROS2 Nav2 autonomy stack on a Nova Carter in Isaac Sim, with SLAM mapping, AMCL localization, and a TF tree built from scratch.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -63,12 +63,13 @@
   <div class="wrap case-body">
     <div>
       <h2>What it is</h2>
-      <p>A complete ROS2 autonomy stack running on a Nova Carter inside Isaac Sim. The robot enters a maze it has never seen, builds a map of it with SLAM, localizes itself against that map with AMCL, and uses Nav2 to plan and follow a path to a goal. No human input at any point after the goal is set.</p>
+      <p>A ROS2 navigation stack running on a Nova Carter robot in Isaac Sim. The robot drives into a maze it has not seen before, builds a map with SLAM, localizes itself on that map with AMCL, and uses Nav2 to plan and follow a path to a goal. After the goal is set, no human input is needed.</p>
 
       <h2>Building the transform tree</h2>
-      <p>To initialize Nav2, we need to publish to both /tf and /tf_static. To accomplish this, I used Isaac Sim's action graph editor, publishing transformations between important sensory functions.
+      <p>Nav2 needs the robot's coordinate frames to be published on /tf and /tf_static. I used Isaac Sim's action graph editor to publish the transforms between the robot base and its sensors.</p>
+
       <h2>System architecture</h2>
-      <p>The simulated robot in Isaac Sim and the ROS2/Nav2 stack communicate over standard ROS2 topics and transforms. Each platform both publishes and subscribes where appropriate so the pipeline looks like a set of cooperating producers and consumers:</p>
+      <p>Isaac Sim and the ROS2/Nav2 stack communicate through standard ROS2 topics and transforms:</p>
       <ul>
         <li><strong>/cmd_vel</strong> (geometry_msgs/Twist) — velocity commands from Nav2/controllers to the simulated base.</li>
         <li><strong>/odom</strong> (nav_msgs/Odometry) — odometry published by the simulator or robot state publisher.</li>
@@ -79,16 +80,16 @@
         <li><strong>/goal_pose</strong> or action goal topics — high-level goals sent to Nav2.</li>
       </ul>
 
-      <p>In practice Isaac Sim publishes sensor topics and listens for <em>/cmd_vel</em>, while ROS2 components publish map/pose and subscribe to sensor streams and goals. This publisher/subscriber split makes the system resilient and modular: either side can be swapped or replayed independently for debugging.</p>
+      <p>Isaac Sim publishes the sensor topics and subscribes to <em>/cmd_vel</em>, while the ROS2 nodes publish the map and pose and subscribe to the sensor data and goals. Because the two sides only communicate through topics, either side can be replaced, or replayed from a recording, when debugging.</p>
 
       <div class="hard">
-        <span class="hard-label">The bug worth writing down</span>
-        <p>The SLAM map came out warped. Walls that were straight in the maze appeared as curves in the occupancy grid.</p>
-        <p>The issue was caused by a noticeable difference in topic rate between the lidar (slower) and the odometry (fast). Low loop time of lidar compared to higher loop time of odom creates conflict where robot moves and updates position half-way between a lidar time, placing each scan at a slightly rotated pose. This overall creates an inconsistent and buggy SLAM map. Fixed by raising the RTX LiDAR's scanRateBaseHz in Isaac Sim to 20 Hz. </p>
+        <span class="hard-label">Main bug: warped SLAM map</span>
+        <p>The SLAM map came out warped. Straight walls in the maze showed up as curves in the occupancy grid.</p>
+        <p>The cause was a mismatch in update rates. The lidar published much slower than the odometry, so the robot moved and turned between lidar scans. Each scan was matched to a slightly wrong pose, which bent the walls in the map. I fixed it by raising the RTX LiDAR's scanRateBaseHz in Isaac Sim to 20 Hz.</p>
       </div>
 
       <h2>Result</h2>
-      <p>End to end navigation through an unmapped maze, including the mapping and localization stages, running entirely in simulation on the Nova Carter platform.</p>
+      <p>The robot navigated a maze it had not seen before, including the mapping and localization steps, fully in simulation on the Nova Carter.</p>
     </div>
 
     <aside class="facts">

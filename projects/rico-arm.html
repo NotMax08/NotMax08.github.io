@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>RICO, a voice-controlled robotic arm — Max Yuan</title>
-<meta name="description" content="A natural language request is sent to a Groq LLM which outputs structured actions; While the LLM parses the command, an OpenCV pipeline computes a bird's eye homography matrix, which is used transform the coordinates of a designated object location, provided by a yolov8 object detection model. These coordinates are then fed to an inverse kinematics solver.">
+<meta name="description" content="A spoken request goes to a Groq LLM, which outputs a list of actions. At the same time, an OpenCV pipeline computes a bird's-eye homography. YOLOv8 detections are mapped through the homography to bench coordinates and passed to an inverse kinematics solver.">
 <link rel="preconnect" href="https://fonts.googleapis.com">                                                              
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;800&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -52,12 +52,12 @@
   <div class="wrap case-body">
     <div>
       <h2>How the pipeline runs</h2>
-      <p>A natural language request is sent to a Groq LLM which outputs a series of actions that help the robot accomplish the requested task. At the same time, an OpenCV pipeline runs and on each frame computes a homography transformation to produce a bird's-eye view. When an object is detected using a trained YOLOv8 model, the detection coordinates are multiplied by the transformation matrix to get the object's position in workspace coordinates. That position is then fed into an inverse kinematics calculator, which the arm uses to reach and grasp the object.</p>
+      <p>A plain-language request is sent to a Groq LLM, which outputs a list of actions for the robot to complete the task. At the same time, an OpenCV pipeline computes a homography transform on each camera frame to get a bird's-eye view of the bench. When the trained YOLOv8 model detects the object, its pixel coordinates are multiplied by the homography matrix to get its position on the bench. That position is passed to an inverse kinematics solver, which calculates the joint angles the arm needs to reach and grab the object.</p>
 
       <div class="hard">
-        <span class="hard-label">Bridging vision and motion</span>
-        <p>To accurately localize the object, we need to convert the detection coordinate (in pixels) into a scalable quantity(mm). A bounding box centre at pixel (412, 260) means nothing to an IK solver.</p>
-        <p>I used a homography transform to map the camera plane onto the workspace plane, which turns any detection into a real coordinate on the bench that the solver can reach for. This is the piece that makes the whole thing work with tools placed anywhere, rather than at memorised positions.</p>
+        <span class="hard-label">Converting pixels to real positions</span>
+        <p>The object detector gives positions in pixels, but the IK solver needs positions in millimetres on the bench. For example, a bounding box centre at pixel (412, 260) cannot be used by the IK solver directly.</p>
+        <p>I used a homography transform to map the camera image plane onto the bench plane. This converts any detection into a real position on the bench, so tools can be placed anywhere instead of at fixed, pre-set positions.</p>
         <h3>Homography examples</h3>
         <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;">
           <img src="../assets/rico/homography_examples.png" alt="Homography examples" style="width:100%;max-width:520px;">
@@ -65,7 +65,7 @@
       </div>
 
       <h2>Result</h2>
-      <p>Voice command to grasp, with no fixed tool positions and no per-tool calibration. Built and demonstrated inside a hackathon weekend.</p>
+      <p>The arm goes from a spoken request to grabbing the tool, without fixed tool positions or separate calibration for each tool. Built and demoed during a hackathon weekend.</p>
     </div>
 
     <aside class="facts">
