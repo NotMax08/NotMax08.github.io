@@ -893,10 +893,11 @@ body{background-image:radial-gradient(1200px 600px at 50% -10%,rgba(255,255,255,
 
 .two-up video{width:100%;display:block;aspect-ratio:16/9;object-fit:cover;background:#0d100f}
 
-/* images with different shapes: columns sized by aspect ratio so neither is cropped */
-.two-up-fit{grid-template-columns:.811fr 1.89fr;align-items:start}
-.two-up-fit img{flex:none;height:auto;object-fit:contain}
+/* tall screenshot: image beside its caption instead of filling the column */
+.case-figure-side{display:grid;grid-template-columns:minmax(0,300px) 1fr;align-items:center}
+.case-figure-side figcaption{border-top:0}
 
 @media (max-width:620px){
-  .two-up-fit{grid-template-columns:1fr}
+  .case-figure-side{grid-template-columns:1fr}
+  .case-figure-side figcaption{border-top:1px solid var(--rule)}
 }
