@@ -193,8 +193,8 @@
       </div>
 
       <h3>Supervised fine-tuning and DAgger</h3>
-
-      <p>Training uses imitation learning. For each recorded camera frame, the action the human took is the label, and the model learns to predict it. This is <em>supervised fine-tuning</em> (behavior cloning), starting from π₀'s pretrained weights instead of training from scratch.</p>
+      
+      <p>For training the model, the input is the video footage and prompt, while the output is the joint orientation velocity, position, etc. With this information, the robot learns to "imitate" the teleoperaed actions, hence the term imitation learning. Since we train this data on a foundation model (pi0), the model is able to learn this motion from an unknown environment. This is <em>supervised fine-tuning</em> (behavior cloning), starting from π₀'s pretrained weights instead of training from scratch.</p>
 
       <p>Behavior cloning has a known problem. The model only sees states from good human demonstrations, so when it makes a small mistake it ends up in a state it has never seen, and the errors add up. <em>DAgger</em> (Dataset Aggregation) helps with this. We run the current policy, record the states it reaches, have a human label the correct action for those states, add that data to the training set, and retrain. After a few rounds, the dataset also covers the states the policy reaches on its own.</p>
 
