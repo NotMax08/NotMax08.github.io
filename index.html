@@ -18,11 +18,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
 <!-- bump ?v= whenever style.css, main.js or sim.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-09-25">
+<link rel="stylesheet" href="style.css?v=2026-09-25b">
 <script>(function(){var d=document.documentElement;d.classList.add('js');try{if(sessionStorage.getItem('booted')||matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('seen')}catch(e){}})();</script>
 <!-- three.js for the robot sim, loaded on demand by main.js -->
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
-<script src="main.js?v=2026-09-25" defer></script>
+<script src="main.js?v=2026-09-25b" defer></script>
 </head>
 
 <body>
@@ -52,6 +52,7 @@
   <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
   <symbol id="i-network" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="m6.7 7.1 3.6 3.8M6.7 16.9l3.6-3.8M13.7 10.9l3.6-3.8M13.7 13.1l3.6 3.8"/></symbol>
   <symbol id="i-brackets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></symbol>
   <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
 </svg>
 
@@ -155,21 +156,21 @@
       </div>
 
       <div class="stats reveal">
-        <a class="stat" href="#awards" aria-label="3 hackathons, 1st place at BOTS 2026">
+        <a class="stat" href="#awards" aria-label="3 hackathons: 1st place at BOTS 2026, 2nd place at RythmHacks 2025">
           <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-laptop"/></svg></span>
           <span class="stat-num" data-count="3" aria-hidden="true">3</span>
           <span class="stat-label" aria-hidden="true">hackathons</span>
-          <span class="stat-sub" aria-hidden="true">1st place · BOTS 2026</span>
+          <span class="stat-sub" aria-hidden="true">1st BOTS · 2nd RythmHacks</span>
         </a>
-        <a class="stat" href="#projects" aria-label="5 robotics projects">
+        <a class="stat" href="#projects" aria-label="6 robotics projects">
           <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-layers"/></svg></span>
-          <span class="stat-num" data-count="5" aria-hidden="true">5</span>
+          <span class="stat-num" data-count="6" aria-hidden="true">6</span>
           <span class="stat-label" aria-hidden="true">robotics projects</span>
           <span class="stat-sub" aria-hidden="true">RL · autonomy · manipulation</span>
         </a>
-        <a class="stat" href="#awards" aria-label="3 awards, including FIRST Worlds 2025">
+        <a class="stat" href="#awards" aria-label="4 awards, including FIRST Worlds 2025">
           <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg></span>
-          <span class="stat-num" data-count="3" aria-hidden="true">3</span>
+          <span class="stat-num" data-count="4" aria-hidden="true">4</span>
           <span class="stat-label" aria-hidden="true">awards</span>
           <span class="stat-sub" aria-hidden="true">incl. FIRST Worlds 2025</span>
         </a>
@@ -217,9 +218,9 @@
             <p class="sim-side-label">waypoints</p>
             <ul class="sim-goals">
               <li><button class="sim-goal" type="button" data-goal="about"><span class="k">01</span><span class="n">about</span><span class="d">who I am</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="projects"><span class="k">02</span><span class="n">projects</span><span class="d">5 builds</span></button></li>
+              <li><button class="sim-goal" type="button" data-goal="projects"><span class="k">02</span><span class="n">projects</span><span class="d">6 builds</span></button></li>
               <li><button class="sim-goal" type="button" data-goal="experience"><span class="k">03</span><span class="n">experience</span><span class="d">WATonomous, FTC</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="awards"><span class="k">04</span><span class="n">awards</span><span class="d">BOTS, FIRST Worlds</span></button></li>
+              <li><button class="sim-goal" type="button" data-goal="awards"><span class="k">04</span><span class="n">awards</span><span class="d">BOTS, RythmHacks, Worlds</span></button></li>
               <li><button class="sim-goal" type="button" data-goal="skills"><span class="k">05</span><span class="n">skills</span><span class="d">from my résumé</span></button></li>
               <li><button class="sim-goal" type="button" data-goal="contact"><span class="k">06</span><span class="n">contact</span><span class="d">say hi</span></button></li>
             </ul>
@@ -312,7 +313,7 @@
             <p>Photos, demo videos, highlights, and code.</p>
           </div>
           <div class="all-top">
-            <span class="all-count">05 projects</span>
+            <span class="all-count">06 projects</span>
             <span class="all-arrow"><svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
@@ -333,7 +334,7 @@
         <li class="moment"><figure><img src="assets/photos/ftc-worlds.jpg" alt="FTC team 18844 with a Canadian flag at the FIRST World Championships" width="1600" height="1067" loading="lazy"><figcaption>Team Canada @ Worlds</figcaption></figure></li>
         <li class="moment"><figure><img src="assets/photos/rico-team.jpg" alt="Max and a teammate beside the RICO arm at Eureka Hacks" width="1600" height="1205" loading="lazy" style="object-position:34% 50%"><figcaption>RICO demo day</figcaption></figure></li>
         <li class="moment"><figure><img src="assets/photos/bracket-closeup.jpg" alt="Bracket Bot's gripper holding a slice of toast" width="1600" height="900" loading="lazy" style="object-position:58% 50%"><figcaption>toast, π₀ style</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/launcher.jpg" alt="The RythmHacks turret: a 3D-printed ping-pong ball launcher with a flywheel and servos, wired to an Arduino" width="1200" height="1200" loading="lazy"><figcaption>RythmHacks turret · 2nd place</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/launcher.jpg" alt="The RythmHacks turret: a 3D-printed ping-pong ball launcher with a flywheel and servos, wired to an Arduino" width="1200" height="1200" loading="lazy"><figcaption>StudyBuddy 9520 · RythmHacks</figcaption></figure></li>
       </ul>
     </section>
 
@@ -426,18 +427,18 @@
         <p class="ph-sub">Robot learning, autonomy, and manipulation, from hackathon weekends to solo simulation projects and competitive robotics.</p>
       </div>
       <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">05</span>
+        <span class="ph-num">06</span>
         <ul class="tags"><li class="tag">Isaac Lab</li><li class="tag">ROS2</li><li class="tag">π₀ VLA</li><li class="tag">OpenCV</li></ul>
       </div>
     </header>
 
     <div class="page-body">
       <div class="filters" role="group" aria-label="Filter projects">
-        <button class="btn btn-glow btn-sm" type="button" data-filter="all" aria-pressed="true">All <span class="count">5</span></button>
+        <button class="btn btn-glow btn-sm" type="button" data-filter="all" aria-pressed="true">All <span class="count">6</span></button>
         <button class="btn btn-ghost btn-sm" type="button" data-filter="learning" aria-pressed="false">Robot learning <span class="count">2</span></button>
         <button class="btn btn-ghost btn-sm" type="button" data-filter="autonomy" aria-pressed="false">Autonomy <span class="count">2</span></button>
-        <button class="btn btn-ghost btn-sm" type="button" data-filter="vision" aria-pressed="false">Vision &amp; manipulation <span class="count">3</span></button>
-        <button class="btn btn-ghost btn-sm" type="button" data-filter="hackathon" aria-pressed="false">Hackathons <span class="count">2</span></button>
+        <button class="btn btn-ghost btn-sm" type="button" data-filter="vision" aria-pressed="false">Vision &amp; manipulation <span class="count">4</span></button>
+        <button class="btn btn-ghost btn-sm" type="button" data-filter="hackathon" aria-pressed="false">Hackathons <span class="count">3</span></button>
       </div>
       <p class="visually-hidden" id="filterStatus" role="status" aria-live="polite"></p>
 
@@ -647,6 +648,54 @@
           </div>
         </article>
 
+        <!-- StudyBuddy 9520 (mini project) -->
+        <article class="pcard mini glow-card reveal" id="studybuddy" data-cats="vision hackathon">
+          <div class="carousel" data-carousel>
+            <div class="car-track" tabindex="0" role="group" aria-label="StudyBuddy 9520: demo video and photos">
+              <figure class="car-slide">
+                <button class="yt" type="button" data-yt="DLb4IcTUDbg" data-title="StudyBuddy 9520 demonstration" aria-label="Play the StudyBuddy 9520 demo video (loads YouTube)">
+                  <img src="assets/studybuddy/turret.jpg" alt="" width="1200" height="1600" loading="lazy">
+                  <span class="yt-play"><i><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></i>watch the demo</span>
+                </button>
+              </figure>
+              <figure class="car-slide"><img src="assets/photos/launcher.jpg" alt="The turret on the bench, wired to an Arduino UNO and a breadboard" width="1200" height="1200" loading="lazy"><figcaption>Wired up: Arduino UNO, servos, flywheel motor</figcaption></figure>
+              <figure class="car-slide contain light"><img src="assets/studybuddy/cad.jpg" alt="Onshape CAD render of the turret: flywheel, ball hopper, pan and tilt servos, and webcam mount" width="586" height="896" loading="lazy"><figcaption>Designed in Onshape, then 3D-printed</figcaption></figure>
+            </div>
+            <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
+            <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
+            <span class="pcard-num">06</span>
+            <span class="car-count" aria-hidden="true">1 / 3</span>
+          </div>
+          <div class="pcard-body">
+            <div class="pcard-meta">
+              <span class="p-mini">mini project</span>
+              <span class="p-date">Oct 2025</span>
+              <span class="p-cat">vision &amp; control</span>
+              <span class="p-award">2nd place · RythmHacks 2025</span>
+            </div>
+            <h3 class="pcard-title">StudyBuddy 9520</h3>
+            <p class="pcard-org">An anti-procrastination turret · RythmHacks 2025 · team of four</p>
+            <p class="pcard-desc">A desk turret that watches you study and fires a ping-pong ball when you get distracted. YOLOv8 spots the distraction, PID loops aim the pan and tilt servos at you, and a flywheel launches the ball.</p>
+            <ul class="tags"><li class="tag">YOLOv8</li><li class="tag">OpenCV</li><li class="tag">PID control</li><li class="tag">Arduino</li><li class="tag">C++</li><li class="tag">Python</li><li class="tag">Onshape</li></ul>
+            <div class="pcard-actions">
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-studybuddy">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <a class="btn btn-ghost btn-sm btn-icon" href="https://github.com/NotMax08/StudyBuddy9520" target="_blank" rel="noopener" aria-label="Code on GitHub"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></a>
+              <a class="btn btn-glow btn-sm" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">Devpost <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
+            </div>
+          </div>
+          <div class="expand" id="x-studybuddy">
+            <div class="expand-inner"><div class="expand-content">
+              <p class="panel-label">highlights</p>
+              <ul class="bullets">
+                <li>Designed the turret in <b>Onshape</b> and 3D-printed it: two high-torque servos for <b>yaw and pitch</b>, and a <b>1550 RPM DC motor</b> spinning the flywheel.</li>
+                <li>A laptop runs <b>YOLOv8</b> on a 4K webcam feed to find the distracted person, then sends aim targets to an <b>Arduino UNO</b> over serial. Switching to asynchronous serial removed the lag between detection and motion.</li>
+                <li>A <b>ServoEncoder</b> class wraps <b>PID control</b> and encoder tracking. The servos only covered 60–120° instead of the documented 0–180°, so the PID output had to be normalized and retuned for their non-linear response.</li>
+                <li>When YOLOv8 dropped a detection, the turret kept aiming at the last valid target instead of snapping back.</li>
+              </ul>
+            </div></div>
+          </div>
+        </article>
+
       </div>
     </div>
   </section>
@@ -731,11 +780,11 @@
       <div class="ph-left">
         <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/awards</span><span class="t-sym">$&nbsp;</span>ls<span class="term-cursor" aria-hidden="true"></span></p>
         <h2 class="ph-title">Awards &amp; <em>wins</em></h2>
-        <p class="ph-sub">A hackathon win and FIRST championship awards.</p>
+        <p class="ph-sub">Two hackathon podiums and FIRST championship awards.</p>
       </div>
       <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">03</span>
-        <ul class="tags"><li class="tag">BOTS 2026</li><li class="tag">FIRST Worlds 2025</li></ul>
+        <span class="ph-num">04</span>
+        <ul class="tags"><li class="tag">BOTS 2026</li><li class="tag">RythmHacks 2025</li><li class="tag">FIRST Worlds 2025</li></ul>
       </div>
     </header>
 
@@ -763,6 +812,13 @@
           <h3 class="t-name">BOTS Hackathon</h3>
           <p class="t-event">Battle of the Schools, WAT.ai vs. UTMIST</p>
           <span class="t-year">Sept 2026</span>
+        </article>
+        <article class="trophy reveal">
+          <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
+          <p class="t-place">2nd place</p>
+          <h3 class="t-name">RythmHacks 2025</h3>
+          <p class="t-event">StudyBuddy 9520, an anti-procrastination turret · <a href="#studybuddy">see the project</a></p>
+          <span class="t-year">Oct 2025</span>
         </article>
         <article class="trophy reveal">
           <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
@@ -821,8 +877,8 @@
         <section class="skill-box reveal" id="sk-lang" aria-labelledby="sk-lang-h">
           <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-brackets"/></svg></span><h3 id="sk-lang-h">Languages</h3><span class="sb-n">3 skills</span></div>
           <div class="skill-chips">
-            <button class="skill" type="button" data-used="quad,rico">Python <span class="n">2</span></button>
-            <span class="skill">C++</span>
+            <button class="skill" type="button" data-used="quad,rico,turret">Python <span class="n">3</span></button>
+            <button class="skill" type="button" data-used="turret">C++ <span class="n">1</span></button>
             <button class="skill" type="button" data-used="ftc">Java <span class="n">1</span></button>
           </div>
           <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
@@ -843,8 +899,8 @@
           <div class="skill-chips">
             <button class="skill" type="button" data-used="maze">NVIDIA Isaac Sim <span class="n">1</span></button>
             <button class="skill" type="button" data-used="quad">Isaac Lab <span class="n">1</span></button>
-            <button class="skill" type="button" data-used="brackey,rico,ftc">OpenCV <span class="n">3</span></button>
-            <button class="skill" type="button" data-used="rico">YOLOv8 <span class="n">1</span></button>
+            <button class="skill" type="button" data-used="brackey,rico,ftc,turret">OpenCV <span class="n">4</span></button>
+            <button class="skill" type="button" data-used="rico,turret">YOLOv8 <span class="n">2</span></button>
           </div>
           <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
         </section>
@@ -857,10 +913,10 @@
             <button class="skill" type="button" data-used="maze">Nav2 <span class="n">1</span></button>
             <button class="skill" type="button" data-used="maze">slam_toolbox <span class="n">1</span></button>
             <button class="skill" type="button" data-used="maze">AMCL <span class="n">1</span></button>
-            <button class="skill" type="button" data-used="ftc">PID control <span class="n">1</span></button>
+            <button class="skill" type="button" data-used="ftc,turret">PID control <span class="n">2</span></button>
             <button class="skill" type="button" data-used="brackey,rico">Inverse kinematics <span class="n">2</span></button>
             <button class="skill" type="button" data-used="ftc,maze">Odometry <span class="n">2</span></button>
-            <span class="skill">Onshape</span>
+            <button class="skill" type="button" data-used="turret">Onshape <span class="n">1</span></button>
           </div>
           <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
         </section>

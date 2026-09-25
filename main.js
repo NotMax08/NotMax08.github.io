@@ -9,7 +9,7 @@
 
   const doc = document.documentElement;
   const BASE = doc.dataset.root || '';          // "../" on project pages
-  const VERSION = '2026-09-25';                  // keep in step with the ?v= in index.html
+  const VERSION = '2026-09-25b';                  // keep in step with the ?v= in index.html
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const $ = (sel, el = document) => el.querySelector(sel);
@@ -386,6 +386,7 @@
     maze: ['Maze navigation', BASE + 'projects/maze-nav2.html'],
     rico: ['RICO', BASE + 'projects/rico-arm.html'],
     ftc: ['FTC 18844', BASE + 'projects/ftc-18844.html'],
+    turret: ['StudyBuddy 9520', homeHref + '#studybuddy'],
     wato: ['WATonomous', homeHref + '#experience'],
   };
 
@@ -427,6 +428,19 @@
   /* ---------- copy email ---------- */
 
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', copyEmail));
+
+  /* ---------- YouTube: a poster until clicked, so nothing loads from YouTube up front ---------- */
+
+  $$('[data-yt]').forEach(btn => btn.addEventListener('click', () => {
+    const frame = document.createElement('iframe');
+    frame.className = 'yt-frame';
+    frame.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(btn.dataset.yt)}?autoplay=1&rel=0`;
+    frame.title = btn.dataset.title || 'YouTube video';
+    frame.allow = 'autoplay; encrypted-media; picture-in-picture; fullscreen';
+    frame.allowFullscreen = true;
+    btn.replaceWith(frame);
+    frame.focus();
+  }));
 
   $$('[data-year]').forEach(el => { el.textContent = String(new Date().getFullYear()); });
 
@@ -672,8 +686,9 @@
             ['maze-nav2', 'projects/maze-nav2.html'],
             ['rico-arm', 'projects/rico-arm.html'],
             ['ftc-18844', 'projects/ftc-18844.html'],
+            ['studybuddy-9520', '#studybuddy'],
           ].forEach(([name, href]) => line([['t-tag', '  '], ['', name, () => { location.href = href; }]]));
-          say('brackey-way, quadruped-ppo, maze-nav2, rico-arm, ftc-18844');
+          say('brackey-way, quadruped-ppo, maze-nav2, rico-arm, ftc-18844, studybuddy-9520');
           return;
         }
         const parts = [];

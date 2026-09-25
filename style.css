@@ -1153,6 +1153,50 @@ kbd{
 .pcard.featured .carousel{aspect-ratio:auto;height:100%;min-height:380px}
 .pcard.featured .expand{grid-column:1/-1}
 
+/* smaller full-width card for hackathon side builds */
+.pcard.mini{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);
+}
+.pcard.mini .carousel{aspect-ratio:auto;min-height:320px}
+.pcard.mini .car-track{position:absolute;inset:0}   /* the portrait photos shouldn't set the card's height */
+.pcard.mini .expand{grid-column:1/-1}
+.pcard.mini .car-slide img{object-position:50% 40%}
+.p-mini{padding:.12rem .4rem;border:1px solid var(--line-2);border-radius:5px;color:var(--ink-2)}
+
+/* click-to-load YouTube */
+.yt{
+  position:relative;
+  display:block;
+  width:100%;height:100%;
+  padding:0;border:0;
+  background:var(--well);
+  cursor:pointer;
+}
+.yt img{width:100%;height:100%;object-fit:cover;filter:saturate(.8) brightness(.62);transition:filter .3s ease}
+.yt:hover img,.yt:focus-visible img{filter:saturate(.95) brightness(.78)}
+.yt-play{
+  position:absolute;left:50%;top:50%;
+  display:inline-flex;align-items:center;gap:.55rem;
+  padding:.45rem .85rem .45rem .45rem;
+  border-radius:999px;
+  background:rgba(12,14,16,.78);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+  border:1px solid var(--line-3);
+  font:450 .76rem/1 var(--font-mono);
+  color:var(--ink);
+  white-space:nowrap;
+  transform:translate(-50%,-50%);
+  transition:transform .25s var(--ease);
+}
+.yt:hover .yt-play{transform:translate(-50%,-50%) scale(1.04)}
+.yt-play i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--on-accent)}
+.yt-play svg{width:13px;height:13px;margin-left:2px}
+.yt-frame{display:block;width:100%;height:100%;border:0;background:#000}
+.car-slide.contain.light img{background:#fff}
+
 .carousel{position:relative;aspect-ratio:16/10;background:var(--well);overflow:hidden}
 .car-track{
   display:flex;height:100%;
@@ -1325,7 +1369,7 @@ kbd{
 .ah-photos .p2{margin-top:2rem}
 .ah-photos figcaption{margin-top:.45rem;font:450 .7rem/1.3 var(--font-mono);color:var(--ink-3)}
 
-.trophies{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem}
+.trophies{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.8rem}
 .trophy{
   position:relative;
   padding:1.2rem 1.25rem 1.3rem;
@@ -1340,6 +1384,8 @@ kbd{
 .t-place{margin:0;font:450 .72rem/1.3 var(--font-mono);color:var(--accent-ink)}
 .t-name{margin:.35rem 0 .3rem;font-size:1.05rem;letter-spacing:-.01em}
 .t-event{margin:0;font-size:.86rem;color:var(--ink-3)}
+.t-event a{color:var(--accent-ink);text-decoration:none;border-bottom:1px solid var(--line-3);white-space:nowrap}
+.t-event a:hover{color:var(--accent);border-bottom-color:var(--accent)}
 .t-year{position:absolute;right:1.1rem;top:1.25rem;font:450 .72rem/1 var(--font-mono);color:var(--ink-4)}
 
 .team-photo{
@@ -1737,6 +1783,7 @@ button.skill:hover,.skill.is-on{color:var(--ink);border-color:var(--line-3);back
   .t-brackey{min-height:380px}
   .contact-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   .moments{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .trophies{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 
 @media (max-width:960px){
@@ -1751,11 +1798,11 @@ button.skill:hover,.skill.is-on{color:var(--ink);border-color:var(--line-3);back
   .sim-goal .d{display:none}
   .sim-joints,.sim-joints-cap,.sim-side .sim-side-label.j{display:none}
   .pgrid{grid-template-columns:minmax(0,1fr)}
-  .pcard.featured{display:flex}
-  .pcard.featured .carousel{aspect-ratio:16/10;min-height:0;height:auto}
+  .pcard.featured,.pcard.mini{display:flex}
+  .pcard.featured .carousel,.pcard.mini .carousel{aspect-ratio:16/10;min-height:0;height:auto}
+  .pcard.mini .car-track{position:static}
   .award-hero{grid-template-columns:minmax(0,1fr)}
   .ah-photos{max-width:440px}
-  .trophies{grid-template-columns:minmax(0,1fr)}
   .team-photo{grid-template-columns:minmax(0,1fr)}
   .skill-grid{grid-template-columns:minmax(0,1fr)}
   .about-grid{grid-template-columns:minmax(0,1fr)}
@@ -1784,6 +1831,7 @@ button.skill:hover,.skill.is-on{color:var(--ink);border-color:var(--line-3);back
   .moments{grid-template-columns:repeat(2,minmax(0,1fr))}
   .contact-grid{grid-template-columns:minmax(0,1fr)}
   .contact-card{min-height:0}
+  .trophies{grid-template-columns:minmax(0,1fr)}
   .info-cards{grid-template-columns:minmax(0,1fr)}
   .ph-right{align-items:flex-start}
   .ph-right .tags{justify-content:flex-start}
