@@ -1,6 +1,7 @@
 /* =========================================================
    Max Yuan · portfolio behaviour
-   Shared by index.html and every project page. No dependencies.
+   Shared by index.html and every project page. No dependencies;
+   the robot sim (sim.js) is imported on demand from the home page.
    ========================================================= */
 
 (() => {
@@ -8,15 +9,17 @@
 
   const doc = document.documentElement;
   const BASE = doc.dataset.root || '';          // "../" on project pages
+  const VERSION = '2026-09-25';                  // keep in step with the ?v= in index.html
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
   const attempt = (fn, fallback = null) => { try { return fn(); } catch (e) { return fallback; } };
-  const local = { get: k => attempt(() => localStorage.getItem(k)), set: (k, v) => attempt(() => localStorage.setItem(k, v)) };
   const session = { get: k => attempt(() => sessionStorage.getItem(k)), set: (k, v) => attempt(() => sessionStorage.setItem(k, v)) };
   const isHome = !!$('.page[data-page]');
   const homeHref = isHome ? '' : BASE + 'index.html';
+  const SECTIONS = ['about', 'projects', 'experience', 'awards', 'skills', 'contact'];
+  const EMAIL = 'maxyuan081205@gmail.com';
 
   // Jump without the CSS smooth-scroll (used when swapping pages).
   function jumpTo(y) {
@@ -26,73 +29,101 @@
     doc.style.scrollBehavior = prev;
   }
 
-  /* ---------- first-visit loader ---------- */
+  /* ---------- toast ---------- */
 
-  const readyQueue = [];
-  let ready = false;
-  const whenReady = fn => (ready ? fn() : readyQueue.push(fn));
-  function markReady() {
-    if (ready) return;
-    ready = true;
-    readyQueue.splice(0).forEach(fn => fn());
+  const toastEl = $('#toast');
+  let toastTimer = 0;
+  function toast(message) {
+    if (!toastEl) return;
+    toastEl.textContent = message;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
   }
 
-  const loader = $('#loader');
-  if (loader && !doc.classList.contains('seen')) {
-    const t0 = performance.now();
-    let hidden = false;
-    const hide = () => {
-      if (hidden) return;
-      hidden = true;
-      loader.classList.add('done');
-      session.set('seen', '1');
-      setTimeout(() => loader.remove(), 700);
-      markReady();
-    };
-    window.addEventListener('load', () => setTimeout(hide, Math.max(0, 1000 - (performance.now() - t0))));
-    setTimeout(hide, 2600);
-  } else {
-    loader?.remove();
-    session.set('seen', '1');
-    markReady();
-  }
-
-  /* ---------- theme ---------- */
-
-  const themeBtn = $('#themeToggle');
-  const metaTheme = $('meta[name="theme-color"]');
-
-  function paintTheme(theme) {
-    doc.dataset.theme = theme;
-    themeBtn?.setAttribute('aria-pressed', String(theme === 'dark'));
-    themeBtn?.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
-    if (metaTheme) metaTheme.content = theme === 'dark' ? '#0D0B1C' : '#F7F5FF';
-  }
-  paintTheme(doc.dataset.theme === 'dark' ? 'dark' : 'light');
-
-  function toggleTheme() {
-    const next = doc.dataset.theme === 'dark' ? 'light' : 'dark';
-    local.set('theme', next);
-    if (!document.startViewTransition || reduceMotion.matches || !themeBtn) {
-      paintTheme(next);                     // CSS transitions give a soft fade
-      return;
+  async function copyEmail() {
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      toast('email copied ✓');
+      return true;
+    } catch (e) {
+      window.location.href = `mailto:${EMAIL}`;
+      return false;
     }
-    // Circular reveal that grows out of the toggle button.
-    const r = themeBtn.getBoundingClientRect();
-    const x = r.left + r.width / 2;
-    const y = r.top + r.height / 2;
-    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-    doc.classList.add('no-trans');
-    const vt = document.startViewTransition(() => paintTheme(next));
-    vt.ready.then(() => {
-      doc.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 650, easing: 'cubic-bezier(.2,.7,.2,1)', pseudoElement: '::view-transition-new(root)' }
-      );
-    }).catch(() => {});
-    vt.finished.finally(() => doc.classList.remove('no-trans'));
   }
-  themeBtn?.addEventListener('click', toggleTheme);
+
+  /* ---------- ambient dot grid ---------- */
+
+  function initDots() {
+    const canvas = $('#dots');
+    const ctx = canvas && canvas.getContext('2d');
+    if (!ctx) return;
+    const GAP = 26;
+    let base = null;
+    let glows = [];
+    let dpr = 1;
+    let last = 0;
+
+    function build() {
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      base = document.createElement('canvas');
+      base.width = canvas.width;
+      base.height = canvas.height;
+      const b = base.getContext('2d');
+      b.scale(dpr, dpr);
+      b.fillStyle = 'rgba(183,201,226,.075)';
+      const pts = [];
+      for (let y = GAP / 2; y < h; y += GAP) {
+        for (let x = GAP / 2; x < w; x += GAP) {
+          b.fillRect(x - 0.7, y - 0.7, 1.4, 1.4);
+          pts.push([x, y]);
+        }
+      }
+      // a few dots breathe slowly, each on its own clock
+      glows = [];
+      const n = Math.round(pts.length * 0.035);
+      for (let i = 0; i < n; i += 1) {
+        const [x, y] = pts[(Math.random() * pts.length) | 0];
+        glows.push({ x, y, p: Math.random() * Math.PI * 2, s: 0.25 + Math.random() * 0.55 });
+      }
+    }
+
+    function paint(t) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(base, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      for (const g of glows) {
+        const a = Math.pow(Math.max(0, Math.sin(t * g.s + g.p)), 4) * 0.5;
+        if (a < 0.02) continue;
+        ctx.fillStyle = `rgba(183,201,226,${(a * 0.18).toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(g.x, g.y, 4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = `rgba(183,201,226,${a.toFixed(3)})`;
+        ctx.beginPath(); ctx.arc(g.x, g.y, 1.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    function loop(now) {
+      requestAnimationFrame(loop);
+      if (now - last < 50) return;               // ~20 fps is plenty for a slow shimmer
+      last = now;
+      paint(now / 1000);
+    }
+
+    build();
+    if (reduceMotion.matches) paint(4);
+    else requestAnimationFrame(loop);
+    let resizeTimer = 0;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => { build(); if (reduceMotion.matches) paint(4); }, 150);
+    }, { passive: true });
+  }
+  initDots();
 
   /* ---------- nav: mobile menu ---------- */
 
@@ -112,11 +143,12 @@
     if (navLinks?.classList.contains('open') && !e.target.closest('#navLinks, #navBurger')) setMenu(false);
   });
 
-  /* ---------- scroll: progress bar, nav shadow, back-to-top ---------- */
+  /* ---------- scroll: progress bar, nav border, back-to-top, terminal tilt ---------- */
 
   const progress = $('#progress');
   const nav = $('#nav');
   const toTop = $('#toTop');
+  const term = $('#term');
   let scrollQueued = false;
 
   function onScroll() {
@@ -126,17 +158,26 @@
     progress?.style.setProperty('--p', max > 0 ? Math.min(1, y / max).toFixed(4) : '0');
     nav?.classList.toggle('scrolled', y > 8);
     toTop?.classList.toggle('show', y > window.innerHeight * 0.8);
+    if (term && !reduceMotion.matches && term.offsetParent) {
+      // the terminal leans back a little as you scroll past it
+      const p = Math.min(1, y / (window.innerHeight * 0.85));
+      term.style.setProperty('--tilt', `${(p * 14).toFixed(2)}deg`);
+      term.style.setProperty('--tscale', (1 - p * 0.06).toFixed(4));
+      term.style.opacity = (1 - p * 0.55).toFixed(3);
+    }
   }
   const queueScroll = () => { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } };
   window.addEventListener('scroll', queueScroll, { passive: true });
   window.addEventListener('resize', queueScroll, { passive: true });
+  // once the entrance animation is done, let the scroll-driven transform take over
+  term?.addEventListener('animationend', () => { term.style.animation = 'none'; onScroll(); }, { once: true });
   onScroll();
 
   toTop?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
   });
 
-  /* ---------- cursor-follow glow on cards and buttons ---------- */
+  /* ---------- cursor-follow light on cards and buttons ---------- */
 
   if (finePointer.matches) {
     let lastEvent = null;
@@ -172,7 +213,7 @@
   $$('.reveal').forEach(el => {
     const sibs = el.parentElement ? $$(':scope > .reveal', el.parentElement) : [el];
     const i = sibs.indexOf(el);
-    if (i > 0) el.style.setProperty('--d', `${Math.min(i, 6) * 0.07}s`);
+    if (i > 0) el.style.setProperty('--d', `${Math.min(i, 6) * 0.06}s`);
   });
 
   function initReveal(scope = document) {
@@ -183,13 +224,12 @@
 
   function countUp(el) {
     const end = parseFloat(el.dataset.count);
-    const suffix = el.dataset.suffix || '';
-    if (reduceMotion.matches || Number.isNaN(end)) { el.textContent = end + suffix; return; }
+    if (reduceMotion.matches || Number.isNaN(end)) { el.textContent = String(end); return; }
     const t0 = performance.now();
-    const dur = 1400;
+    const dur = 1200;
     const step = now => {
       const p = Math.min(1, (now - t0) / dur);
-      el.textContent = Math.round(end * (1 - Math.pow(1 - p, 3))) + suffix;
+      el.textContent = String(Math.round(end * (1 - Math.pow(1 - p, 3))));
       if (p < 1) requestAnimationFrame(step);
     };
     requestAnimationFrame(step);
@@ -198,8 +238,8 @@
   function scramble(el) {
     const word = el.dataset.scramble;
     if (reduceMotion.matches) { el.textContent = word; return; }
-    const glyphs = 'ABCDEFGHJKLMNOPQRSTUVWXYZ0123456789#<>/+*';
-    const total = 30;
+    const glyphs = 'abcdefghijklmnopqrstuvwxyz0123456789_/<>';
+    const total = 26;
     let frame = 0;
     const tick = () => {
       const settled = Math.floor((frame / total) * word.length);
@@ -222,7 +262,7 @@
         $$('[data-scramble]', entry.target).forEach(scramble);
       });
     }, { threshold: 0.4 });
-    whenReady(() => statIO.observe(stats));
+    statIO.observe(stats);
   }
 
   /* ---------- carousels ---------- */
@@ -384,29 +424,533 @@
     target.classList.add('flash');
   }));
 
-  /* ---------- copy email + toast ---------- */
+  /* ---------- copy email ---------- */
 
-  const toastEl = $('#toast');
-  let toastTimer = 0;
-  function toast(message) {
-    if (!toastEl) return;
-    toastEl.textContent = message;
-    toastEl.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2200);
-  }
-
-  $$('[data-copy]').forEach(btn => btn.addEventListener('click', async () => {
-    const text = btn.dataset.copy;
-    try {
-      await navigator.clipboard.writeText(text);
-      toast('Email copied ✓');
-    } catch (e) {
-      window.location.href = `mailto:${text}`;
-    }
-  }));
+  $$('[data-copy]').forEach(btn => btn.addEventListener('click', copyEmail));
 
   $$('[data-year]').forEach(el => { el.textContent = String(new Date().getFullYear()); });
+
+  /* ---------- home: terminal intro ---------- */
+
+  function initTerminal() {
+    const body = $('#termBody');
+    if (!body || !term) return;
+    const hints = $('#termHints');
+    const instant = doc.classList.contains('seen');
+    const history = [];
+    let histIndex = 0;
+    let booting = true;
+    let skip = false;
+    let busy = false;
+    let input = null;
+    let inputLine = null;
+
+    const live = document.createElement('p');      // announces command output to screen readers
+    live.className = 'visually-hidden';
+    live.setAttribute('role', 'status');
+    term.after(live);
+
+    const sleep = ms => new Promise(res => setTimeout(res, skip ? 0 : ms));
+    const scrollDown = () => { body.scrollTop = body.scrollHeight; };
+
+    // A line is a list of [className, text] parts, or a plain string.
+    function line(parts, cls = '') {
+      const p = document.createElement('p');
+      p.className = `term-line ${cls}`.trim();
+      (typeof parts === 'string' ? [['', parts]] : parts).forEach(([c, text, onClick]) => {
+        const s = document.createElement('span');
+        if (c) s.className = c;
+        s.textContent = text;
+        if (onClick) {
+          s.classList.add('t-link');
+          s.setAttribute('role', 'button');
+          s.tabIndex = 0;
+          s.addEventListener('click', onClick);
+          s.addEventListener('keydown', e => { if (e.key === 'Enter') onClick(); });
+        }
+        p.append(s);
+      });
+      if (inputLine && inputLine.isConnected) body.insertBefore(p, inputLine);
+      else body.append(p);
+      scrollDown();
+      return p;
+    }
+
+    const prompt = () => [['t-user', 'max@portfolio'], ['', ' '], ['t-path', '~'], ['', ' '], ['t-sym', '%'], ['', ' ']];
+
+    async function typeCommand(cmd) {
+      const p = line(prompt());
+      const c = document.createElement('span');
+      c.className = 't-cmd';
+      const cursor = document.createElement('span');
+      cursor.className = 'term-cursor';
+      p.append(c, cursor);
+      for (const ch of cmd) {
+        if (skip) { c.textContent = cmd; break; }
+        c.textContent += ch;
+        scrollDown();
+        await sleep(28 + Math.random() * 38);
+      }
+      await sleep(220);
+      cursor.remove();
+    }
+
+    const go = key => { location.hash = `#${key}`; };
+    const openTab = url => { window.open(url, '_blank', 'noopener'); };
+
+    const NOW = [
+      [['t-tag', '→ '], ['', 'humanoid RL + autonomy on WATonomous']],
+      [['t-tag', '→ '], ['', 'training a Unitree Go2 to walk with PPO in Isaac Lab']],
+      [['t-tag', '→ '], ['', 'getting into VLAs (π₀ / π₀.5) and sim digital twins']],
+    ];
+
+    const lastLogin = () => {
+      const d = new Date();
+      const day = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).replace(',', '');
+      const time = d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+      return `Last login: ${day} ${time} on ttys000`;
+    };
+
+    const BOOT = [
+      { out: [[['t-dim', lastLogin()]]] },
+      { cmd: 'whoami', out: [[['t-cmd', 'Max Yuan · Mechatronics Engineering @ UWaterloo']]] },
+      { cmd: 'cat now.txt', out: NOW },
+      {
+        cmd: 'ros2 launch portfolio site.launch.py', gap: 170,
+        out: [
+          [['t-info', '[INFO] [robot_state_publisher]: loaded go2.urdf, so101.urdf']],
+          [['t-info', '[INFO] [site]: about · projects · experience · awards · skills · contact']],
+          [['t-info', '[INFO] [site]: '], ['t-ok', 'ready ✓'], ['t-info', ' scroll down, or type '], ['t-cmd', 'help']],
+        ],
+      },
+    ];
+
+    async function boot() {
+      body.textContent = '';
+      if (instant) skip = true;
+      else await sleep(900);
+      for (const step of BOOT) {
+        if (step.cmd) await typeCommand(step.cmd);
+        for (const out of step.out) {
+          line(out);
+          await sleep(step.gap || 60);
+        }
+        await sleep(step.cmd ? 320 : 380);
+      }
+      booting = false;
+      skip = false;
+      session.set('booted', '1');
+      makeInput();
+      hints?.classList.add('show');
+    }
+
+    function makeInput() {
+      inputLine = document.createElement('div');
+      inputLine.className = 'term-line term-input-line';
+      const pr = document.createElement('span');
+      pr.className = 't-prompt';
+      prompt().forEach(([c, text]) => {
+        const s = document.createElement('span');
+        if (c) s.className = c;
+        s.textContent = text;
+        pr.append(s);
+      });
+      const wrap = document.createElement('span');
+      wrap.className = 'term-input-wrap';
+      input = document.createElement('input');
+      input.className = 'term-input';
+      input.type = 'text';
+      input.spellcheck = false;
+      input.autocomplete = 'off';
+      input.setAttribute('autocapitalize', 'off');
+      input.setAttribute('aria-label', 'Terminal: type a command, like help');
+      input.setAttribute('enterkeyhint', 'send');
+      const cursor = document.createElement('span');
+      cursor.className = 'term-cursor';
+      cursor.setAttribute('aria-hidden', 'true');
+      const mirror = document.createElement('span');     // measures text width so the block cursor can follow the caret
+      mirror.setAttribute('aria-hidden', 'true');
+      mirror.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;font:inherit';
+      wrap.append(input, cursor, mirror);
+      inputLine.append(pr, wrap);
+      body.append(inputLine);
+      scrollDown();
+
+      const place = () => {
+        mirror.textContent = input.value.slice(0, input.selectionStart ?? input.value.length);
+        cursor.style.transform = `translateX(${mirror.offsetWidth}px)`;
+      };
+      ['input', 'keyup', 'click', 'focus'].forEach(ev => input.addEventListener(ev, place));
+      input.addEventListener('focus', () => wrap.classList.add('focused'));
+      input.addEventListener('blur', () => wrap.classList.remove('focused'));
+      input.addEventListener('keydown', onKey);
+      input._place = place;
+    }
+
+    function complete() {
+      const v = input.value;
+      const commands = ['help', 'ls', 'cd', 'cat', 'open', 'whoami', 'clear', 'history', 'email', 'ros2', 'pwd', 'echo', 'date'];
+      const args = { cd: SECTIONS, cat: ['now.txt', 'skills.txt', 'README.md'], open: ['resume.pdf', 'github', 'linkedin'] };
+      let pre = '';
+      let word = v;
+      let list = commands;
+      const m = v.match(/^(cd|cat|open)\s+(\S*)$/);
+      if (m) {
+        pre = v.slice(0, v.length - m[2].length);
+        word = m[2];
+        list = args[m[1]];
+      } else if (/\s/.test(v)) {
+        return;
+      }
+      const hits = list.filter(w => w.startsWith(word));
+      if (hits.length === 1) input.value = pre + hits[0] + (list === commands ? ' ' : '');
+      else if (hits.length > 1) {
+        echo(v);
+        line(hits.map(h => ['t-info', `${h}   `]));
+      }
+      input._place();
+    }
+
+    function onKey(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        const v = input.value;
+        input.value = '';
+        input._place();
+        run(v);
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!history.length) return;
+        histIndex = Math.max(0, histIndex - 1);
+        input.value = history[histIndex] || '';
+        requestAnimationFrame(() => { input.setSelectionRange(input.value.length, input.value.length); input._place(); });
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        histIndex = Math.min(history.length, histIndex + 1);
+        input.value = history[histIndex] || '';
+        input._place();
+      } else if (e.key === 'Tab') {
+        if (!input.value) return;               // let Tab move focus when there's nothing to complete
+        e.preventDefault();
+        complete();
+      } else if (e.key === 'l' && e.ctrlKey) {
+        e.preventDefault();
+        run('clear', true);
+      } else if (e.key === 'c' && e.ctrlKey && !window.getSelection().toString()) {
+        echo(`${input.value}^C`);
+        input.value = '';
+        input._place();
+      }
+    }
+
+    function echo(cmd) {
+      line([...prompt(), ['t-cmd', cmd]]);
+    }
+
+    function say(text) { live.textContent = text; }
+
+    const COMMANDS = {
+      help() {
+        const rows = [
+          ['ls', 'list what\'s here'],
+          ['cd <section>', 'open a section, e.g. cd projects'],
+          ['cat now.txt', 'what I\'m working on'],
+          ['cat skills.txt', 'skills at a glance'],
+          ['open resume.pdf', 'also: open github, open linkedin'],
+          ['ros2 run sim explore', 'drive a robot around the site'],
+          ['email', 'copy my email'],
+          ['whoami · clear · history', ''],
+        ];
+        rows.forEach(([c, d]) => line([['t-cmd', c.padEnd(26)], ['t-info', d]]));
+        say('Commands: ls, cd section, cat now.txt, cat skills.txt, open resume.pdf, ros2 run sim explore, email, whoami, clear, history.');
+      },
+      ls(args) {
+        if (/^projects\/?$/.test(args[0] || '')) {
+          [
+            ['brackey-way', 'projects/brackey-way.html'],
+            ['quadruped-ppo', 'projects/quadruped-ppo.html'],
+            ['maze-nav2', 'projects/maze-nav2.html'],
+            ['rico-arm', 'projects/rico-arm.html'],
+            ['ftc-18844', 'projects/ftc-18844.html'],
+          ].forEach(([name, href]) => line([['t-tag', '  '], ['', name, () => { location.href = href; }]]));
+          say('brackey-way, quadruped-ppo, maze-nav2, rico-arm, ftc-18844');
+          return;
+        }
+        const parts = [];
+        SECTIONS.forEach(s => { parts.push(['t-tag', `${s}/`, () => go(s)]); parts.push(['', '  ']); });
+        parts.push(['', 'now.txt  skills.txt  '], ['t-cmd', 'resume.pdf', () => openTab('resume.pdf')]);
+        line(parts);
+        say(`${SECTIONS.join(', ')}, now.txt, skills.txt, resume.pdf`);
+      },
+      cd(args) {
+        const raw = (args[0] || '~').replace(/^~\/?/, '').replace(/\/$/, '').toLowerCase();
+        if (!raw || raw === '.') { line([['t-info', 'you\'re already home']]); return; }
+        if (raw === '..' || raw === '/') { line([['t-info', 'this is as far up as it goes']]); return; }
+        const key = raw === 'sim' || raw === 'explore' ? 'explore' : raw;
+        if (key === 'explore') { COMMANDS.ros2(['run', 'sim', 'explore']); return; }
+        if (!SECTIONS.includes(key)) { line([['t-err', `cd: no such directory: ${args[0]}`]]); return; }
+        line([['t-info', 'opening '], ['t-tag', `~/${key}`], ['t-info', ' …']]);
+        say(`Opening ${key}`);
+        setTimeout(() => go(key), reduceMotion.matches ? 0 : 380);
+      },
+      cat(args) {
+        const f = (args[0] || '').toLowerCase();
+        if (f === 'now.txt') { NOW.forEach(l => line(l)); return; }
+        if (f === 'skills.txt') {
+          [
+            ['languages ', 'Python · C++ · Java'],
+            ['robotics  ', 'ROS2 · Nav2 · slam_toolbox · AMCL · PID · IK · odometry'],
+            ['sim/vision', 'Isaac Sim · Isaac Lab · OpenCV · YOLOv8'],
+            ['learning  ', 'PPO · imitation learning · SFT · π₀ VLA · rsl_rl · PyTorch'],
+          ].forEach(([k, v]) => line([['t-tag', `${k}  `], ['', v]]));
+          line([['t-info', 'full list with projects: '], ['t-cmd', 'cd skills', () => go('skills')]]);
+          say('Skills: Python, C++, Java; ROS2, Nav2, SLAM, PID, IK; Isaac Sim, Isaac Lab, OpenCV, YOLOv8; PPO, imitation learning, pi zero VLA, PyTorch.');
+          return;
+        }
+        if (f === 'readme.md') {
+          line('I like robots that have to deal with the real world: legged locomotion,');
+          line('mobile autonomy, and manipulation that mixes learned policies with classical control.');
+          line([['t-info', 'more: '], ['t-cmd', 'cd about', () => go('about')]]);
+          return;
+        }
+        line([['t-err', `cat: ${args[0] || ''}: no such file`], ['t-info', '  (try now.txt or skills.txt)']]);
+      },
+      open(args) {
+        const f = (args[0] || '').toLowerCase();
+        const targets = {
+          'resume.pdf': 'resume.pdf', resume: 'resume.pdf',
+          github: 'https://github.com/NotMax08',
+          linkedin: 'https://linkedin.com/in/max-yuan-a0b34b36b',
+        };
+        if (!targets[f]) { line([['t-err', `open: ${args[0] || '(nothing)'}: not found`], ['t-info', '  (resume.pdf, github, linkedin)']]); return; }
+        line([['t-info', `opening ${f} in a new tab`]]);
+        openTab(targets[f]);
+      },
+      whoami() { line([['t-cmd', 'Max Yuan · Mechatronics Engineering @ UWaterloo']]); },
+      pwd() { line('/home/max'); },
+      date() { line(new Date().toString()); },
+      echo(args, rawArgs) { line(rawArgs); },
+      email() {
+        copyEmail().then(ok => line(ok ? [['t-ok', '✓ '], ['', `${EMAIL} copied to clipboard`]] : [['t-info', 'opening your mail app']]));
+      },
+      history() { history.forEach((h, i) => line([['t-dim', `${String(i + 1).padStart(4)}  `], ['', h]])); },
+      clear() { $$('.term-line:not(.term-input-line)', body).forEach(l => l.remove()); },
+      ros2(args) {
+        if (args[0] === 'run' && /sim|explore/.test(args.slice(1).join(' '))) {
+          line([['t-info', '[INFO] [sim]: spawning go2 + so101 × 2 … scroll ↓']]);
+          say('Scrolling to the robot sim');
+          setTimeout(() => $('#explore')?.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' }), 250);
+          return;
+        }
+        if (args[0] === 'launch') { line([['t-info', '[INFO] [site]: already running']]); return; }
+        line([['t-info', 'try: '], ['t-cmd', 'ros2 run sim explore']]);
+      },
+      sudo(args) {
+        if (args.join(' ').toLowerCase() === 'hire max') {
+          line([['t-dim', '[sudo] password for recruiter: ********']]);
+          line([['t-ok', 'access granted ✓'], ['t-info', ' opening '], ['t-tag', '~/contact'], ['t-info', ' …']]);
+          setTimeout(() => go('contact'), reduceMotion.matches ? 0 : 700);
+          return;
+        }
+        line([['t-err', 'sudo: permission denied'], ['t-info', '  (try: sudo hire max)']]);
+      },
+    };
+    COMMANDS.sim = () => COMMANDS.ros2(['run', 'sim', 'explore']);
+    COMMANDS.explore = COMMANDS.sim;
+    COMMANDS.resume = () => COMMANDS.open(['resume.pdf']);
+    COMMANDS.contact = () => COMMANDS.cd(['contact']);
+
+    function run(raw, silent) {
+      const v = raw.trim();
+      if (!silent) echo(raw);
+      if (!v) return;
+      history.push(v);
+      histIndex = history.length;
+      const [name, ...args] = v.split(/\s+/);
+      const fn = COMMANDS[name.toLowerCase()];
+      if (!fn) {
+        const section = SECTIONS.find(s => s === name.toLowerCase());
+        if (section) { COMMANDS.cd([section]); return; }
+        line([['t-err', `zsh: command not found: ${name}`], ['t-info', '  (try help)']]);
+        say(`Command not found: ${name}. Try help.`);
+        return;
+      }
+      fn(args, v.slice(name.length).trim());
+    }
+
+    // hint chips type their command in, then run it
+    $$('[data-cmd]', hints || document).forEach(btn => btn.addEventListener('click', async () => {
+      if (busy) return;
+      busy = true;
+      if (booting) { skip = true; while (booting) await new Promise(r => setTimeout(r, 20)); }
+      const cmd = btn.dataset.cmd;
+      if (reduceMotion.matches) input.value = cmd;
+      else {
+        input.value = '';
+        for (const ch of cmd) { input.value += ch; input._place(); await new Promise(r => setTimeout(r, 22)); }
+      }
+      await new Promise(r => setTimeout(r, 120));
+      input.value = '';
+      input._place();
+      run(cmd);
+      busy = false;
+    }));
+
+    // clicking the terminal skips the intro, or focuses the prompt
+    body.addEventListener('click', e => {
+      if (booting) { skip = true; return; }
+      if (e.target.closest('.t-link') || window.getSelection().toString()) return;
+      input?.focus({ preventScroll: true });
+    });
+
+    boot();
+  }
+
+  /* ---------- home: sim navigator (sim.js is loaded when it scrolls near) ---------- */
+
+  const INTENTS = {
+    about: ['about', 'who', 'yourself', 'bio', 'background', 'introduce', 'story', 'person', 'human'],
+    projects: ['project', 'build', 'built', 'made', 'make', 'portfolio', 'demo', 'robot', 'case'],
+    experience: ['experience', 'team', 'wato', 'watonomous', 'ftc', 'job', 'career', 'humanoid', 'worked'],
+    awards: ['award', 'win', 'won', 'prize', 'trophy', 'hackathon', 'bots', 'worlds', 'recognition'],
+    skills: ['skill', 'tool', 'stack', 'tech', 'language', 'know', 'python', 'ros'],
+    contact: ['contact', 'email', 'mail', 'hire', 'reach', 'talk', 'linkedin', 'message', 'connect', 'chat'],
+  };
+
+  // Keyword grounding for the instruction box: returns the section with the most hits.
+  function groundInstruction(text) {
+    const words = text.toLowerCase().match(/[a-z0-9]+/g) || [];
+    let best = null;
+    let bestScore = 0;
+    let matched = '';
+    for (const [key, keys] of Object.entries(INTENTS)) {
+      let score = 0;
+      let hit = '';
+      for (const w of words) {
+        const k = keys.find(k => w === k || (k.length > 3 && w.startsWith(k)));
+        if (k) { score += k === key || w.startsWith(key.slice(0, 5)) ? 2 : 1; hit = hit || w; }
+      }
+      if (score > bestScore) { best = key; bestScore = score; matched = hit; }
+    }
+    return best ? { key: best, matched } : null;
+  }
+
+  function initSim() {
+    const sim = $('#sim');
+    if (!sim) return;
+    const log = $('#simLog');
+    const form = $('#simCmd');
+    const field = $('#simInput');
+    const tabs = $$('.sim-tab', sim);
+    const view = $('#simView');
+    let api = null;
+    let loading = null;
+
+    const setLog = parts => {
+      if (!log) return;
+      log.textContent = '';
+      parts.forEach(([cls, text]) => {
+        const s = document.createElement('span');
+        if (cls) s.className = cls;
+        s.textContent = text;
+        log.append(s);
+      });
+    };
+    const navigate = key => { location.hash = `#${key}`; };
+
+    const goTo = (key, info) => {
+      $$('.sim-goal', sim).forEach(b => b.classList.toggle('active', b.dataset.goal === key));
+      if (api) api.goTo(key, info);
+      else {
+        setLog([['go', `→ ${key}`]]);
+        navigate(key);
+      }
+    };
+
+    $$('.sim-goal', sim).forEach(b => {
+      b.addEventListener('click', () => goTo(b.dataset.goal, { source: 'waypoint' }));
+      b.addEventListener('mouseenter', () => api?.hover(b.dataset.goal));
+      b.addEventListener('mouseleave', () => api?.hover(null));
+      b.addEventListener('focus', () => api?.hover(b.dataset.goal));
+      b.addEventListener('blur', () => api?.hover(null));
+    });
+
+    form?.addEventListener('submit', e => {
+      e.preventDefault();
+      const text = field.value.trim();
+      if (!text) { field.focus(); return; }
+      const g = groundInstruction(text);
+      if (!g) {
+        setLog([['q', `“${text}”`], ['', '  →  '], ['no', 'couldn\'t ground that to a waypoint.'], ['', ' try “show me the projects” or “how do I contact you”']]);
+        return;
+      }
+      setLog([['q', `“${text}”`], ['', '  →  goal: '], ['go', g.key], ['', `  (matched “${g.matched}”)`]]);
+      field.value = '';
+      field.blur();
+      goTo(g.key, { source: 'instruction', text });
+    });
+
+    // cycle a few example instructions in the placeholder
+    const examples = ['take me to the awards', 'show me what you\'ve built', 'how do I contact you?', 'what tools do you know', 'who are you?', 'which teams are you on'];
+    let ex = 0;
+    setInterval(() => {
+      if (document.activeElement === field || field.value) return;
+      ex = (ex + 1) % examples.length;
+      field.placeholder = examples[ex];
+    }, 3200);
+
+    const selectTab = (tab, focus) => {
+      tabs.forEach(t => {
+        const on = t === tab;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+      });
+      view?.setAttribute('aria-labelledby', tab.id);
+      if (focus) tab.focus();
+      api?.setRobot(tab.dataset.robot);
+    };
+    tabs.forEach((tab, i) => {
+      tab.addEventListener('click', () => selectTab(tab));
+      tab.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        e.preventDefault();
+        selectTab(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true);
+      });
+    });
+
+    const fail = err => {
+      console.warn('sim unavailable:', err);
+      sim.classList.add('failed');
+      sim.dataset.state = 'failed';
+      const status = $('#simStatus');
+      if (status) status.textContent = 'offline';
+    };
+
+    const load = () => {
+      if (loading) return;
+      const probe = document.createElement('canvas');
+      if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) { fail('no WebGL'); return; }
+      loading = import(new URL(`${BASE}sim.js?v=${VERSION}`, document.baseURI).href)
+        .then(m => m.mountSim(sim, {
+          base: BASE,
+          navigate,
+          setLog,
+          reduceMotion: reduceMotion.matches,
+          robot: (tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0]).dataset.robot,
+        }))
+        .then(a => { api = a; })
+        .catch(fail);
+    };
+
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) { io.disconnect(); load(); }
+      }, { rootMargin: '400px 0px' });
+      io.observe(sim);
+    } else {
+      load();
+    }
+  }
 
   /* ---------- home: hash router with page transitions ---------- */
 
@@ -446,7 +990,7 @@
           heading.focus({ preventScroll: true });
         }
       }
-      whenReady(() => initReveal(next));
+      initReveal(next);
       onScroll();
     };
 
@@ -460,13 +1004,11 @@
         if (route.target) route.target.scrollIntoView({ behavior: 'smooth', block: 'start' });
         return;
       }
-      const delta = order.indexOf(route.name) - (prev ? order.indexOf(prev.dataset.page) : 0);
-      app.dataset.dir = prev ? (delta > 0 ? 'fwd' : 'back') : '';
       if (prev && !initial && !reduceMotion.matches) {
         pages.forEach(p => p.classList.remove('leaving'));
         prev.classList.remove('active');
         prev.classList.add('leaving');
-        leaveTimer = setTimeout(() => activate(next, route.target, false), 190);
+        leaveTimer = setTimeout(() => activate(next, route.target, false), 170);
       } else {
         activate(next, route.target, initial);
       }
@@ -487,117 +1029,10 @@
         window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
       }
     });
+
+    initTerminal();
+    initSim();
   } else {
-    whenReady(() => initReveal());
+    initReveal();
   }
-
-  /* ---------- mascot: a tiny Go2 that knows a few facts ---------- */
-
-  function initMascot() {
-    if (session.get('dog') === 'napping') return;
-
-    const quips = [
-      { text: "Hi! I'm a tiny Go2. My big sibling is learning to walk with PPO in Isaac Lab. 🐾", label: 'Watch it walk', href: BASE + 'projects/quadruped-ppo.html' },
-      { text: 'Early walking policies learned to crawl instead. A height reward fixed that.', label: 'See the reward tuning', href: BASE + 'projects/quadruped-ppo.html' },
-      { text: 'A robot pulled toast out of a toaster by itself and won 1st place at BOTS. 🥪', label: 'See the sandwich bot', href: BASE + 'projects/brackey-way.html' },
-      { text: '100+ teleoperated demos went into that π₀ fine-tune.', label: 'How it was trained', href: BASE + 'projects/brackey-way.html' },
-      { text: "The maze robot's SLAM map came out warped until the LiDAR scan rate went up to 20 Hz.", label: 'Read the debug story', href: BASE + 'projects/maze-nav2.html' },
-      { text: 'RICO fetches tools when you ask for them. Built in one hackathon weekend.', label: 'Meet RICO', href: BASE + 'projects/rico-arm.html' },
-      { text: 'Max is looking for a robotics or ML co-op. 👀', label: 'Say hi', href: homeHref + '#contact' },
-      { text: 'Psst: the moon button up top turns on lab mode. 🌙', label: 'Try it', run: () => themeBtn?.click() },
-      { text: 'Need more room to read? I can take a nap. 💤', label: 'Nap time', run: () => nap() },
-    ];
-
-    const wrap = document.createElement('div');
-    wrap.className = 'mascot';
-    wrap.innerHTML = `
-      <button class="mascot-btn" type="button" aria-label="Robot dog: tap for a fun fact" aria-controls="dogBubble" aria-expanded="false">
-        <svg viewBox="0 0 96 80" aria-hidden="true">
-          <defs><linearGradient id="dogFur" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#DCCFFF"/><stop offset="1" stop-color="#A9CEFF"/></linearGradient></defs>
-          <ellipse cx="47" cy="75" rx="27" ry="3.4" fill="rgba(60,40,160,.2)"/>
-          <g class="dog">
-            <g class="leg leg-b"><path d="M58 45 L54 57 L58 69" fill="none" class="ink-2" stroke="#7069AE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
-            <g class="leg leg-a"><path d="M26 45 L22 57 L26 69" fill="none" class="ink-2" stroke="#7069AE" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/></g>
-            <path d="M23 31 L17 19" class="ink" stroke="#2B2650" stroke-width="2.2" stroke-linecap="round"/>
-            <circle class="antenna-tip" cx="16.5" cy="18" r="3" fill="#93C5FD"/>
-            <rect x="19" y="29" width="52" height="19" rx="9.5" fill="url(#dogFur)" class="ink" stroke="#2B2650" stroke-width="2.2"/>
-            <path d="M44 30 V47" stroke="#2B2650" stroke-width="1.4" opacity=".35"/>
-            <circle cx="31" cy="38.5" r="2.2" fill="#8B6CF6"/>
-            <rect x="62" y="21" width="26" height="20" rx="8" fill="#F5F2FF" class="ink" stroke="#2B2650" stroke-width="2.2"/>
-            <rect x="68" y="25.5" width="16.5" height="10.5" rx="5.2" fill="#1B1838"/>
-            <ellipse class="eye" cx="73.5" cy="30.8" rx="2.2" ry="2.4" fill="#9FD6FF"/>
-            <ellipse class="eye" cx="79.8" cy="30.8" rx="2.2" ry="2.4" fill="#9FD6FF"/>
-            <g class="leg leg-a"><path d="M64 45 L59 57 L64 69" fill="none" class="ink" stroke="#2B2650" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-            <g class="leg leg-b"><path d="M33 45 L28 57 L33 69" fill="none" class="ink" stroke="#2B2650" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></g>
-          </g>
-        </svg>
-      </button>
-      <div class="bubble" id="dogBubble" role="status" aria-live="polite">
-        <p class="bubble-text"></p>
-        <div class="bubble-action"></div>
-        <button class="bubble-close" type="button" aria-label="Close"><svg class="i" aria-hidden="true"><use href="#i-close"/></svg></button>
-      </div>`;
-    document.body.append(wrap);
-    document.body.classList.add('has-dog');
-
-    const dogBtn = $('.mascot-btn', wrap);
-    const bubble = $('.bubble', wrap);
-    const textEl = $('.bubble-text', wrap);
-    const actionEl = $('.bubble-action', wrap);
-    let idx = session.get('dogHi') ? Math.floor(Math.random() * quips.length) : 0;
-    let hideTimer = 0;
-
-    function say(q, ms = 9000) {
-      textEl.textContent = q.text;
-      actionEl.textContent = '';
-      const cta = document.createElement(q.href ? 'a' : 'button');
-      cta.className = 'bubble-cta';
-      cta.textContent = `${q.label} →`;
-      if (q.href) cta.href = q.href;
-      else { cta.type = 'button'; cta.addEventListener('click', q.run); }
-      actionEl.append(cta);
-      bubble.classList.add('show');
-      dogBtn.setAttribute('aria-expanded', 'true');
-      clearTimeout(hideTimer);
-      hideTimer = setTimeout(close, ms);
-    }
-    function close() {
-      bubble.classList.remove('show');
-      dogBtn.setAttribute('aria-expanded', 'false');
-    }
-    function hop() {
-      wrap.classList.remove('hop');
-      void wrap.offsetWidth;
-      wrap.classList.add('hop');
-    }
-    function nap() {
-      session.set('dog', 'napping');
-      close();
-      wrap.style.transition = 'opacity .4s ease, transform .4s ease';
-      wrap.style.opacity = '0';
-      wrap.style.transform = 'translateY(20px)';
-      setTimeout(() => { wrap.remove(); document.body.classList.remove('has-dog'); }, 450);
-      toast('The robot dog is napping 💤');
-    }
-
-    dogBtn.addEventListener('click', () => {
-      hop();
-      say(quips[idx % quips.length]);
-      idx += 1;
-    });
-    $('.bubble-close', wrap).addEventListener('click', close);
-    bubble.addEventListener('mouseenter', () => clearTimeout(hideTimer));
-    bubble.addEventListener('mouseleave', () => { hideTimer = setTimeout(close, 4000); });
-
-    // Say hello once per visit.
-    if (!session.get('dogHi')) {
-      whenReady(() => setTimeout(() => {
-        session.set('dogHi', '1');
-        hop();
-        say(quips[0], 7000);
-        idx = 1;
-      }, 3200));
-    }
-  }
-  initMascot();
 })();
