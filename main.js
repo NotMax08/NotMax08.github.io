@@ -1,7 +1,6 @@
 /* =========================================================
    Max Yuan · portfolio behaviour
-   Shared by index.html and every project page. No dependencies;
-   the robot sim (sim.js) is imported on demand from the home page.
+   Shared by index.html and every project page. No dependencies.
    ========================================================= */
 
 (() => {
@@ -9,9 +8,7 @@
 
   const doc = document.documentElement;
   const BASE = doc.dataset.root || '';          // "../" on project pages
-  const VERSION = '2026-09-25b';                  // keep in step with the ?v= in index.html
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const finePointer = window.matchMedia('(hover: hover) and (pointer: fine)');
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
   const attempt = (fn, fallback = null) => { try { return fn(); } catch (e) { return fallback; } };
@@ -52,79 +49,6 @@
     }
   }
 
-  /* ---------- ambient dot grid ---------- */
-
-  function initDots() {
-    const canvas = $('#dots');
-    const ctx = canvas && canvas.getContext('2d');
-    if (!ctx) return;
-    const GAP = 26;
-    let base = null;
-    let glows = [];
-    let dpr = 1;
-    let last = 0;
-
-    function build() {
-      dpr = Math.min(window.devicePixelRatio || 1, 2);
-      const w = window.innerWidth;
-      const h = window.innerHeight;
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-      base = document.createElement('canvas');
-      base.width = canvas.width;
-      base.height = canvas.height;
-      const b = base.getContext('2d');
-      b.scale(dpr, dpr);
-      b.fillStyle = 'rgba(183,201,226,.075)';
-      const pts = [];
-      for (let y = GAP / 2; y < h; y += GAP) {
-        for (let x = GAP / 2; x < w; x += GAP) {
-          b.fillRect(x - 0.7, y - 0.7, 1.4, 1.4);
-          pts.push([x, y]);
-        }
-      }
-      // a few dots breathe slowly, each on its own clock
-      glows = [];
-      const n = Math.round(pts.length * 0.035);
-      for (let i = 0; i < n; i += 1) {
-        const [x, y] = pts[(Math.random() * pts.length) | 0];
-        glows.push({ x, y, p: Math.random() * Math.PI * 2, s: 0.25 + Math.random() * 0.55 });
-      }
-    }
-
-    function paint(t) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(base, 0, 0);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      for (const g of glows) {
-        const a = Math.pow(Math.max(0, Math.sin(t * g.s + g.p)), 4) * 0.5;
-        if (a < 0.02) continue;
-        ctx.fillStyle = `rgba(183,201,226,${(a * 0.18).toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(g.x, g.y, 4, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = `rgba(183,201,226,${a.toFixed(3)})`;
-        ctx.beginPath(); ctx.arc(g.x, g.y, 1.2, 0, Math.PI * 2); ctx.fill();
-      }
-    }
-
-    function loop(now) {
-      requestAnimationFrame(loop);
-      if (now - last < 50) return;               // ~20 fps is plenty for a slow shimmer
-      last = now;
-      paint(now / 1000);
-    }
-
-    build();
-    if (reduceMotion.matches) paint(4);
-    else requestAnimationFrame(loop);
-    let resizeTimer = 0;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => { build(); if (reduceMotion.matches) paint(4); }, 150);
-    }, { passive: true });
-  }
-  initDots();
-
   /* ---------- nav: mobile menu ---------- */
 
   const burger = $('#navBurger');
@@ -143,59 +67,26 @@
     if (navLinks?.classList.contains('open') && !e.target.closest('#navLinks, #navBurger')) setMenu(false);
   });
 
-  /* ---------- scroll: progress bar, nav border, back-to-top, terminal tilt ---------- */
+  /* ---------- scroll: nav border, back-to-top ---------- */
 
-  const progress = $('#progress');
   const nav = $('#nav');
   const toTop = $('#toTop');
-  const term = $('#term');
   let scrollQueued = false;
 
   function onScroll() {
     scrollQueued = false;
     const y = window.scrollY;
-    const max = doc.scrollHeight - window.innerHeight;
-    progress?.style.setProperty('--p', max > 0 ? Math.min(1, y / max).toFixed(4) : '0');
     nav?.classList.toggle('scrolled', y > 8);
     toTop?.classList.toggle('show', y > window.innerHeight * 0.8);
-    if (term && !reduceMotion.matches && term.offsetParent) {
-      // the terminal leans back a little as you scroll past it
-      const p = Math.min(1, y / (window.innerHeight * 0.85));
-      term.style.setProperty('--tilt', `${(p * 14).toFixed(2)}deg`);
-      term.style.setProperty('--tscale', (1 - p * 0.06).toFixed(4));
-      term.style.opacity = (1 - p * 0.55).toFixed(3);
-    }
   }
   const queueScroll = () => { if (!scrollQueued) { scrollQueued = true; requestAnimationFrame(onScroll); } };
   window.addEventListener('scroll', queueScroll, { passive: true });
   window.addEventListener('resize', queueScroll, { passive: true });
-  // once the entrance animation is done, let the scroll-driven transform take over
-  term?.addEventListener('animationend', () => { term.style.animation = 'none'; onScroll(); }, { once: true });
   onScroll();
 
   toTop?.addEventListener('click', () => {
     window.scrollTo({ top: 0, behavior: reduceMotion.matches ? 'auto' : 'smooth' });
   });
-
-  /* ---------- cursor-follow light on cards and buttons ---------- */
-
-  if (finePointer.matches) {
-    let lastEvent = null;
-    let frame = 0;
-    document.addEventListener('pointermove', e => {
-      lastEvent = e;
-      if (frame) return;
-      frame = requestAnimationFrame(() => {
-        frame = 0;
-        const t = lastEvent.target;
-        const el = t instanceof Element ? t.closest('.glow-card, .btn') : null;
-        if (!el) return;
-        const r = el.getBoundingClientRect();
-        el.style.setProperty('--mx', `${lastEvent.clientX - r.left}px`);
-        el.style.setProperty('--my', `${lastEvent.clientY - r.top}px`);
-      });
-    }, { passive: true });
-  }
 
   /* ---------- scroll reveal ---------- */
 
@@ -218,51 +109,6 @@
 
   function initReveal(scope = document) {
     $$('.reveal:not(.in)', scope).forEach(el => (revealIO ? revealIO.observe(el) : el.classList.add('in')));
-  }
-
-  /* ---------- stats: count-up + scramble ---------- */
-
-  function countUp(el) {
-    const end = parseFloat(el.dataset.count);
-    if (reduceMotion.matches || Number.isNaN(end)) { el.textContent = String(end); return; }
-    const t0 = performance.now();
-    const dur = 1200;
-    const step = now => {
-      const p = Math.min(1, (now - t0) / dur);
-      el.textContent = String(Math.round(end * (1 - Math.pow(1 - p, 3))));
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }
-
-  function scramble(el) {
-    const word = el.dataset.scramble;
-    if (reduceMotion.matches) { el.textContent = word; return; }
-    const glyphs = 'abcdefghijklmnopqrstuvwxyz0123456789_/<>';
-    const total = 26;
-    let frame = 0;
-    const tick = () => {
-      const settled = Math.floor((frame / total) * word.length);
-      el.textContent = word.split('').map((c, i) => (i < settled ? c : glyphs[(Math.random() * glyphs.length) | 0])).join('');
-      frame += 1;
-      if (frame <= total) setTimeout(tick, 40);
-      else el.textContent = word;
-    };
-    tick();
-  }
-
-  const stats = $('.stats');
-  if (stats && 'IntersectionObserver' in window && !reduceMotion.matches) {
-    $$('[data-count]', stats).forEach(el => { el.textContent = '0'; });
-    const statIO = new IntersectionObserver((entries, io) => {
-      entries.forEach(entry => {
-        if (!entry.isIntersecting) return;
-        io.unobserve(entry.target);
-        $$('[data-count]', entry.target).forEach(countUp);
-        $$('[data-scramble]', entry.target).forEach(scramble);
-      });
-    }, { threshold: 0.4 });
-    statIO.observe(stats);
   }
 
   /* ---------- carousels ---------- */
@@ -357,7 +203,7 @@
     const f = btn.dataset.filter;
     filterButtons.forEach(b => {
       const on = b === btn;
-      b.classList.toggle('btn-glow', on);
+      b.classList.toggle('btn-primary', on);
       b.classList.toggle('btn-ghost', !on);
       b.setAttribute('aria-pressed', String(on));
     });
@@ -416,15 +262,6 @@
     chip.addEventListener('click', show);
   });
 
-  $$('[data-jump]').forEach(btn => btn.addEventListener('click', () => {
-    const target = document.getElementById(btn.dataset.jump);
-    if (!target) return;
-    target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
-    target.classList.remove('flash');
-    void target.offsetWidth;
-    target.classList.add('flash');
-  }));
-
   /* ---------- copy email ---------- */
 
   $$('[data-copy]').forEach(btn => btn.addEventListener('click', copyEmail));
@@ -447,6 +284,7 @@
   /* ---------- home: terminal intro ---------- */
 
   function initTerminal() {
+    const term = $('#term');
     const body = $('#termBody');
     if (!body || !term) return;
     const hints = $('#termHints');
@@ -525,18 +363,19 @@
       return `Last login: ${day} ${time} on ttys000`;
     };
 
+    // ls output: the folders and the résumé are clickable
+    const lsParts = () => {
+      const parts = [];
+      SECTIONS.forEach(s => { parts.push(['t-tag', `${s}/`, () => go(s)], ['', '  ']); });
+      parts.push(['', 'now.txt  skills.txt  '], ['t-cmd', 'resume.pdf', () => openTab('resume.pdf')]);
+      return parts;
+    };
+
     const BOOT = [
       { out: [[['t-dim', lastLogin()]]] },
       { cmd: 'whoami', out: [[['t-cmd', 'Max Yuan · Mechatronics Engineering @ UWaterloo']]] },
       { cmd: 'cat now.txt', out: NOW },
-      {
-        cmd: 'ros2 launch portfolio site.launch.py', gap: 170,
-        out: [
-          [['t-info', '[INFO] [robot_state_publisher]: loaded go2.urdf, so101.urdf']],
-          [['t-info', '[INFO] [site]: about · projects · experience · awards · skills · contact']],
-          [['t-info', '[INFO] [site]: '], ['t-ok', 'ready ✓'], ['t-info', ' scroll down, or type '], ['t-cmd', 'help']],
-        ],
-      },
+      { cmd: 'ls', out: [lsParts(), [['t-info', 'click a folder, scroll down, or type '], ['t-cmd', 'help']]] },
     ];
 
     async function boot() {
@@ -603,7 +442,7 @@
 
     function complete() {
       const v = input.value;
-      const commands = ['help', 'ls', 'cd', 'cat', 'open', 'whoami', 'clear', 'history', 'email', 'ros2', 'pwd', 'echo', 'date'];
+      const commands = ['help', 'ls', 'cd', 'cat', 'open', 'whoami', 'clear', 'history', 'email', 'pwd', 'echo', 'date'];
       const args = { cd: SECTIONS, cat: ['now.txt', 'skills.txt', 'README.md'], open: ['resume.pdf', 'github', 'linkedin'] };
       let pre = '';
       let word = v;
@@ -671,12 +510,11 @@
           ['cat now.txt', 'what I\'m working on'],
           ['cat skills.txt', 'skills at a glance'],
           ['open resume.pdf', 'also: open github, open linkedin'],
-          ['ros2 run sim explore', 'drive a robot around the site'],
           ['email', 'copy my email'],
           ['whoami · clear · history', ''],
         ];
         rows.forEach(([c, d]) => line([['t-cmd', c.padEnd(26)], ['t-info', d]]));
-        say('Commands: ls, cd section, cat now.txt, cat skills.txt, open resume.pdf, ros2 run sim explore, email, whoami, clear, history.');
+        say('Commands: ls, cd section, cat now.txt, cat skills.txt, open resume.pdf, email, whoami, clear, history.');
       },
       ls(args) {
         if (/^projects\/?$/.test(args[0] || '')) {
@@ -691,18 +529,13 @@
           say('brackey-way, quadruped-ppo, maze-nav2, rico-arm, ftc-18844, studybuddy-9520');
           return;
         }
-        const parts = [];
-        SECTIONS.forEach(s => { parts.push(['t-tag', `${s}/`, () => go(s)]); parts.push(['', '  ']); });
-        parts.push(['', 'now.txt  skills.txt  '], ['t-cmd', 'resume.pdf', () => openTab('resume.pdf')]);
-        line(parts);
+        line(lsParts());
         say(`${SECTIONS.join(', ')}, now.txt, skills.txt, resume.pdf`);
       },
       cd(args) {
-        const raw = (args[0] || '~').replace(/^~\/?/, '').replace(/\/$/, '').toLowerCase();
-        if (!raw || raw === '.') { line([['t-info', 'you\'re already home']]); return; }
-        if (raw === '..' || raw === '/') { line([['t-info', 'this is as far up as it goes']]); return; }
-        const key = raw === 'sim' || raw === 'explore' ? 'explore' : raw;
-        if (key === 'explore') { COMMANDS.ros2(['run', 'sim', 'explore']); return; }
+        const key = (args[0] || '~').replace(/^~\/?/, '').replace(/\/$/, '').toLowerCase();
+        if (!key || key === '.') { line([['t-info', 'you\'re already home']]); return; }
+        if (key === '..' || key === '/') { line([['t-info', 'this is as far up as it goes']]); return; }
         if (!SECTIONS.includes(key)) { line([['t-err', `cd: no such directory: ${args[0]}`]]); return; }
         line([['t-info', 'opening '], ['t-tag', `~/${key}`], ['t-info', ' …']]);
         say(`Opening ${key}`);
@@ -750,16 +583,6 @@
       },
       history() { history.forEach((h, i) => line([['t-dim', `${String(i + 1).padStart(4)}  `], ['', h]])); },
       clear() { $$('.term-line:not(.term-input-line)', body).forEach(l => l.remove()); },
-      ros2(args) {
-        if (args[0] === 'run' && /sim|explore/.test(args.slice(1).join(' '))) {
-          line([['t-info', '[INFO] [sim]: spawning go2 + so101 × 2 … scroll ↓']]);
-          say('Scrolling to the robot sim');
-          setTimeout(() => $('#explore')?.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' }), 250);
-          return;
-        }
-        if (args[0] === 'launch') { line([['t-info', '[INFO] [site]: already running']]); return; }
-        line([['t-info', 'try: '], ['t-cmd', 'ros2 run sim explore']]);
-      },
       sudo(args) {
         if (args.join(' ').toLowerCase() === 'hire max') {
           line([['t-dim', '[sudo] password for recruiter: ********']]);
@@ -770,8 +593,6 @@
         line([['t-err', 'sudo: permission denied'], ['t-info', '  (try: sudo hire max)']]);
       },
     };
-    COMMANDS.sim = () => COMMANDS.ros2(['run', 'sim', 'explore']);
-    COMMANDS.explore = COMMANDS.sim;
     COMMANDS.resume = () => COMMANDS.open(['resume.pdf']);
     COMMANDS.contact = () => COMMANDS.cd(['contact']);
 
@@ -819,152 +640,6 @@
     });
 
     boot();
-  }
-
-  /* ---------- home: sim navigator (sim.js is loaded when it scrolls near) ---------- */
-
-  const INTENTS = {
-    about: ['about', 'who', 'yourself', 'bio', 'background', 'introduce', 'story', 'person', 'human'],
-    projects: ['project', 'build', 'built', 'made', 'make', 'portfolio', 'demo', 'robot', 'case'],
-    experience: ['experience', 'team', 'wato', 'watonomous', 'ftc', 'job', 'career', 'humanoid', 'worked'],
-    awards: ['award', 'win', 'won', 'prize', 'trophy', 'hackathon', 'bots', 'worlds', 'recognition'],
-    skills: ['skill', 'tool', 'stack', 'tech', 'language', 'know', 'python', 'ros'],
-    contact: ['contact', 'email', 'mail', 'hire', 'reach', 'talk', 'linkedin', 'message', 'connect', 'chat'],
-  };
-
-  // Keyword grounding for the instruction box: returns the section with the most hits.
-  function groundInstruction(text) {
-    const words = text.toLowerCase().match(/[a-z0-9]+/g) || [];
-    let best = null;
-    let bestScore = 0;
-    let matched = '';
-    for (const [key, keys] of Object.entries(INTENTS)) {
-      let score = 0;
-      let hit = '';
-      for (const w of words) {
-        const k = keys.find(k => w === k || (k.length > 3 && w.startsWith(k)));
-        if (k) { score += k === key || w.startsWith(key.slice(0, 5)) ? 2 : 1; hit = hit || w; }
-      }
-      if (score > bestScore) { best = key; bestScore = score; matched = hit; }
-    }
-    return best ? { key: best, matched } : null;
-  }
-
-  function initSim() {
-    const sim = $('#sim');
-    if (!sim) return;
-    const log = $('#simLog');
-    const form = $('#simCmd');
-    const field = $('#simInput');
-    const tabs = $$('.sim-tab', sim);
-    const view = $('#simView');
-    let api = null;
-    let loading = null;
-
-    const setLog = parts => {
-      if (!log) return;
-      log.textContent = '';
-      parts.forEach(([cls, text]) => {
-        const s = document.createElement('span');
-        if (cls) s.className = cls;
-        s.textContent = text;
-        log.append(s);
-      });
-    };
-    const navigate = key => { location.hash = `#${key}`; };
-
-    const goTo = (key, info) => {
-      $$('.sim-goal', sim).forEach(b => b.classList.toggle('active', b.dataset.goal === key));
-      if (api) api.goTo(key, info);
-      else {
-        setLog([['go', `→ ${key}`]]);
-        navigate(key);
-      }
-    };
-
-    $$('.sim-goal', sim).forEach(b => {
-      b.addEventListener('click', () => goTo(b.dataset.goal, { source: 'waypoint' }));
-      b.addEventListener('mouseenter', () => api?.hover(b.dataset.goal));
-      b.addEventListener('mouseleave', () => api?.hover(null));
-      b.addEventListener('focus', () => api?.hover(b.dataset.goal));
-      b.addEventListener('blur', () => api?.hover(null));
-    });
-
-    form?.addEventListener('submit', e => {
-      e.preventDefault();
-      const text = field.value.trim();
-      if (!text) { field.focus(); return; }
-      const g = groundInstruction(text);
-      if (!g) {
-        setLog([['q', `“${text}”`], ['', '  →  '], ['no', 'couldn\'t ground that to a waypoint.'], ['', ' try “show me the projects” or “how do I contact you”']]);
-        return;
-      }
-      setLog([['q', `“${text}”`], ['', '  →  goal: '], ['go', g.key], ['', `  (matched “${g.matched}”)`]]);
-      field.value = '';
-      field.blur();
-      goTo(g.key, { source: 'instruction', text });
-    });
-
-    // cycle a few example instructions in the placeholder
-    const examples = ['take me to the awards', 'show me what you\'ve built', 'how do I contact you?', 'what tools do you know', 'who are you?', 'which teams are you on'];
-    let ex = 0;
-    setInterval(() => {
-      if (document.activeElement === field || field.value) return;
-      ex = (ex + 1) % examples.length;
-      field.placeholder = examples[ex];
-    }, 3200);
-
-    const selectTab = (tab, focus) => {
-      tabs.forEach(t => {
-        const on = t === tab;
-        t.setAttribute('aria-selected', String(on));
-        t.tabIndex = on ? 0 : -1;
-      });
-      view?.setAttribute('aria-labelledby', tab.id);
-      if (focus) tab.focus();
-      api?.setRobot(tab.dataset.robot);
-    };
-    tabs.forEach((tab, i) => {
-      tab.addEventListener('click', () => selectTab(tab));
-      tab.addEventListener('keydown', e => {
-        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
-        e.preventDefault();
-        selectTab(tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length], true);
-      });
-    });
-
-    const fail = err => {
-      console.warn('sim unavailable:', err);
-      sim.classList.add('failed');
-      sim.dataset.state = 'failed';
-      const status = $('#simStatus');
-      if (status) status.textContent = 'offline';
-    };
-
-    const load = () => {
-      if (loading) return;
-      const probe = document.createElement('canvas');
-      if (!(probe.getContext('webgl2') || probe.getContext('webgl'))) { fail('no WebGL'); return; }
-      loading = import(new URL(`${BASE}sim.js?v=${VERSION}`, document.baseURI).href)
-        .then(m => m.mountSim(sim, {
-          base: BASE,
-          navigate,
-          setLog,
-          reduceMotion: reduceMotion.matches,
-          robot: (tabs.find(t => t.getAttribute('aria-selected') === 'true') || tabs[0]).dataset.robot,
-        }))
-        .then(a => { api = a; })
-        .catch(fail);
-    };
-
-    if ('IntersectionObserver' in window) {
-      const io = new IntersectionObserver(entries => {
-        if (entries.some(e => e.isIntersecting)) { io.disconnect(); load(); }
-      }, { rootMargin: '400px 0px' });
-      io.observe(sim);
-    } else {
-      load();
-    }
   }
 
   /* ---------- home: hash router with page transitions ---------- */
@@ -1046,7 +721,6 @@
     });
 
     initTerminal();
-    initSim();
   } else {
     initReveal();
   }

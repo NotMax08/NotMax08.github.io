@@ -5,24 +5,22 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Max Yuan · Robotics</title>
 <meta name="description" content="Max Yuan, Mechatronics Engineering student at the University of Waterloo. Quadruped locomotion with PPO in Isaac Lab, ROS2 Nav2 autonomy, and learned + vision-guided manipulation. WATonomous humanoid team.">
-<meta name="theme-color" content="#0E1012">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#FBF8F3">
+<meta name="color-scheme" content="light">
 <meta property="og:title" content="Max Yuan · Robotics">
 <meta property="og:description" content="Quadruped locomotion with PPO, ROS2 autonomy, and VLA-driven manipulation. 1st place at the BOTS hackathon; WATonomous humanoid team.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://notmax08.github.io/">
 <meta property="og:image" content="https://notmax08.github.io/assets/photos/bracket-toaster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2314171A'/%3E%3Cpath d='M17 21l11 11-11 11' fill='none' stroke='%23B7C9E2' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M33 44h14' stroke='%23B7C9E2' stroke-width='5' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23B7C9E2'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%231F2630' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400..600&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
-<!-- bump ?v= whenever style.css, main.js or sim.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-09-25b">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- bump ?v= whenever style.css or main.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
+<link rel="stylesheet" href="style.css?v=2026-10-01">
 <script>(function(){var d=document.documentElement;d.classList.add('js');try{if(sessionStorage.getItem('booted')||matchMedia('(prefers-reduced-motion: reduce)').matches)d.classList.add('seen')}catch(e){}})();</script>
-<!-- three.js for the robot sim, loaded on demand by main.js -->
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
-<script src="main.js?v=2026-09-25b" defer></script>
+<script src="main.js?v=2026-10-01" defer></script>
 </head>
 
 <body>
@@ -41,29 +39,12 @@
   <symbol id="i-github" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-1.95c-3.2.7-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.39-5.25 5.67.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5z"/></symbol>
   <symbol id="i-linkedin" viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.56v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13zM7.12 20.45H3.56V9h3.56v11.45z"/></symbol>
   <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3.5 7 8.5 6 8.5-6"/></symbol>
-  <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M17 5h3v1.5a3.5 3.5 0 0 1-3.5 3.5M7 5H4v1.5A3.5 3.5 0 0 0 7.5 10"/></symbol>
-  <symbol id="i-laptop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M2 20h20M10 8.5 8 10.5l2 2M14 8.5l2 2-2 2"/></symbol>
-  <symbol id="i-layers" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></symbol>
-  <symbol id="i-bot" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3.5"/><path d="M12 4.5V8M9 13.5h.01M15 13.5h.01M9.5 17h5"/><circle cx="12" cy="3.5" r="1"/></symbol>
   <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15h-.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></symbol>
-  <symbol id="i-cap" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M22 9 12 4 2 9l10 5z"/><path d="M6 11v5c3 2.5 9 2.5 12 0v-5M22 9v6"/></symbol>
-  <symbol id="i-terminal" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="m7 9 3 3-3 3M12.5 15h4.5"/></symbol>
-  <symbol id="i-cpu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><rect x="9.5" y="9.5" width="5" height="5" rx="1"/><path d="M9 2.5V6M15 2.5V6M9 18v3.5M15 18v3.5M2.5 9H6M2.5 15H6M18 9h3.5M18 15h3.5"/></symbol>
-  <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
-  <symbol id="i-network" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="6" r="2"/><circle cx="5" cy="18" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="m6.7 7.1 3.6 3.8M6.7 16.9l3.6-3.8M13.7 10.9l3.6-3.8M13.7 13.1l3.6 3.8"/></symbol>
-  <symbol id="i-brackets" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m8 7-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></symbol>
   <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 8 5.5z"/></symbol>
-  <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/></symbol>
 </svg>
 
-<canvas id="dots" aria-hidden="true"></canvas>
-<div id="progress" aria-hidden="true"></div>
-
 <header class="nav" id="nav">
-  <a class="brand" href="#home" aria-label="Max Yuan, home">
-    <span class="brand-mark"><svg class="i" aria-hidden="true"><use href="#i-terminal"/></svg></span>
-    <span class="brand-name">Max Yuan</span>
-  </a>
+  <a class="brand" href="#home">Max Yuan</a>
   <nav class="nav-links" id="navLinks" aria-label="Primary">
     <a href="#home" data-nav="home">Home</a>
     <a href="#about" data-nav="about">About</a>
@@ -105,10 +86,9 @@
               <p class="term-line"><span class="t-tag">→</span> humanoid RL + autonomy on WATonomous</p>
               <p class="term-line"><span class="t-tag">→</span> training a Unitree Go2 to walk with PPO in Isaac Lab</p>
               <p class="term-line"><span class="t-tag">→</span> getting into VLAs (π₀ / π₀.5) and sim digital twins</p>
-              <p class="term-line"><span class="t-user">max@portfolio</span> <span class="t-path">~</span> <span class="t-sym">%</span> <span class="t-cmd">ros2 launch portfolio site.launch.py</span></p>
-              <p class="term-line t-info">[INFO] [robot_state_publisher]: loaded go2.urdf, so101.urdf</p>
-              <p class="term-line t-info">[INFO] [site]: about · projects · experience · awards · skills · contact</p>
-              <p class="term-line"><span class="t-info">[INFO] [site]:</span> <span class="t-ok">ready ✓</span> <span class="t-info">scroll down, or type</span> <span class="t-cmd">help</span></p>
+              <p class="term-line"><span class="t-user">max@portfolio</span> <span class="t-path">~</span> <span class="t-sym">%</span> <span class="t-cmd">ls</span></p>
+              <p class="term-line"><a class="t-tag" href="#about">about/</a>  <a class="t-tag" href="#projects">projects/</a>  <a class="t-tag" href="#experience">experience/</a>  <a class="t-tag" href="#awards">awards/</a>  <a class="t-tag" href="#skills">skills/</a>  <a class="t-tag" href="#contact">contact/</a>  <a class="t-cmd" href="resume.pdf">resume.pdf</a></p>
+              <p class="term-line t-info">scroll down for more</p>
             </div>
           </div>
         </div>
@@ -116,24 +96,22 @@
 
       <ul class="term-hints" id="termHints" aria-label="Terminal shortcuts">
         <li class="lbl" aria-hidden="true">try</li>
-        <li><button class="hint" type="button" data-cmd="ls">ls</button></li>
+        <li><button class="hint" type="button" data-cmd="help">help</button></li>
         <li><button class="hint" type="button" data-cmd="cd projects">cd projects</button></li>
         <li><button class="hint" type="button" data-cmd="cat skills.txt">cat skills.txt</button></li>
-        <li><button class="hint" type="button" data-cmd="ros2 run sim explore">ros2 run sim explore</button></li>
         <li><button class="hint" type="button" data-cmd="open resume.pdf">open resume.pdf</button></li>
       </ul>
 
-      <a class="scroll-hint" href="#intro">scroll <i></i></a>
+      <a class="scroll-hint" href="#intro">Scroll for more ↓</a>
     </div>
 
     <!-- intro -->
     <section class="section intro" id="intro" aria-labelledby="name-h">
       <div class="intro-grid">
         <div class="intro-text reveal">
-          <p class="eyebrow">Robotics portfolio</p>
           <h1 class="hero-name" id="name-h">Max Yuan</h1>
-          <p class="hero-role">Mechatronics Engineering @ UWaterloo · WATonomous humanoid team</p>
-          <p class="hero-sub">I build robots that learn to move and handle things: <strong>quadruped locomotion</strong> with PPO, <strong>ROS2 autonomy</strong>, and <strong>learned + vision-guided manipulation</strong>. Next, I'm going deeper into <strong>vision-language-action models</strong> and <strong>simulation</strong>.</p>
+          <p class="hero-role">Mechatronics Engineering at the University of Waterloo, on the WATonomous humanoid team.</p>
+          <p class="hero-sub">I build robots that learn to move and handle things: quadruped locomotion with PPO, ROS2 autonomy, and learned and vision-guided manipulation. Next, I'm going deeper into vision-language-action models and simulation.</p>
           <ul class="tags" aria-label="Focus areas">
             <li class="tag">reinforcement learning</li>
             <li class="tag">π₀ VLA</li>
@@ -142,210 +120,125 @@
             <li class="tag">computer vision</li>
           </ul>
           <div class="hero-ctas">
-            <a class="btn btn-glow" href="#projects">View projects <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+            <a class="btn btn-primary" href="#projects">View projects <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             <a class="btn btn-ghost" href="resume.pdf" target="_blank" rel="noopener">Résumé <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
             <a class="btn btn-ghost btn-icon" href="https://github.com/NotMax08" target="_blank" rel="noopener" aria-label="GitHub"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></a>
             <a class="btn btn-ghost btn-icon" href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener" aria-label="LinkedIn"><svg class="i" aria-hidden="true"><use href="#i-linkedin"/></svg></a>
             <a class="btn btn-ghost btn-icon" href="mailto:maxyuan081205@gmail.com" aria-label="Email"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg></a>
           </div>
+          <p class="hero-status"><span class="dot" aria-hidden="true"></span>Open to robotics and ML co-op roles</p>
         </div>
         <figure class="intro-photo reveal">
           <img src="assets/photos/max-portrait.jpg" width="690" height="920" alt="Max Yuan smiling at a restaurant table">
-          <figcaption><span class="pulse-dot"></span>open to robotics &amp; ML co-op roles</figcaption>
         </figure>
       </div>
 
       <div class="stats reveal">
         <a class="stat" href="#awards" aria-label="3 hackathons: 1st place at BOTS 2026, 2nd place at RythmHacks 2025">
-          <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-laptop"/></svg></span>
-          <span class="stat-num" data-count="3" aria-hidden="true">3</span>
-          <span class="stat-label" aria-hidden="true">hackathons</span>
+          <span class="stat-num" aria-hidden="true">3</span>
+          <span class="stat-label" aria-hidden="true">Hackathons</span>
           <span class="stat-sub" aria-hidden="true">1st BOTS · 2nd RythmHacks</span>
         </a>
         <a class="stat" href="#projects" aria-label="6 robotics projects">
-          <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-layers"/></svg></span>
-          <span class="stat-num" data-count="6" aria-hidden="true">6</span>
-          <span class="stat-label" aria-hidden="true">robotics projects</span>
-          <span class="stat-sub" aria-hidden="true">RL · autonomy · manipulation</span>
+          <span class="stat-num" aria-hidden="true">6</span>
+          <span class="stat-label" aria-hidden="true">Robotics projects</span>
+          <span class="stat-sub" aria-hidden="true">RL, autonomy, manipulation</span>
         </a>
         <a class="stat" href="#awards" aria-label="4 awards, including FIRST Worlds 2025">
-          <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-trophy"/></svg></span>
-          <span class="stat-num" data-count="4" aria-hidden="true">4</span>
-          <span class="stat-label" aria-hidden="true">awards</span>
-          <span class="stat-sub" aria-hidden="true">incl. FIRST Worlds 2025</span>
+          <span class="stat-num" aria-hidden="true">4</span>
+          <span class="stat-label" aria-hidden="true">Awards</span>
+          <span class="stat-sub" aria-hidden="true">Including FIRST Worlds 2025</span>
         </a>
         <a class="stat" href="#experience" aria-label="Design team: WATonomous, humanoid sub team">
-          <span class="stat-icon"><svg class="i" aria-hidden="true"><use href="#i-bot"/></svg></span>
-          <span class="stat-num word" data-scramble="WATonomous" aria-hidden="true">WATonomous</span>
-          <span class="stat-label" aria-hidden="true">design team</span>
-          <span class="stat-sub" aria-hidden="true">humanoid · RL &amp; autonomy</span>
+          <span class="stat-num word" aria-hidden="true">WATonomous</span>
+          <span class="stat-label" aria-hidden="true">Design team</span>
+          <span class="stat-sub" aria-hidden="true">Humanoid · RL and autonomy</span>
         </a>
       </div>
     </section>
 
-    <!-- sim navigator -->
-    <section class="section" id="explore" aria-labelledby="sim-h">
-      <div class="section-head reveal">
-        <div>
-          <p class="eyebrow">Explore in sim</p>
-          <h2 class="section-title" id="sim-h">Send a robot <em>somewhere</em></h2>
-          <p class="section-sub">Two robots loaded from their real URDFs. Pick a waypoint, or type an instruction the way you'd prompt a VLA, and the robot takes you to that part of the site.</p>
-        </div>
-      </div>
-
-      <div class="sim reveal" id="sim" data-state="loading">
-        <div class="sim-bar">
-          <div class="sim-tabs" role="tablist" aria-label="Robot">
-            <button class="sim-tab" id="tab-go2" type="button" role="tab" aria-selected="true" aria-controls="simView" data-robot="go2">Unitree Go2 <span>locomotion</span></button>
-            <button class="sim-tab" id="tab-arms" type="button" role="tab" aria-selected="false" aria-controls="simView" data-robot="arms" tabindex="-1">SO-101 × 2 <span>manipulation</span></button>
-          </div>
-          <span class="sim-status"><i></i><span id="simStatus">loading</span></span>
-        </div>
-
-        <div class="sim-main">
-          <div class="sim-view" id="simView" role="tabpanel" aria-labelledby="tab-go2">
-            <dl class="sim-hud" id="simHud" aria-hidden="true"></dl>
-            <div class="sim-labels" id="simLabels" aria-hidden="true"></div>
-            <p class="sim-help" id="simHelp">drag to orbit · click the floor to set a goal</p>
-            <div class="sim-loading" id="simLoading"><span id="simLoadingText">waiting to load the sim…</span><i></i></div>
-            <div class="sim-fallback">
-              <span>The 3D sim couldn't start in this browser (it needs WebGL).</span>
-              <span>The waypoints still work: pick one to jump there.</span>
-            </div>
-          </div>
-
-          <aside class="sim-side" aria-label="Waypoints">
-            <p class="sim-side-label">waypoints</p>
-            <ul class="sim-goals">
-              <li><button class="sim-goal" type="button" data-goal="about"><span class="k">01</span><span class="n">about</span><span class="d">who I am</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="projects"><span class="k">02</span><span class="n">projects</span><span class="d">6 builds</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="experience"><span class="k">03</span><span class="n">experience</span><span class="d">WATonomous, FTC</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="awards"><span class="k">04</span><span class="n">awards</span><span class="d">BOTS, RythmHacks, Worlds</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="skills"><span class="k">05</span><span class="n">skills</span><span class="d">from my résumé</span></button></li>
-              <li><button class="sim-goal" type="button" data-goal="contact"><span class="k">06</span><span class="n">contact</span><span class="d">say hi</span></button></li>
-            </ul>
-            <p class="sim-side-label j">/joint_states</p>
-            <div class="sim-joints" id="simJoints" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-            <p class="sim-joints-cap" id="simJointsCap">12 joints · normalized to limits</p>
-          </aside>
-        </div>
-
-        <form class="sim-cmd" id="simCmd" autocomplete="off">
-          <label class="sim-cmd-label" for="simInput">instruction</label>
-          <span class="sim-cmd-field"><input id="simInput" type="text" enterkeyhint="go" placeholder="take me to the awards" spellcheck="false"></span>
-          <button class="btn btn-glow btn-sm" type="submit">Run <kbd aria-hidden="true">↵</kbd></button>
-        </form>
-        <p class="sim-log" id="simLog" role="status" aria-live="polite">waypoints are pages of this site. the robot drives you there.</p>
-      </div>
-      <p class="sim-note">Meshes and kinematics come from Unitree's <a href="https://github.com/unitreerobotics/unitree_ros/tree/master/robots/go2_description" target="_blank" rel="noopener">go2_description</a> and TheRobotStudio's <a href="https://github.com/TheRobotStudio/SO-ARM100" target="_blank" rel="noopener">SO-101</a> URDFs. The gait and grasps here are scripted (inverse kinematics, no trained policy), and the instruction box matches keywords rather than running a model.</p>
-    </section>
-
-    <!-- featured work -->
+    <!-- projects preview -->
     <section class="section" aria-labelledby="featured-h">
       <div class="section-head reveal">
-        <div>
-          <p class="eyebrow">Featured work</p>
-          <h2 class="section-title" id="featured-h">Robots I've been <em>building</em></h2>
-        </div>
-        <a class="btn btn-ghost" href="#projects">All projects <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <h2 class="section-title" id="featured-h">Projects</h2>
+        <a class="text-link" href="#projects">All projects <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
 
       <div class="bento">
-        <a class="tile t-brackey glow-card reveal" href="projects/brackey-way.html">
+        <a class="tile t-brackey reveal" href="projects/brackey-way.html">
           <video class="tile-media" src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-autoplay aria-hidden="true"></video>
-          <span class="shade"></span>
-          <span class="tile-badge accent"><svg class="i" aria-hidden="true" style="width:13px;height:13px"><use href="#i-trophy"/></svg>1st place · BOTS hackathon</span>
           <div class="tile-info">
-            <p class="tile-kicker">π₀ VLA · OpenCV · IK · state machine</p>
+            <p class="tile-kicker"><span class="win">1st place, BOTS hackathon</span> · π₀ VLA, OpenCV, IK</p>
             <h3>The Brackey Way</h3>
             <p class="tile-desc">A dual-arm Bracket Bot that makes a sandwich on its own: toast out of the toaster, lettuce on, top slice closed.</p>
-            <span class="tile-cta">read the case study <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
 
-        <a class="tile t-quad glow-card reveal" href="projects/quadruped-ppo.html">
+        <a class="tile t-quad reveal" href="projects/quadruped-ppo.html">
           <video class="tile-media" src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-autoplay aria-hidden="true"></video>
-          <span class="shade"></span>
-          <span class="tile-badge"><span class="pulse-dot blue"></span>in progress</span>
           <div class="tile-info">
-            <p class="tile-kicker">Isaac Lab · PPO · rsl_rl</p>
+            <p class="tile-kicker">Isaac Lab · PPO · in progress</p>
             <h3>Go2 quadruped locomotion</h3>
-            <span class="tile-cta">view project <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
 
-        <a class="tile t-maze glow-card reveal" href="projects/maze-nav2.html">
+        <a class="tile t-maze reveal" href="projects/maze-nav2.html">
           <video class="tile-media" src="assets/loops/nav.mp4" poster="assets/loops/nav.jpg" muted loop playsinline preload="none" data-autoplay aria-hidden="true"></video>
-          <span class="shade"></span>
-          <span class="tile-badge">SLAM map · 5× speed</span>
           <div class="tile-info">
-            <p class="tile-kicker">ROS2 · Nav2 · SLAM · AMCL</p>
+            <p class="tile-kicker">ROS2 · Nav2 · SLAM</p>
             <h3>Autonomous maze navigation</h3>
-            <span class="tile-cta">view project <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
 
-        <a class="tile t-rico glow-card reveal" href="projects/rico-arm.html">
+        <a class="tile t-rico reveal" href="projects/rico-arm.html">
           <img class="tile-media" src="assets/photos/rico-bench.jpg" alt="" width="1400" height="1296" loading="lazy">
-          <span class="shade"></span>
-          <span class="tile-badge">Eureka Hacks</span>
           <div class="tile-info">
-            <p class="tile-kicker">YOLOv8 · homography · IK</p>
+            <p class="tile-kicker">Eureka Hacks · YOLOv8 · IK</p>
             <h3>RICO, the tool-fetching arm</h3>
-            <span class="tile-cta">view project <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
 
-        <a class="tile t-ftc glow-card reveal" href="projects/ftc-18844.html">
+        <a class="tile t-ftc reveal" href="projects/ftc-18844.html">
           <video class="tile-media" src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-autoplay aria-hidden="true"></video>
-          <span class="shade"></span>
-          <span class="tile-badge">FIRST Worlds 2025 · Team Canada</span>
           <div class="tile-info">
-            <p class="tile-kicker">PID · odometry · CNN</p>
+            <p class="tile-kicker">FIRST Worlds 2025 · Team Canada</p>
             <h3>FTC team 18844</h3>
-            <span class="tile-cta">view project <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
           </div>
         </a>
 
         <a class="tile t-all reveal" href="#projects">
           <div>
-            <h3>See every project</h3>
+            <h3>All 6 projects</h3>
             <p>Photos, demo videos, highlights, and code.</p>
           </div>
-          <div class="all-top">
-            <span class="all-count">06 projects</span>
-            <span class="all-arrow"><svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
-          </div>
+          <span class="all-arrow"><svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
       </div>
     </section>
 
-    <!-- moments -->
+    <!-- photos -->
     <section class="section" aria-labelledby="moments-h">
       <div class="section-head reveal">
-        <div>
-          <p class="eyebrow">Behind the builds</p>
-          <h2 class="section-title" id="moments-h">Moments from the <em>lab</em></h2>
-        </div>
+        <h2 class="section-title" id="moments-h">Photos</h2>
       </div>
       <ul class="moments reveal">
-        <li class="moment"><figure><img src="assets/photos/bots-pitch.jpg" alt="Max presenting the Brackey Way at the BOTS hackathon" width="1000" height="1315" loading="lazy" style="object-position:62% 35%"><figcaption>pitching at BOTS</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/max-bracketbot.jpg" alt="Max next to Bracket Bot" width="1000" height="1716" loading="lazy" style="object-position:50% 12%"><figcaption>me + Bracket Bot</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/ftc-worlds.jpg" alt="FTC team 18844 with a Canadian flag at the FIRST World Championships" width="1600" height="1067" loading="lazy"><figcaption>Team Canada @ Worlds</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/rico-team.jpg" alt="Max and a teammate beside the RICO arm at Eureka Hacks" width="1600" height="1205" loading="lazy" style="object-position:34% 50%"><figcaption>RICO demo day</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/bracket-closeup.jpg" alt="Bracket Bot's gripper holding a slice of toast" width="1600" height="900" loading="lazy" style="object-position:58% 50%"><figcaption>toast, π₀ style</figcaption></figure></li>
-        <li class="moment"><figure><img src="assets/photos/launcher.jpg" alt="The RythmHacks turret: a 3D-printed ping-pong ball launcher with a flywheel and servos, wired to an Arduino" width="1200" height="1200" loading="lazy"><figcaption>StudyBuddy 9520 · RythmHacks</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/bots-pitch.jpg" alt="Max presenting the Brackey Way at the BOTS hackathon" width="1000" height="1315" loading="lazy" style="object-position:62% 35%"><figcaption>Pitching at BOTS</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/max-bracketbot.jpg" alt="Max next to Bracket Bot" width="1000" height="1716" loading="lazy" style="object-position:50% 12%"><figcaption>With Bracket Bot</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/ftc-worlds.jpg" alt="FTC team 18844 with a Canadian flag at the FIRST World Championships" width="1600" height="1067" loading="lazy"><figcaption>Team Canada at Worlds</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/rico-team.jpg" alt="Max and a teammate beside the RICO arm at Eureka Hacks" width="1600" height="1205" loading="lazy" style="object-position:34% 50%"><figcaption>RICO at Eureka Hacks</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/bracket-closeup.jpg" alt="Bracket Bot's gripper holding a slice of toast" width="1600" height="900" loading="lazy" style="object-position:58% 50%"><figcaption>The toast grasp</figcaption></figure></li>
+        <li class="moment"><figure><img src="assets/photos/launcher.jpg" alt="The RythmHacks turret: a 3D-printed ping-pong ball launcher with a flywheel and servos, wired to an Arduino" width="1200" height="1200" loading="lazy"><figcaption>StudyBuddy 9520</figcaption></figure></li>
       </ul>
     </section>
 
     <section class="section">
       <div class="cta-band reveal">
         <div>
-          <h2>Looking for a robotics or <em>ML co-op</em>.</h2>
+          <h2>Looking for a robotics or ML co-op</h2>
           <p>Happy to talk about locomotion policies, sim-to-real transfer, robot manipulation, or anything else in robotics.</p>
         </div>
         <div class="cta-actions">
-          <a class="btn btn-glow" href="mailto:maxyuan081205@gmail.com"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Email me</a>
+          <a class="btn btn-primary" href="mailto:maxyuan081205@gmail.com"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg>Email me</a>
           <a class="btn btn-ghost" href="resume.pdf" target="_blank" rel="noopener">Résumé <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
         </div>
       </div>
@@ -358,29 +251,20 @@
        ===================================================== -->
   <section class="page" id="about" data-page="about" data-title="About">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/about</span><span class="t-sym">$&nbsp;</span>cat README.md<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">The human behind the <em>robots</em></h2>
-        <p class="ph-sub">A bit about me, what I'm working on right now, and what I'm looking for.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">hi.</span>
-        <ul class="tags"><li class="tag">Waterloo, ON</li><li class="tag">Mechatronics '31</li><li class="tag">co-op</li></ul>
-      </div>
+      <h2 class="ph-title">About</h2>
     </header>
 
     <div class="page-body">
       <div class="about-grid">
         <figure class="about-photo reveal">
           <img src="assets/photos/max-about.jpg" width="800" height="1200" alt="Max Yuan in a black polo at a restaurant table" loading="lazy">
-          <figcaption>hi, I'm Max</figcaption>
         </figure>
 
         <div class="about-copy">
-          <p class="lead reveal">I like robots that have to deal with the <em>real world</em>.</p>
+          <p class="lead reveal">I like robots that have to deal with the real world.</p>
           <p class="reveal">I'm a Mechatronics Engineering student at the University of Waterloo (Honours Co-op, class of 2031). I'm most interested in robots that work in the physical world: legged locomotion, mobile autonomy, and manipulation that mixes learned policies with classical control.</p>
-          <p class="reveal">Most of my recent work is robot learning and autonomy. I'm training a <b>Unitree Go2 to walk with PPO</b> in Isaac Lab, I built a <b>ROS2 Nav2 stack</b> that maps and navigates a maze in Isaac Sim, and my team fine-tuned a <b>π₀ vision-language-action model</b> to pull toast out of a toaster, which won 1st place at the BOTS hackathon.</p>
-          <p class="reveal">Before university I was co-captain and lead programmer of FTC team 18844 (Pr0teens). We represented Team Canada at the 2025 FIRST World Championships, and I ran robot showcases and SPIKE robotics workshops for 60+ kids across the GTA. Now I'm on <b>WATonomous's humanoid sub team</b>, working on the RL and autonomy stack.</p>
+          <p class="reveal">Most of my recent work is robot learning and autonomy. I'm training a Unitree Go2 to walk with PPO in Isaac Lab, I built a ROS2 Nav2 stack that maps and navigates a maze in Isaac Sim, and my team fine-tuned a π₀ vision-language-action model to pull toast out of a toaster, which won 1st place at the BOTS hackathon.</p>
+          <p class="reveal">Before university I was co-captain and lead programmer of FTC team 18844 (Pr0teens). We represented Team Canada at the 2025 FIRST World Championships, and I ran robot showcases and SPIKE robotics workshops for 60+ kids across the GTA. Now I'm on WATonomous's humanoid sub team, working on the RL and autonomy stack.</p>
 
           <div class="quick-facts reveal">
             <div class="qf"><b>2031</b><span>BASc Mechatronics, UWaterloo</span></div>
@@ -391,22 +275,22 @@
 
           <div class="info-cards">
             <article class="info-card reveal">
-              <p class="ic-label"><svg class="i" aria-hidden="true"><use href="#i-cap"/></svg>education</p>
+              <p class="ic-label">Education</p>
               <h3>University of Waterloo</h3>
               <p>BASc, Mechatronics Engineering, Honours Co-op</p>
               <p class="ic-meta">Sept 2026 – Apr 2031 · Waterloo, ON</p>
             </article>
             <article class="info-card reveal">
-              <p class="ic-label"><span class="pulse-dot blue"></span>right now</p>
+              <p class="ic-label">Right now</p>
               <h3>WATonomous · Humanoid</h3>
               <p>RL and autonomy stack. Next up: RL in Isaac Lab and simulation digital twins for π₀.5 VLA development.</p>
             </article>
             <article class="info-card wide reveal">
-              <p class="ic-label"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg>looking for</p>
+              <p class="ic-label">Looking for</p>
               <h3>A robotics or ML co-op</h3>
               <p>Happy to talk about locomotion policies, sim-to-real transfer, robot manipulation, or anything else in robotics.</p>
               <div class="cta-actions" style="margin-top:1rem">
-                <a class="btn btn-glow btn-sm" href="#contact">Get in touch <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+                <a class="btn btn-primary btn-sm" href="#contact">Get in touch <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
                 <a class="btn btn-ghost btn-sm" href="resume.pdf" target="_blank" rel="noopener">Résumé <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
               </div>
             </article>
@@ -421,20 +305,13 @@
        ===================================================== -->
   <section class="page" id="projects" data-page="projects" data-title="Projects">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/projects</span><span class="t-sym">$&nbsp;</span>ls<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">Selected <em>projects</em></h2>
-        <p class="ph-sub">Robot learning, autonomy, and manipulation, from hackathon weekends to solo simulation projects and competitive robotics.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">06</span>
-        <ul class="tags"><li class="tag">Isaac Lab</li><li class="tag">ROS2</li><li class="tag">π₀ VLA</li><li class="tag">OpenCV</li></ul>
-      </div>
+      <h2 class="ph-title">Projects</h2>
+      <p class="ph-sub">Robot learning, autonomy, and manipulation, from hackathon weekends to solo simulation projects and competitive robotics.</p>
     </header>
 
     <div class="page-body">
       <div class="filters" role="group" aria-label="Filter projects">
-        <button class="btn btn-glow btn-sm" type="button" data-filter="all" aria-pressed="true">All <span class="count">6</span></button>
+        <button class="btn btn-primary btn-sm" type="button" data-filter="all" aria-pressed="true">All <span class="count">6</span></button>
         <button class="btn btn-ghost btn-sm" type="button" data-filter="learning" aria-pressed="false">Robot learning <span class="count">2</span></button>
         <button class="btn btn-ghost btn-sm" type="button" data-filter="autonomy" aria-pressed="false">Autonomy <span class="count">2</span></button>
         <button class="btn btn-ghost btn-sm" type="button" data-filter="vision" aria-pressed="false">Vision &amp; manipulation <span class="count">4</span></button>
@@ -445,7 +322,7 @@
       <div class="pgrid">
 
         <!-- Brackey Way -->
-        <article class="pcard featured glow-card reveal" data-cats="learning vision hackathon">
+        <article class="pcard featured reveal" data-cats="learning vision hackathon">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="The Brackey Way: photos and video">
               <figure class="car-slide"><video src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-autoplay aria-label="Bracket Bot assembling a sandwich autonomously"></video></figure>
@@ -457,69 +334,64 @@
             </div>
             <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
             <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
-            <span class="pcard-num">01</span>
-            <span class="car-count" aria-hidden="true">1 / 6</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
               <span class="p-date">Sept 2026</span>
-              <span class="p-cat">robot learning</span>
-              <span class="p-award">1st place · BOTS hackathon</span>
+              <span class="p-cat">Robot learning</span>
+              <span class="p-award">1st place, BOTS hackathon</span>
             </div>
             <h3 class="pcard-title">The Brackey Way</h3>
             <p class="pcard-org">Autonomous VLA sandwich assembly on Bracket Bot · team of four</p>
             <p class="pcard-desc">A dual-arm Bracket Bot that takes toast out of a toaster, puts it on a plate, adds lettuce, and places the top slice. A fine-tuned π₀ VLA handles the difficult grasps, OpenCV + inverse kinematics handles the simple ones, and a state machine switches between them.</p>
             <ul class="tags"><li class="tag">π₀ VLA</li><li class="tag">SFT / imitation learning</li><li class="tag">OpenCV (HSV)</li><li class="tag">inverse kinematics</li><li class="tag">state machine</li><li class="tag">Meta Quest teleop</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-brackey">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
-              <a class="btn btn-glow btn-sm" href="projects/brackey-way.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-brackey">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <a class="btn btn-primary btn-sm" href="projects/brackey-way.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-brackey">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>Fine-tuned a <b>π₀ vision-language-action model</b> with supervised fine-tuning on <b>100+ teleoperated demonstrations</b> (camera video and a text prompt in; joint positions and velocities out).</li>
-                <li>Resampled <b>65 Hz joint data</b> and <b>5 fps camera frames</b> onto one fixed time grid so every frame is paired with the right actions.</li>
+                <li>Fine-tuned a π₀ vision-language-action model with supervised fine-tuning on 100+ teleoperated demonstrations (camera video and a text prompt in; joint positions and velocities out).</li>
+                <li>Resampled 65 Hz joint data and 5 fps camera frames onto one fixed time grid so every frame is paired with the right actions.</li>
                 <li>Varied object placement and lighting between demonstrations, and used DAgger-style data aggregation, to reduce overfitting.</li>
-                <li>Found the lettuce with <b>HSV threshold segmentation</b> and reached it with <b>inverse kinematics</b>, with wrist-camera closed-loop correction for 1–2 cm of head-camera calibration error.</li>
-                <li>Built a <b>finite state machine</b> that switches between the classical (CV + IK) and learned (VLA) controllers, advancing once the arm settles back at its home pose.</li>
+                <li>Found the lettuce with HSV threshold segmentation and reached it with inverse kinematics, with wrist-camera closed-loop correction for 1–2 cm of head-camera calibration error.</li>
+                <li>Built a finite state machine that switches between the classical (CV + IK) and learned (VLA) controllers, advancing once the arm settles back at its home pose.</li>
               </ul>
             </div></div>
           </div>
         </article>
 
         <!-- Quadruped -->
-        <article class="pcard glow-card reveal" data-cats="learning">
+        <article class="pcard reveal" data-cats="learning">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="Quadruped locomotion: video">
               <figure class="car-slide"><video src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-autoplay aria-label="Unitree Go2 policies walking in Isaac Lab"></video></figure>
             </div>
-            <span class="pcard-num">02</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
               <span class="p-date">Aug – Sept 2026</span>
-              <span class="p-cat">robot learning</span>
-              <span class="p-status"><span class="pulse-dot blue"></span>in progress</span>
+              <span class="p-cat">Robot learning</span>
+              <span class="p-status">In progress</span>
             </div>
             <h3 class="pcard-title">Quadruped locomotion with PPO</h3>
             <p class="pcard-org">Unitree Go2 · NVIDIA Isaac Lab · solo project</p>
             <p class="pcard-desc">A walking policy for a Unitree Go2, trained from scratch with PPO in a custom manager-based RL environment I built in Isaac Lab.</p>
             <ul class="tags"><li class="tag">Isaac Lab</li><li class="tag">PPO</li><li class="tag">rsl_rl</li><li class="tag">PyTorch</li><li class="tag">curriculum learning</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-quad">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-quad">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
               <a class="btn btn-ghost btn-sm btn-icon" href="https://github.com/NotMax08/unitree_go2_ppo_isaaclab" target="_blank" rel="noopener" aria-label="Code on GitHub"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></a>
-              <a class="btn btn-glow btn-sm" href="projects/quadruped-ppo.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <a class="btn btn-primary btn-sm" href="projects/quadruped-ppo.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-quad">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>Built a custom <b>ManagerBasedRLEnv</b> for flat-terrain Go2 locomotion: <b>48-dim observations</b>, <b>12-DOF joint-position actions</b>, and a custom reward stack.</li>
-                <li>Designed a <b>sigmoid curriculum</b> that ramps up the foot-lift reward over training, so the policy learns to balance before the reward starts shaping its gait.</li>
-                <li>Early policies learned to crawl; a custom <b>height reward</b> fixed it, and squared <b>action-rate penalties</b> keep joint motion smooth.</li>
+                <li>Built a custom ManagerBasedRLEnv for flat-terrain Go2 locomotion: 48-dim observations, 12-DOF joint-position actions, and a custom reward stack.</li>
+                <li>Designed a sigmoid curriculum that ramps up the foot-lift reward over training, so the policy learns to balance before the reward starts shaping its gait.</li>
+                <li>Early policies learned to crawl; a custom height reward fixed it, and squared action-rate penalties keep joint motion smooth.</li>
                 <li>Next: get-up recovery policies and domain randomization for sim-to-real transfer.</li>
               </ul>
             </div></div>
@@ -527,7 +399,7 @@
         </article>
 
         <!-- Maze navigation -->
-        <article class="pcard glow-card reveal" data-cats="autonomy">
+        <article class="pcard reveal" data-cats="autonomy">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="Maze navigation: video and diagrams">
               <figure class="car-slide contain"><video src="assets/loops/nav.mp4" poster="assets/loops/nav.jpg" muted loop playsinline preload="none" data-autoplay aria-label="SLAM map of the maze being built in RViz, sped up five times"></video><figcaption>SLAM map being built (5× speed)</figcaption></figure>
@@ -538,30 +410,27 @@
             </div>
             <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
             <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
-            <span class="pcard-num">03</span>
-            <span class="car-count" aria-hidden="true">1 / 5</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
               <span class="p-date">May – July 2026</span>
-              <span class="p-cat">autonomy</span>
+              <span class="p-cat">Autonomy</span>
             </div>
             <h3 class="pcard-title">Autonomous maze navigation</h3>
             <p class="pcard-org">NVIDIA Nova Carter · Isaac Sim 5.1 · ROS2 · solo project</p>
             <p class="pcard-desc">A ROS2 navigation stack on a Nova Carter in Isaac Sim. The robot drives into a maze it hasn't seen, builds a map with SLAM, localizes with AMCL, and uses Nav2 to plan and follow a path to the goal.</p>
             <ul class="tags"><li class="tag">ROS2</li><li class="tag">Nav2</li><li class="tag">slam_toolbox</li><li class="tag">AMCL</li><li class="tag">Isaac Sim</li><li class="tag">RViz</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-maze">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-maze">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
               <a class="btn btn-ghost btn-sm btn-icon" href="https://github.com/NotMax08/isaac-sim-maze-slam-nav2" target="_blank" rel="noopener" aria-label="Code on GitHub"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></a>
-              <a class="btn btn-glow btn-sm" href="projects/maze-nav2.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <a class="btn btn-primary btn-sm" href="projects/maze-nav2.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-maze">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>Integrated <b>slam_toolbox</b> mapping, <b>AMCL</b> localization, and <b>Nav2</b> with a Regulated Pure Pursuit controller, debugging in <b>RViz</b>.</li>
-                <li>Built the full <b>TF tree</b> (map → odom → chassis_link → sensors) with Isaac Sim action graphs; debugged QoS mismatches, sensor-rate bottlenecks, and frame-authority conflicts.</li>
+                <li>Integrated slam_toolbox mapping, AMCL localization, and Nav2 with a Regulated Pure Pursuit controller, debugging in RViz.</li>
+                <li>Built the full TF tree (map → odom → chassis_link → sensors) with Isaac Sim action graphs; debugged QoS mismatches, sensor-rate bottlenecks, and frame-authority conflicts.</li>
                 <li>Traced a warped SLAM map to LiDAR scans lagging odometry during turns, and fixed it by raising the RTX LiDAR scan rate to 20 Hz.</li>
               </ul>
             </div></div>
@@ -569,7 +438,7 @@
         </article>
 
         <!-- RICO -->
-        <article class="pcard glow-card reveal" data-cats="vision hackathon">
+        <article class="pcard reveal" data-cats="vision hackathon">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="RICO: photos and video">
               <figure class="car-slide"><video src="assets/loops/rico.mp4" poster="assets/loops/rico.jpg" muted loop playsinline preload="none" data-autoplay aria-label="The RICO arm reaching for a tool on the bench"></video></figure>
@@ -579,37 +448,34 @@
             </div>
             <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
             <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
-            <span class="pcard-num">04</span>
-            <span class="car-count" aria-hidden="true">1 / 4</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
               <span class="p-date">Eureka Hacks</span>
-              <span class="p-cat">vision &amp; manipulation</span>
+              <span class="p-cat">Vision &amp; manipulation</span>
             </div>
             <h3 class="pcard-title">RICO, a tool-fetching arm</h3>
             <p class="pcard-org">4-DOF arm · overhead camera · hackathon team</p>
             <p class="pcard-desc">Ask for a tool in plain language and the arm finds it on the bench and hands it to you. A Groq LLM plans the steps, YOLOv8 finds the tool, and inverse kinematics moves the arm.</p>
             <ul class="tags"><li class="tag">YOLOv8</li><li class="tag">OpenCV homography</li><li class="tag">inverse kinematics</li><li class="tag">Groq LLM</li><li class="tag">Python</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-rico">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
-              <a class="btn btn-glow btn-sm" href="projects/rico-arm.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-rico">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <a class="btn btn-primary btn-sm" href="projects/rico-arm.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-rico">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>A <b>Groq LLM</b> turns a plain-language request into a list of robot actions.</li>
-                <li>A <b>homography</b> maps YOLOv8 detections from pixels to positions on the bench, so tools can go anywhere instead of at fixed spots.</li>
-                <li>An <b>inverse kinematics</b> solver turns that position into the joint angles needed to reach and grab the tool.</li>
+                <li>A Groq LLM turns a plain-language request into a list of robot actions.</li>
+                <li>A homography maps YOLOv8 detections from pixels to positions on the bench, so tools can go anywhere instead of at fixed spots.</li>
+                <li>An inverse kinematics solver turns that position into the joint angles needed to reach and grab the tool.</li>
               </ul>
             </div></div>
           </div>
         </article>
 
         <!-- FTC -->
-        <article class="pcard glow-card reveal" data-cats="autonomy vision">
+        <article class="pcard reveal" data-cats="autonomy vision">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="FTC 18844: video and photos">
               <figure class="car-slide"><video src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-autoplay aria-label="FTC team 18844's robot on the field"></video></figure>
@@ -618,44 +484,41 @@
             </div>
             <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
             <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
-            <span class="pcard-num">05</span>
-            <span class="car-count" aria-hidden="true">1 / 3</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
               <span class="p-date">Sept 2023 – Apr 2025</span>
-              <span class="p-cat">competition</span>
-              <span class="p-award">Connect Award · Worlds</span>
+              <span class="p-cat">Competition</span>
+              <span class="p-award">Connect Award, Worlds</span>
             </div>
             <h3 class="pcard-title">FIRST Tech Challenge 18844</h3>
             <p class="pcard-org">Co-captain, lead programmer &amp; driver</p>
             <p class="pcard-desc">Competitive robotics with team 18844, ending at the 2025 FIRST World Championships as Team Canada representatives. I led the software: localization, autonomous pathing, and vision-based pickup.</p>
             <ul class="tags"><li class="tag">Java</li><li class="tag">PID control</li><li class="tag">odometry</li><li class="tag">OpenCV</li><li class="tag">CNN</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-ftc">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
-              <a class="btn btn-glow btn-sm" href="projects/ftc-18844.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-ftc">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <a class="btn btn-primary btn-sm" href="projects/ftc-18844.html">Case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-ftc">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>Tuned three <b>PID controllers</b> (x, y, heading) for point-to-point autonomous pathing, turning the integral term on only within 10–20 cm of the target so moves finish without overshoot.</li>
-                <li>Fused <b>two-wheel odometry</b> with <b>IMU heading</b>, rotating robot-frame motion into field coordinates.</li>
-                <li>Automated sample pickup with <b>OpenCV</b> and a <b>custom-trained CNN</b> that estimates each sample's distance and orientation.</li>
+                <li>Tuned three PID controllers (x, y, heading) for point-to-point autonomous pathing, turning the integral term on only within 10–20 cm of the target so moves finish without overshoot.</li>
+                <li>Fused two-wheel odometry with IMU heading, rotating robot-frame motion into field coordinates.</li>
+                <li>Automated sample pickup with OpenCV and a custom-trained CNN that estimates each sample's distance and orientation.</li>
               </ul>
             </div></div>
           </div>
         </article>
 
         <!-- StudyBuddy 9520 (mini project) -->
-        <article class="pcard mini glow-card reveal" id="studybuddy" data-cats="vision hackathon">
+        <article class="pcard mini reveal" id="studybuddy" data-cats="vision hackathon">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="StudyBuddy 9520: demo video and photos">
               <figure class="car-slide">
                 <button class="yt" type="button" data-yt="DLb4IcTUDbg" data-title="StudyBuddy 9520 demonstration" aria-label="Play the StudyBuddy 9520 demo video (loads YouTube)">
                   <img src="assets/studybuddy/turret.jpg" alt="" width="1200" height="1600" loading="lazy">
-                  <span class="yt-play"><i><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></i>watch the demo</span>
+                  <span class="yt-play"><i><svg class="i" aria-hidden="true"><use href="#i-play"/></svg></i>Watch the demo</span>
                 </button>
               </figure>
               <figure class="car-slide"><img src="assets/photos/launcher.jpg" alt="The turret on the bench, wired to an Arduino UNO and a breadboard" width="1200" height="1200" loading="lazy"><figcaption>Wired up: Arduino UNO, servos, flywheel motor</figcaption></figure>
@@ -663,33 +526,30 @@
             </div>
             <button class="car-btn car-prev" type="button" aria-label="Previous slide"><svg class="i" aria-hidden="true"><use href="#i-chev-left"/></svg></button>
             <button class="car-btn car-next" type="button" aria-label="Next slide"><svg class="i" aria-hidden="true"><use href="#i-chev-right"/></svg></button>
-            <span class="pcard-num">06</span>
-            <span class="car-count" aria-hidden="true">1 / 3</span>
           </div>
           <div class="pcard-body">
             <div class="pcard-meta">
-              <span class="p-mini">mini project</span>
+              <span class="p-mini">Mini project</span>
               <span class="p-date">Oct 2025</span>
-              <span class="p-cat">vision &amp; control</span>
-              <span class="p-award">2nd place · RythmHacks 2025</span>
+              <span class="p-cat">Vision &amp; control</span>
+              <span class="p-award">2nd place, RythmHacks 2025</span>
             </div>
             <h3 class="pcard-title">StudyBuddy 9520</h3>
             <p class="pcard-org">An anti-procrastination turret · RythmHacks 2025 · team of four</p>
             <p class="pcard-desc">A desk turret that watches you study and fires a ping-pong ball when you get distracted. YOLOv8 spots the distraction, PID loops aim the pan and tilt servos at you, and a flywheel launches the ball.</p>
             <ul class="tags"><li class="tag">YOLOv8</li><li class="tag">OpenCV</li><li class="tag">PID control</li><li class="tag">Arduino</li><li class="tag">C++</li><li class="tag">Python</li><li class="tag">Onshape</li></ul>
             <div class="pcard-actions">
-              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-studybuddy">details &amp; highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
+              <button class="expand-btn" type="button" aria-expanded="false" aria-controls="x-studybuddy">Highlights <svg class="i" aria-hidden="true"><use href="#i-chev-down"/></svg></button>
               <a class="btn btn-ghost btn-sm btn-icon" href="https://github.com/NotMax08/StudyBuddy9520" target="_blank" rel="noopener" aria-label="Code on GitHub"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></a>
-              <a class="btn btn-glow btn-sm" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">Devpost <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
+              <a class="btn btn-primary btn-sm" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">Devpost <svg class="i arr arr-ne" aria-hidden="true"><use href="#i-arrow-ne"/></svg></a>
             </div>
           </div>
           <div class="expand" id="x-studybuddy">
             <div class="expand-inner"><div class="expand-content">
-              <p class="panel-label">highlights</p>
               <ul class="bullets">
-                <li>Designed the turret in <b>Onshape</b> and 3D-printed it: two high-torque servos for <b>yaw and pitch</b>, and a <b>1550 RPM DC motor</b> spinning the flywheel.</li>
-                <li>A laptop runs <b>YOLOv8</b> on a 4K webcam feed to find the distracted person, then sends aim targets to an <b>Arduino UNO</b> over serial. Switching to asynchronous serial removed the lag between detection and motion.</li>
-                <li>A <b>ServoEncoder</b> class wraps <b>PID control</b> and encoder tracking. The servos only covered 60–120° instead of the documented 0–180°, so the PID output had to be normalized and retuned for their non-linear response.</li>
+                <li>Designed the turret in Onshape and 3D-printed it: two high-torque servos for yaw and pitch, and a 1550 RPM DC motor spinning the flywheel.</li>
+                <li>A laptop runs YOLOv8 on a 4K webcam feed to find the distracted person, then sends aim targets to an Arduino UNO over serial. Switching to asynchronous serial removed the lag between detection and motion.</li>
+                <li>A ServoEncoder class wraps PID control and encoder tracking. The servos only covered 60–120° instead of the documented 0–180°, so the PID output had to be normalized and retuned for their non-linear response.</li>
                 <li>When YOLOv8 dropped a detection, the turret kept aiming at the last valid target instead of snapping back.</li>
               </ul>
             </div></div>
@@ -705,30 +565,22 @@
        ===================================================== -->
   <section class="page" id="experience" data-page="experience" data-title="Experience">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/experience</span><span class="t-sym">$&nbsp;</span>git log --oneline<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">Teams I've <em>built with</em></h2>
-        <p class="ph-sub">A university design team, a competitive robotics team, and where I'm studying.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">02</span>
-        <ul class="tags"><li class="tag">WATonomous</li><li class="tag">FTC 18844</li></ul>
-      </div>
+      <h2 class="ph-title">Experience</h2>
     </header>
 
     <div class="page-body">
       <ol class="timeline">
         <li class="tl-item current reveal">
           <span class="tl-dot" aria-hidden="true"></span>
-          <article class="tl-card glow-card">
+          <article class="tl-card">
             <div class="tl-head">
               <h3 class="tl-role">Humanoid Sub Team</h3>
               <span class="tl-date">Sept 2026 – present</span>
             </div>
-            <p class="tl-org"><span class="pulse-dot blue"></span>WATonomous · University of Waterloo design team</p>
+            <p class="tl-org">WATonomous · University of Waterloo design team</p>
             <ul class="bullets">
-              <li>Contributing to the <b>RL and autonomy stack</b> on the humanoid sub team.</li>
-              <li>Upcoming work in <b>reinforcement learning (Isaac Lab)</b> and <b>simulation-based digital twins</b> for π₀.5 VLA model development.</li>
+              <li>Contributing to the RL and autonomy stack on the humanoid sub team.</li>
+              <li>Upcoming work in reinforcement learning (Isaac Lab) and simulation-based digital twins for π₀.5 VLA model development.</li>
             </ul>
             <ul class="tags"><li class="tag">Isaac Lab</li><li class="tag">reinforcement learning</li><li class="tag">digital twins</li><li class="tag">π₀.5 VLA</li></ul>
           </article>
@@ -736,7 +588,7 @@
 
         <li class="tl-item reveal">
           <span class="tl-dot" aria-hidden="true"></span>
-          <article class="tl-card glow-card">
+          <article class="tl-card">
             <div class="tl-head">
               <h3 class="tl-role">Co-Captain, Lead Programmer &amp; Driver</h3>
               <span class="tl-date">Sept 2023 – Apr 2025</span>
@@ -745,9 +597,9 @@
             <p class="tl-note">1st place Connect Award, Ochoa Division, at the 2025 FIRST World Championships, as Team Canada representatives.</p>
             <ul class="bullets">
               <li>Distributed work across the programming subdivision, scoping tasks by skill level and integrating everyone's contributions.</li>
-              <li>Ran robot showcases and hands-on SPIKE robotics workshops for <b>60+ kids</b> across the GTA.</li>
-              <li>Built a <b>PID pathing system</b> fusing two-wheel odometry with IMU data to localize the robot in field coordinates.</li>
-              <li>Automated a pickup system with <b>OpenCV</b> and a <b>custom-trained CNN</b> that estimates distance and orientation.</li>
+              <li>Ran robot showcases and hands-on SPIKE robotics workshops for 60+ kids across the GTA.</li>
+              <li>Built a PID pathing system fusing two-wheel odometry with IMU data to localize the robot in field coordinates.</li>
+              <li>Automated a pickup system with OpenCV and a custom-trained CNN that estimates distance and orientation.</li>
             </ul>
             <div class="tl-gallery">
               <figure><img src="assets/photos/ftc-worlds.jpg" alt="Team 18844 with a Canadian flag at FIRST Worlds" width="1600" height="1067" loading="lazy"></figure>
@@ -759,13 +611,12 @@
 
         <li class="tl-item reveal">
           <span class="tl-dot" aria-hidden="true"></span>
-          <article class="tl-card glow-card">
+          <article class="tl-card">
             <div class="tl-head">
               <h3 class="tl-role">BASc, Mechatronics Engineering</h3>
               <span class="tl-date">Sept 2026 – Apr 2031</span>
             </div>
-            <p class="tl-org">University of Waterloo · Honours Co-op</p>
-            <p class="tl-note" style="margin-bottom:0">Education. Waterloo, ON.</p>
+            <p class="tl-org" style="margin-bottom:0">University of Waterloo · Honours Co-op · Waterloo, ON</p>
           </article>
         </li>
       </ol>
@@ -777,66 +628,54 @@
        ===================================================== -->
   <section class="page" id="awards" data-page="awards" data-title="Awards">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/awards</span><span class="t-sym">$&nbsp;</span>ls<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">Awards &amp; <em>wins</em></h2>
-        <p class="ph-sub">Two hackathon podiums and FIRST championship awards.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">04</span>
-        <ul class="tags"><li class="tag">BOTS 2026</li><li class="tag">RythmHacks 2025</li><li class="tag">FIRST Worlds 2025</li></ul>
-      </div>
+      <h2 class="ph-title">Awards</h2>
     </header>
 
     <div class="page-body">
       <article class="award-hero reveal">
         <div>
-          <span class="ah-badge"><svg class="i" aria-hidden="true" style="width:13px;height:13px"><use href="#i-trophy"/></svg>1st place</span>
-          <p class="ah-context">BOTS Hackathon · Battle of the Schools · WAT.ai vs. UTMIST · Sept 2026</p>
-          <h3 class="ah-title">The Brackey Way, an <em>autonomous sandwich</em> robot</h3>
+          <span class="ah-badge">1st place</span>
+          <p class="ah-context">BOTS hackathon (Battle of the Schools), WAT.ai vs. UTMIST · Sept 2026</p>
+          <h3 class="ah-title">The Brackey Way, an autonomous sandwich robot</h3>
           <p class="ah-desc">A dual-arm Bracket Bot that takes toast out of a toaster, adds lettuce, and closes the sandwich with no human control. A fine-tuned π₀ VLA handles the toaster grasp, OpenCV + IK handles the lettuce, and a state machine runs the steps. The prize was four Bambu Lab P1S 3D printers.</p>
           <ul class="tags"><li class="tag">π₀ VLA</li><li class="tag">100+ teleop demos</li><li class="tag">OpenCV + IK</li><li class="tag">team of four</li></ul>
           <a class="btn btn-ghost" href="projects/brackey-way.html">Read the case study <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         </div>
         <div class="ah-photos">
-          <figure class="p1"><img src="assets/photos/max-bracketbot.jpg" alt="Max next to Bracket Bot, holding the finished sandwich" width="1000" height="1716" loading="lazy" style="object-position:50% 30%"><figcaption>the winning sandwich</figcaption></figure>
-          <figure class="p2"><img src="assets/photos/bots-pitch.jpg" alt="Max presenting at the BOTS hackathon" width="1000" height="1315" loading="lazy" style="object-position:62% 40%"><figcaption>pitching it</figcaption></figure>
+          <figure class="p1"><img src="assets/photos/max-bracketbot.jpg" alt="Max next to Bracket Bot, holding the finished sandwich" width="1000" height="1716" loading="lazy" style="object-position:50% 30%"><figcaption>The winning sandwich</figcaption></figure>
+          <figure class="p2"><img src="assets/photos/bots-pitch.jpg" alt="Max presenting at the BOTS hackathon" width="1000" height="1315" loading="lazy" style="object-position:62% 40%"><figcaption>Pitching it</figcaption></figure>
         </div>
       </article>
 
-      <p class="sub-head">trophy shelf</p>
+      <h3 class="sub-head">All awards</h3>
       <div class="trophies">
         <article class="trophy reveal">
-          <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
+          <span class="t-year">Sept 2026</span>
           <p class="t-place">1st place</p>
           <h3 class="t-name">BOTS Hackathon</h3>
           <p class="t-event">Battle of the Schools, WAT.ai vs. UTMIST</p>
-          <span class="t-year">Sept 2026</span>
         </article>
         <article class="trophy reveal">
-          <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
+          <span class="t-year">Oct 2025</span>
           <p class="t-place">2nd place</p>
           <h3 class="t-name">RythmHacks 2025</h3>
-          <p class="t-event">StudyBuddy 9520, an anti-procrastination turret · <a href="#studybuddy">see the project</a></p>
-          <span class="t-year">Oct 2025</span>
+          <p class="t-event">StudyBuddy 9520, an anti-procrastination turret · <a href="#studybuddy">See the project</a></p>
         </article>
         <article class="trophy reveal">
-          <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
+          <span class="t-year">2025</span>
           <p class="t-place">1st place · Connect Award</p>
           <h3 class="t-name">FIRST World Championships</h3>
           <p class="t-event">Ochoa Division, as Team Canada representatives</p>
-          <span class="t-year">2025</span>
         </article>
         <article class="trophy reveal">
-          <span class="t-medal" aria-hidden="true"><svg class="i"><use href="#i-trophy"/></svg></span>
+          <span class="t-year">Team 18844</span>
           <p class="t-place">2nd place · Inspire Award</p>
           <h3 class="t-name">FTC Ontario Provincials</h3>
           <p class="t-event">Ontario Provincial Championships</p>
-          <span class="t-year">Team 18844</span>
         </article>
       </div>
 
-      <p class="sub-head">team canada</p>
+      <h3 class="sub-head">Team Canada</h3>
       <figure class="team-photo reveal">
         <img src="assets/photos/ftc-worlds.jpg" alt="FTC team 18844 holding a Canadian flag at the FIRST World Championships" width="1600" height="1067" loading="lazy">
         <figcaption>
@@ -853,60 +692,45 @@
        ===================================================== -->
   <section class="page" id="skills" data-page="skills" data-title="Skills">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/skills</span><span class="t-sym">$&nbsp;</span>cat skills.txt<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">Skills &amp; <em>tools</em></h2>
-        <p class="ph-sub">Everything here is from my résumé. Hover or tap a skill to see which projects I used it in.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">25</span>
-        <ul class="tags"><li class="tag">5 categories</li><li class="tag">linked to projects</li></ul>
-      </div>
+      <h2 class="ph-title">Skills</h2>
+      <p class="ph-sub">Hover or tap a skill to see which projects I used it in.</p>
     </header>
 
     <div class="page-body">
-      <div class="skill-cats">
-        <button class="skill-cat" type="button" data-jump="sk-lang"><span class="sc-icon"><svg class="i" aria-hidden="true"><use href="#i-brackets"/></svg></span>Languages<span class="sc-n">3</span></button>
-        <button class="skill-cat" type="button" data-jump="sk-env"><span class="sc-icon"><svg class="i" aria-hidden="true"><use href="#i-terminal"/></svg></span>Environments<span class="sc-n">3</span></button>
-        <button class="skill-cat" type="button" data-jump="sk-sim"><span class="sc-icon"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></span>Simulation &amp; vision<span class="sc-n">4</span></button>
-        <button class="skill-cat" type="button" data-jump="sk-robot"><span class="sc-icon"><svg class="i" aria-hidden="true"><use href="#i-cpu"/></svg></span>Robotics &amp; control<span class="sc-n">9</span></button>
-        <button class="skill-cat" type="button" data-jump="sk-ml"><span class="sc-icon"><svg class="i" aria-hidden="true"><use href="#i-network"/></svg></span>Machine learning<span class="sc-n">6</span></button>
-      </div>
-
       <div class="skill-grid">
         <section class="skill-box reveal" id="sk-lang" aria-labelledby="sk-lang-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-brackets"/></svg></span><h3 id="sk-lang-h">Languages</h3><span class="sb-n">3 skills</span></div>
+          <div class="sb-head"><h3 id="sk-lang-h">Languages</h3><span class="sb-n">3 skills</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="quad,rico,turret">Python <span class="n">3</span></button>
             <button class="skill" type="button" data-used="turret">C++ <span class="n">1</span></button>
             <button class="skill" type="button" data-used="ftc">Java <span class="n">1</span></button>
           </div>
-          <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
+          <p class="skill-used" aria-live="polite">Tap a skill with a number to see where I used it.</p>
         </section>
 
         <section class="skill-box reveal" id="sk-env" aria-labelledby="sk-env-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-terminal"/></svg></span><h3 id="sk-env-h">Environments</h3><span class="sb-n">3 skills</span></div>
+          <div class="sb-head"><h3 id="sk-env-h">Environments</h3><span class="sb-n">3 skills</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="maze">Ubuntu <span class="n">1</span></button>
             <span class="skill">Linux CLI</span>
             <span class="skill">Git</span>
           </div>
-          <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
+          <p class="skill-used" aria-live="polite">Tap a skill with a number to see where I used it.</p>
         </section>
 
         <section class="skill-box reveal" id="sk-sim" aria-labelledby="sk-sim-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-eye"/></svg></span><h3 id="sk-sim-h">Simulation &amp; vision</h3><span class="sb-n">4 skills</span></div>
+          <div class="sb-head"><h3 id="sk-sim-h">Simulation &amp; vision</h3><span class="sb-n">4 skills</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="maze">NVIDIA Isaac Sim <span class="n">1</span></button>
             <button class="skill" type="button" data-used="quad">Isaac Lab <span class="n">1</span></button>
             <button class="skill" type="button" data-used="brackey,rico,ftc,turret">OpenCV <span class="n">4</span></button>
             <button class="skill" type="button" data-used="rico,turret">YOLOv8 <span class="n">2</span></button>
           </div>
-          <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
+          <p class="skill-used" aria-live="polite">Tap a skill with a number to see where I used it.</p>
         </section>
 
         <section class="skill-box reveal" id="sk-robot" aria-labelledby="sk-robot-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-cpu"/></svg></span><h3 id="sk-robot-h">Robotics &amp; control</h3><span class="sb-n">9 skills</span></div>
+          <div class="sb-head"><h3 id="sk-robot-h">Robotics &amp; control</h3><span class="sb-n">9 skills</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="maze">ROS2 <span class="n">1</span></button>
             <button class="skill" type="button" data-used="maze">RViz <span class="n">1</span></button>
@@ -918,11 +742,11 @@
             <button class="skill" type="button" data-used="ftc,maze">Odometry <span class="n">2</span></button>
             <button class="skill" type="button" data-used="turret">Onshape <span class="n">1</span></button>
           </div>
-          <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
+          <p class="skill-used" aria-live="polite">Tap a skill with a number to see where I used it.</p>
         </section>
 
         <section class="skill-box wide reveal" id="sk-ml" aria-labelledby="sk-ml-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-network"/></svg></span><h3 id="sk-ml-h">Machine learning</h3><span class="sb-n">6 skills</span></div>
+          <div class="sb-head"><h3 id="sk-ml-h">Machine learning</h3><span class="sb-n">6 skills</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="quad">Reinforcement learning (PPO) <span class="n">1</span></button>
             <button class="skill" type="button" data-used="brackey">Imitation learning <span class="n">1</span></button>
@@ -931,11 +755,11 @@
             <button class="skill" type="button" data-used="quad">rsl_rl <span class="n">1</span></button>
             <button class="skill" type="button" data-used="quad">PyTorch <span class="n">1</span></button>
           </div>
-          <p class="skill-used" aria-live="polite">hover or tap a skill with a number to see where I used it.</p>
+          <p class="skill-used" aria-live="polite">Tap a skill with a number to see where I used it.</p>
         </section>
 
         <section class="skill-box wide upcoming reveal" data-prefix="next" aria-labelledby="sk-next-h">
-          <div class="sb-head"><span class="sb-icon"><svg class="i" aria-hidden="true"><use href="#i-spark"/></svg></span><h3 id="sk-next-h">Learning next</h3><span class="sb-n">in progress</span></div>
+          <div class="sb-head"><h3 id="sk-next-h">Learning next</h3><span class="sb-n">In progress</span></div>
           <div class="skill-chips">
             <button class="skill" type="button" data-used="wato">π₀.5 VLA</button>
             <button class="skill" type="button" data-used="wato">Simulation digital twins</button>
@@ -943,18 +767,8 @@
             <button class="skill" type="button" data-used="quad">Sim-to-real transfer</button>
             <button class="skill" type="button" data-used="quad">Get-up recovery policies</button>
           </div>
-          <p class="skill-used" aria-live="polite">what I'm picking up next, and where.</p>
+          <p class="skill-used" aria-live="polite">What I'm picking up next, and where.</p>
         </section>
-      </div>
-
-      <div class="cta-band reveal" style="margin-top:2rem">
-        <div>
-          <h2>Want it all on <em>one page</em>?</h2>
-          <p>The same skills, plus projects and experience, in my résumé.</p>
-        </div>
-        <div class="cta-actions">
-          <a class="btn btn-glow" href="resume.pdf" target="_blank" rel="noopener"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg>Open résumé</a>
-        </div>
       </div>
     </div>
   </section>
@@ -964,51 +778,41 @@
        ===================================================== -->
   <section class="page" id="contact" data-page="contact" data-title="Contact">
     <header class="ph">
-      <div class="ph-left">
-        <p class="ph-path"><span class="t-user">max@portfolio</span><span class="t-sym">:</span><span class="t-path">~/contact</span><span class="t-sym">$&nbsp;</span>ping max<span class="term-cursor" aria-hidden="true"></span></p>
-        <h2 class="ph-title">Let's <em>talk</em> robots</h2>
-        <p class="ph-sub">Looking for a robotics or ML co-op. Happy to talk about locomotion policies, sim-to-real transfer, robot manipulation, or anything else in robotics.</p>
-      </div>
-      <div class="ph-right" aria-hidden="true">
-        <span class="ph-num">@</span>
-      </div>
+      <h2 class="ph-title">Contact</h2>
+      <p class="ph-sub">Looking for a robotics or ML co-op. Happy to talk about locomotion policies, sim-to-real transfer, robot manipulation, or anything else in robotics.</p>
     </header>
 
     <div class="page-body">
       <div class="contact-grid">
-        <a class="contact-card glow-card reveal" href="mailto:maxyuan081205@gmail.com">
+        <a class="contact-card reveal" href="mailto:maxyuan081205@gmail.com">
           <span class="cc-icon"><svg class="i" aria-hidden="true"><use href="#i-mail"/></svg></span>
           <span class="cc-label">Email</span>
           <span class="cc-sub">maxyuan081205@gmail.com</span>
-          <span class="cc-go">say hi <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
-        <a class="contact-card glow-card reveal" href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">
+        <a class="contact-card reveal" href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">
           <span class="cc-icon"><svg class="i" aria-hidden="true"><use href="#i-linkedin"/></svg></span>
           <span class="cc-label">LinkedIn</span>
           <span class="cc-sub">in/max-yuan-a0b34b36b</span>
-          <span class="cc-go">connect <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
-        <a class="contact-card glow-card reveal" href="https://github.com/NotMax08" target="_blank" rel="noopener">
+        <a class="contact-card reveal" href="https://github.com/NotMax08" target="_blank" rel="noopener">
           <span class="cc-icon"><svg class="i" aria-hidden="true"><use href="#i-github"/></svg></span>
           <span class="cc-label">GitHub</span>
           <span class="cc-sub">github.com/NotMax08</span>
-          <span class="cc-go">read the code <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></span>
         </a>
-        <a class="contact-card glow-card reveal" href="resume.pdf" target="_blank" rel="noopener">
+        <a class="contact-card reveal" href="resume.pdf" target="_blank" rel="noopener">
           <span class="cc-icon"><svg class="i" aria-hidden="true"><use href="#i-file"/></svg></span>
           <span class="cc-label">Résumé</span>
           <span class="cc-sub">PDF · one page</span>
-          <span class="cc-go">open it <svg class="i" aria-hidden="true"><use href="#i-arrow-ne"/></svg></span>
         </a>
       </div>
 
       <div class="cta-band reveal">
         <div>
-          <h2>The fastest way to <em>reach me</em>.</h2>
-          <p>Email works best. Copy the address or open your mail app.</p>
+          <h2>Email works best</h2>
+          <p>Copy the address, or open your mail app.</p>
         </div>
         <div class="cta-actions">
-          <button class="btn btn-glow" type="button" data-copy="maxyuan081205@gmail.com"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy email</button>
+          <button class="btn btn-primary" type="button" data-copy="maxyuan081205@gmail.com"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>Copy email</button>
           <a class="btn btn-ghost" href="mailto:maxyuan081205@gmail.com">Open mail <svg class="i arr" aria-hidden="true"><use href="#i-arrow"/></svg></a>
         </div>
       </div>
@@ -1026,11 +830,11 @@
       <a href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">LinkedIn</a>
       <a href="resume.pdf" target="_blank" rel="noopener">Résumé</a>
     </nav>
-    <p class="footer-note">© <span data-year>2026</span> Max Yuan · built by hand, hosted on GitHub Pages</p>
+    <p class="footer-note">© <span data-year>2026</span> Max Yuan</p>
   </div>
 </footer>
 
-<button class="btn btn-ghost btn-icon" id="toTop" type="button" aria-label="Back to top"><svg class="i" aria-hidden="true"><use href="#i-arrow-up"/></svg></button>
+<button class="btn btn-icon" id="toTop" type="button" aria-label="Back to top"><svg class="i" aria-hidden="true"><use href="#i-arrow-up"/></svg></button>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 </body>
