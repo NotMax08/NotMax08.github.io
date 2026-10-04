@@ -160,7 +160,7 @@
               </div>
             </div>
             <a class="tl-media" href="projects/pi05-pick-place.html" tabindex="-1" aria-hidden="true">
-              <video src="assets/loops/pi05.mp4" poster="assets/loops/pi05.jpg" muted loop playsinline preload="none" data-autoplay></video>
+              <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-autoplay></video>
             </a>
           </article>
         </li>
@@ -461,7 +461,7 @@
         <article class="pcard featured reveal" data-cats="learning vision">
           <div class="carousel" data-carousel>
             <div class="car-track" tabindex="0" role="group" aria-label="π₀.5 pick and place: video, photos and charts">
-              <figure class="car-slide"><video src="assets/loops/pi05.mp4" poster="assets/loops/pi05.jpg" muted loop playsinline preload="none" data-autoplay aria-label="The simulated Pioneer arm picking up a red cube and placing it in a tray"></video><figcaption>The fine-tuned policy in Isaac Sim</figcaption></figure>
+              <figure class="car-slide contain"><video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-autoplay aria-label="Isaac Sim recording: the Pioneer arm picks up a red cube and places it in a tray, with the wrist and base camera views shown in two smaller windows"></video></figure>
               <figure class="car-slide"><img src="assets/pi05/teleop.jpg" alt="Max moving the leader arm while the simulated Pioneer arm follows on the monitor" width="1280" height="720" loading="lazy"><figcaption>Recording a demonstration with the leader arm</figcaption></figure>
               <figure class="car-slide"><img src="assets/pi05/leader-arm.jpg" alt="The 3D-printed leader arm clamped to a desk, with the simulation on the monitor behind it" width="1200" height="1600" loading="lazy" style="object-position:50% 28%"><figcaption>The 7-servo leader arm</figcaption></figure>
               <figure class="car-slide contain"><img src="assets/pi05/cameras.jpg" alt="Two camera views from the simulation: a wrist camera close to the cube, and the base camera looking down at the table" width="1880" height="516" loading="lazy"><figcaption>Wrist and base camera views</figcaption></figure>
@@ -489,7 +489,7 @@
           <div class="expand" id="x-pi05">
             <div class="expand-inner"><div class="expand-content">
               <ul class="bullets">
-                <li>Froze the PaliGemma vision-language backbone and trained only the action expert, detaching the backbone's activations at every layer so backpropagation never runs through it.</li>
+                <li>Froze the PaliGemma vision-language backbone, which is already trained on internet-scale data, and fine-tuned only the action head so it adjusts to this arm and task.</li>
                 <li>Recorded 71 demonstrations (5,654 frames at 25 fps, three camera views) with a 7-servo leader arm driving a digital twin in Isaac Sim, saved as a LeRobot v3.0 dataset.</li>
                 <li>Moved training from a 12 GB laptop GPU to a 48 GB cloud GPU, using gradient accumulation to keep 32 samples per update on both, with warmup and cosine decay on the learning rate.</li>
                 <li>Wrote an offline evaluation with a hold-still baseline. It showed the first 1,000-update run was underfit, which led to the 6,000-update run.</li>
@@ -768,7 +768,7 @@
               </div>
             </div>
             <a class="tl-media" href="projects/pi05-pick-place.html" tabindex="-1" aria-hidden="true">
-              <video src="assets/loops/pi05.mp4" poster="assets/loops/pi05.jpg" muted loop playsinline preload="none" data-autoplay></video>
+              <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-autoplay></video>
             </a>
           </article>
         </li>
