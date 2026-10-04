@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" data-root="../">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fine-tuning π₀.5 for pick and place — Max Yuan</title>
+<meta name="description" content="Fine-tuning the π₀.5 vision-language-action model so the WATonomous Pioneer arm picks up a cube and places it in a tray: a frozen vision-language backbone, a trained action expert, and demonstrations recorded with a leader arm in Isaac Sim.">
+<meta property="og:title" content="Fine-tuning π₀.5 for pick and place">
+<meta property="og:description" content="A frozen vision-language backbone, a trained action expert, and 71 demonstrations recorded with a leader arm and a digital twin in Isaac Sim.">
+<meta property="og:type" content="article">
+<meta property="og:image" content="https://notmax08.github.io/assets/pi05/demo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta name="theme-color" content="#0E0C0A">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23D6AE7B'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%231A140D' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<!-- bump ?v= whenever style.css or main.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
+<link rel="stylesheet" href="../style.css?v=2026-10-04">
+<script>document.documentElement.classList.add('js');</script>
+<script src="../main.js?v=2026-10-04" defer></script>
+</head>
+
+<body class="case-page">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-arrow-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></symbol>
+  <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></symbol>
+</svg>
+
+<header class="nav" id="nav">
+  <a class="brand" href="../index.html">Max Yuan</a>
+  <nav class="nav-links" id="navLinks" aria-label="Primary">
+    <a href="../index.html#home">Home</a>
+    <a href="../index.html#about">About</a>
+    <a href="../index.html#projects" aria-current="page">Projects</a>
+    <a href="../index.html#experience">Experience</a>
+    <a href="../index.html#awards">Awards</a>
+    <a href="../index.html#skills">Skills</a>
+    <a href="../index.html#contact">Contact</a>
+  </nav>
+  <div class="nav-actions">
+    <a class="btn btn-ghost btn-sm nav-resume" href="../resume.pdf" target="_blank" rel="noopener" aria-label="Résumé (PDF)">
+      <svg class="i" aria-hidden="true"><use href="#i-file"/></svg><span class="label">Résumé</span>
+    </a>
+    <button class="btn btn-ghost btn-icon btn-sm nav-burger" id="navBurger" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="navLinks"><i></i><i></i><i></i></button>
+  </div>
+</header>
+
+
+<div class="wrap">
+  <a class="back" href="../index.html#projects"><svg class="i" aria-hidden="true"><use href="#i-arrow-left"/></svg>All projects</a>
+</div>
+
+<main id="main" tabindex="-1">
+
+  <div class="project-card">
+
+  <header class="wrap case-head">
+    <p class="eyebrow">WATonomous · Humanoid team</p>
+    <h1>Fine-tuning π₀.5 for pick and place</h1>
+    <p class="lede">A π₀.5 vision-language-action model, fine-tuned so the Pioneer humanoid's left arm picks up a cube and places it in a tray in Isaac Sim. I recorded the demonstrations with a leader arm, wrote the training and evaluation scripts, and trained only the action expert on top of a frozen vision-language backbone.</p>
+    <p class="case-stack"><span>π₀.5 VLA</span><span>Flow matching</span><span>LeRobot</span><span>PyTorch</span><span>Isaac Sim</span><span>Leader-arm teleop</span><span>Weights &amp; Biases</span></p>
+  </header>
+
+  <div class="wrap">
+    <div class="case-media">
+      <video controls muted playsinline preload="metadata" poster="../assets/pi05/demo.jpg" aria-label="The simulated Pioneer arm picking up a red cube and placing it in a blue tray, several times in a row">
+        <source src="../assets/pi05/demo.mp4" type="video/mp4">
+      </video>
+    </div>
+    <p class="media-note">The policy after 6,000 weight updates, running in Isaac Sim. The clip shows several attempts in a row.</p>
+  </div>
+
+  <div class="wrap">
+    <div class="stat-row">
+      <div class="stat"><b>71</b><span>teleoperated demonstrations, 5,654 frames at 25 fps</span></div>
+      <div class="stat"><b>3</b><span>camera views at 256 × 256: base and two wrists</span></div>
+      <div class="stat"><b>6,000</b><span>weight updates of 32 samples each</span></div>
+      <div class="stat"><b>48 GB</b><span>one cloud GPU, with the backbone frozen</span></div>
+    </div>
+  </div>
+
+  <div class="wrap case-body">
+    <div>
+
+      <h2>Overview</h2>
+
+      <p>The WATonomous humanoid team is building a humanoid called Pioneer. The part I worked with is its bimanual arm rig: two arms with six joints each and a two-finger gripper. My task was to get the left arm to do a simple manipulation task from camera images and one text instruction: <em>pick up the cube and place it in the tray</em>.</p>
+
+      <p>Training a policy from scratch would need far more data than one person can record. So I fine-tuned <strong>π₀.5</strong>, a vision-language-action (VLA) model from Physical Intelligence, using the open-source LeRobot implementation and its <code>pi05_base</code> weights. A VLA takes camera images and a text instruction and outputs robot actions.</p>
+
+      <p>The work had three parts: recording demonstrations in simulation, writing a training script that fits on the hardware I could get, and checking whether the result had actually learned anything.</p>
+
+      <h2>How π₀.5 is built</h2>
+
+      <p>π₀.5 is two transformers that run side by side.</p>
+
+      <ul>
+        <li>The first is <strong>PaliGemma</strong>, a vision-language model: a SigLIP image encoder feeding a Gemma language model with 2 billion parameters, about 3 billion in total. It reads the camera images and the text prompt. In π₀.5 the arm's joint state is also written into the prompt as text, after each value is sorted into one of 256 bins.</li>
+        <li>The second is the <strong>action expert</strong>, a smaller Gemma-style transformer with about 300 million parameters. It takes a chunk of 50 future actions with noise added, and predicts how to remove the noise.</li>
+      </ul>
+
+      <p>At every layer the two share one attention step. The action tokens can look at the image and text tokens, but not the other way round. So the backbone works out what is in the scene and what the instruction means, and the action expert turns that into motion.</p>
+
+      <div class="fsm">
+        <svg viewBox="0 0 840 290" role="img" aria-label="Diagram of π₀.5. Three camera images, the task prompt and the joint state go into the PaliGemma vision-language model, which is frozen. The action expert, which is trained, attends to the vision-language model at every layer, takes a noisy 50-step action chunk and the flow-matching time as input, and outputs a 50-step action chunk.">
+          <defs>
+            <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="t-muted"></path>
+            </marker>
+            <marker id="ahb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="t-learned"></path>
+            </marker>
+          </defs>
+          <g font-family="DM Sans, sans-serif">
+
+            <!-- inputs -->
+            <g>
+              <rect x="4" y="14" width="176" height="56" rx="10" class="st-done" stroke-width="1.5"></rect>
+              <text x="92" y="38" text-anchor="middle" font-size="14.5" font-weight="600" class="t-ink">3 camera images</text>
+              <text x="92" y="57" text-anchor="middle" font-size="12.5" class="t-muted">base and both wrists</text>
+            </g>
+            <g>
+              <rect x="4" y="84" width="176" height="56" rx="10" class="st-done" stroke-width="1.5"></rect>
+              <text x="92" y="108" text-anchor="middle" font-size="14.5" font-weight="600" class="t-ink">Task prompt</text>
+              <text x="92" y="127" text-anchor="middle" font-size="12.5" class="t-muted">"pick up the cube …"</text>
+            </g>
+            <g>
+              <rect x="4" y="154" width="176" height="56" rx="10" class="st-done" stroke-width="1.5"></rect>
+              <text x="92" y="178" text-anchor="middle" font-size="14.5" font-weight="600" class="t-ink">Joint state</text>
+              <text x="92" y="197" text-anchor="middle" font-size="12.5" class="t-muted">8 values, as text tokens</text>
+            </g>
+            <line x1="180" y1="42" x2="214" y2="84" class="ln" stroke-width="1.6" marker-end="url(#ah)"></line>
+            <line x1="180" y1="112" x2="214" y2="112" class="ln" stroke-width="1.6" marker-end="url(#ah)"></line>
+            <line x1="180" y1="182" x2="214" y2="140" class="ln" stroke-width="1.6" marker-end="url(#ah)"></line>
+
+            <!-- frozen backbone -->
+            <g>
+              <rect x="220" y="30" width="204" height="164" rx="14" class="st-done" stroke-width="1.5" stroke-dasharray="6 4"></rect>
+              <text x="322" y="92" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">PaliGemma VLM</text>
+              <text x="322" y="115" text-anchor="middle" font-size="13" class="t-muted">SigLIP encoder + Gemma 2B</text>
+              <text x="322" y="148" text-anchor="middle" font-size="13" font-weight="600" class="t-muted">frozen · about 3B params</text>
+            </g>
+
+            <!-- shared attention, one way -->
+            <line x1="424" y1="112" x2="504" y2="112" class="ln-learned" stroke-width="1.8" marker-end="url(#ahb)"></line>
+            <text x="464" y="96" text-anchor="middle" font-size="12" class="t-learned">attention at</text>
+            <text x="464" y="134" text-anchor="middle" font-size="12" class="t-learned">every layer</text>
+
+            <!-- trained action expert -->
+            <g>
+              <rect x="510" y="30" width="192" height="164" rx="14" class="st-learned" stroke-width="1.5"></rect>
+              <text x="606" y="92" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Action expert</text>
+              <text x="606" y="115" text-anchor="middle" font-size="13" class="t-muted">Gemma-style transformer</text>
+              <text x="606" y="148" text-anchor="middle" font-size="13" font-weight="600" class="t-learned">trained · about 300M params</text>
+            </g>
+
+            <!-- noisy actions in -->
+            <g>
+              <rect x="510" y="232" width="192" height="54" rx="10" class="st-done" stroke-width="1.5"></rect>
+              <text x="606" y="255" text-anchor="middle" font-size="14" font-weight="600" class="t-ink">Noisy action chunk</text>
+              <text x="606" y="273" text-anchor="middle" font-size="12.5" class="t-muted">plus the flow-matching time</text>
+            </g>
+            <line x1="606" y1="232" x2="606" y2="200" class="ln" stroke-width="1.6" marker-end="url(#ah)"></line>
+
+            <!-- actions out -->
+            <line x1="702" y1="112" x2="728" y2="112" class="ln-learned" stroke-width="1.8" marker-end="url(#ahb)"></line>
+            <g>
+              <rect x="734" y="74" width="102" height="76" rx="10" class="st-learned" stroke-width="1.5"></rect>
+              <text x="785" y="100" text-anchor="middle" font-size="14" font-weight="600" class="t-ink">Action chunk</text>
+              <text x="785" y="119" text-anchor="middle" font-size="12.5" class="t-muted">50 steps</text>
+              <text x="785" y="136" text-anchor="middle" font-size="12.5" class="t-muted">2 s at 25 Hz</text>
+            </g>
+          </g>
+        </svg>
+        <div class="fsm-legend">
+          <span><i class="lg-frozen"></i>frozen or fixed input</span>
+          <span><i class="lg-learned"></i>trained in this project</span>
+        </div>
+      </div>
+
+      <h3>Flow matching</h3>
+
+      <p>Actions come out through flow matching. During training, a clean action chunk from a demonstration is mixed with random noise, and the model learns to predict the direction that leads from the clean actions to the noise. At run time it starts from pure noise and takes 10 small steps back along that direction. What is left is a chunk of 50 actions, two seconds of motion at 25 Hz. In my evaluation the first 10 steps (0.4 s) of each chunk are executed before the policy plans again.</p>
+
+      <h2>Freezing the backbone</h2>
+
+      <p>The pretrained backbone already knows how to read images and language. What it has never seen is this arm, these cameras, and this task. With 71 short demonstrations, updating about 3 billion backbone parameters would mostly risk damaging what the model already knows, and it needs far more memory. So I froze the whole vision-language model and trained only the parts that produce actions: the action expert, the two projections that map actions into and out of it, and the small network that encodes the flow-matching time.</p>
+
+      <p>Freezing the weights does not save much memory on its own. Because the action expert attends to the backbone at every layer, PyTorch still keeps every backbone activation and traces gradients back through all of it, even though none of those weights will change. But the attention mask already stops the action tokens from influencing the image and text tokens, so the backbone's outputs do not depend on anything being trained. That makes it safe to cut them out of the gradient graph. I wrapped LeRobot's layer function to do that:</p>
+
+<pre><code>_compute_layer_complete = pi05_modeling.compute_layer_complete
+
+def _compute_layer_frozen_prefix(*args, **kwargs):
+    prefix_out, suffix_out = _compute_layer_complete(*args, **kwargs)
+    return [prefix_out.detach(), suffix_out]
+
+pi05_modeling.compute_layer_complete = _compute_layer_frozen_prefix</code></pre>
+
+      <p>After each layer, the backbone's output (the prefix) is detached. Backpropagation then stops at the action expert, and PyTorch no longer has to keep the backbone's intermediate results around for a backward pass that would never use them.</p>
+
+      <h2>Recording demonstrations</h2>
+
+      <p>There was no dataset for this arm, so I recorded one in simulation. The Pioneer arm in Isaac Sim is a digital twin of the real one, and I drive it with a physical leader arm: a 3D-printed arm with seven Feetech STS3215 servos, one for each of the six joints and one for the gripper. The servo motors stay off and only their encoders are read. Each leader joint maps directly to the matching joint of the simulated arm, so moving the leader by hand moves the robot the same way, with no inverse kinematics in between.</p>
+
+      <figure class="case-figure case-figure-side">
+        <img src="../assets/pi05/leader-arm.jpg" alt="A white 3D-printed leader arm with a servo at each joint, clamped to a desk, with the Pioneer arm simulation on the monitor behind it" width="1200" height="1600" loading="lazy">
+        <figcaption><b>The leader arm.</b> Seven servos used as joint encoders, one per joint and one for the gripper. On the monitor behind it is the scene it drives: the simulated arm, the table, the cube and the tray.</figcaption>
+      </figure>
+
+      <figure class="case-figure">
+        <video src="../assets/pi05/teleop.mp4" poster="../assets/pi05/teleop.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Max moving the leader arm by hand while the simulated Pioneer arm follows on the monitor"></video>
+        <figcaption><b>Recording a demonstration.</b> I move the leader arm by hand, and the simulated arm follows it joint for joint.</figcaption>
+      </figure>
+
+      <p>The recorder I wrote saves four things 25 times a second: the arm's measured joint positions (the state), the joint targets coming from the leader (the action), the camera images, and the text prompt. It writes them as a LeRobot v3.0 dataset. Keys on the keyboard start, save or delete a take.</p>
+
+      <p>I also built the scene (a table, a cube and a tray) and set up the three cameras: a base camera looking down at the table, and one on each wrist between the gripper fingers. I set the cameras up to match the real robot's camera specs. The base camera, for example, is a model of the colour camera on an Intel RealSense D455, with that camera's lens. The closer the simulated images are to what the real cameras will see, the less the policy has to relearn when it moves to the real arm.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/pi05/cameras.jpg" alt="Two views from the simulation: a wrist camera close to the red cube between the gripper fingers, and the base camera looking down at the table, the tray, the cube and both grippers" width="1880" height="516" loading="lazy">
+        <figcaption><b>What the policy sees.</b> Two of the three views: the left wrist camera, close to the cube, and the base camera looking down at the table.</figcaption>
+      </figure>
+
+      <p>The finished dataset has 71 episodes and 5,654 frames. Each episode is short, about 3 seconds, because the task is short.</p>
+
+      <h2>From a recording to model input</h2>
+
+      <p>The model cannot read a recording directly. LeRobot's pre-processor and post-processor sit between the dataset and π₀.5 and convert in both directions.</p>
+
+      <ul>
+        <li>Images are resized to the 224 × 224 the image encoder expects.</li>
+        <li>The prompt and the binned joint state are turned into tokens.</li>
+        <li>Joint states and actions are normalized. Every dimension has a different range: in this data the wrist joint moves through almost 2 radians, while a gripper finger moves 0.05 metres. π₀.5 rescales each dimension to roughly −1 to 1, using its 1st and 99th percentile in the training data. Without this, the dimensions with the largest numbers would dominate the loss and get the largest gradients.</li>
+        <li>States and actions are padded from 8 values to the 32 the model was built for.</li>
+        <li>On the way out, the post-processor undoes the normalization, so the output is joint targets in radians again.</li>
+      </ul>
+
+      <h3>Delta actions</h3>
+
+      <p>The dataset stores absolute joint targets. I trained on delta actions instead: each of the 50 steps in a chunk is the offset from where the arm was when the chunk was planned. The gripper stays absolute, because open and closed are targets, not motions. A policy that has not learned much then predicts something close to zero and holds still, instead of drifting toward an average pose.</p>
+
+      <p>This conversion cannot be stored in the dataset, because the same frame appears in 50 different chunks, each relative to a different starting state. So the script converts every batch as it trains, and recomputes the normalization statistics for the deltas.</p>
+
+      <h2>The training script</h2>
+
+      <p>The training loop is written out by hand instead of calling LeRobot's training command, so every step is visible. From top to bottom:</p>
+
+      <dl class="walk">
+        <dt>Setup</dt>
+        <dd>Fixes the random seeds, downloads the dataset from the Hugging Face Hub, and checks the Hub and Weights &amp; Biases logins before anything is loaded. A missing token then fails in seconds, not after hours of training.</dd>
+        <dt>Model</dt>
+        <dd>Loads <code>pi05_base</code> and matches the policy's inputs and outputs to this dataset's cameras and joints. Weights are stored as 32-bit floats and the forward pass runs in bfloat16 under autocast. Half-precision math is faster and smaller, and full-precision weights keep small AdamW updates from being rounded away.</dd>
+        <dt>Train and validation split</dt>
+        <dd>Shuffles the episodes and holds one out for validation; the other 70 are for training. The split is by episode, not by frame, because neighbouring frames are nearly identical.</dd>
+        <dt>Data loading</dt>
+        <dd>Each sample is one frame plus the next 50 actions. Batches are shuffled so that one update mixes frames from many episodes, and the last, smaller batch of an epoch is dropped so every update carries the same weight.</dd>
+        <dt>Processors</dt>
+        <dd>Builds the normalization, tokenization and padding steps from the dataset's statistics, with the action statistics swapped for the delta-action ones.</dd>
+        <dt>Freezing</dt>
+        <dd>Turns gradients on only for the action expert, the action projections and the time network, and gives the optimizer only those parameters.</dd>
+        <dt>Learning rate</dt>
+        <dd>AdamW with a peak learning rate of 2.5e-5. It ramps up linearly over the first 100 updates, holds at the peak, then follows a cosine curve down to 10% of the peak over the last 1,000 updates.</dd>
+        <dt>Training loop</dt>
+        <dd>Each forward pass handles 16 samples. The gradients from two passes are added together before one weight update, so every update is based on 32 samples. Gradients are clipped to a norm of 1.0.</dd>
+        <dt>Validation</dt>
+        <dd>Every 250 updates the held-out episode is scored with the same noise and flow times each time, so a change in validation loss comes from the weights and not from random sampling.</dd>
+        <dt>Checkpoints and logs</dt>
+        <dd>Loss, learning rate and gradient norm go to a CSV file and to Weights &amp; Biases. A checkpoint is about 14.5 GB, so the script deletes the old one before writing the new one, then uploads the final one to the Hub.</dd>
+      </dl>
+
+      <h2>Making it fit</h2>
+
+      <p>My laptop's GPU has 12 GB of memory, and π₀.5 ran out of memory on it. I first shrank the batch to 2 samples and accumulated gradients over 16 passes, which still gives 32 samples per update, just slowly. Then I moved the training to a 48 GB cloud GPU. There a batch of 16 with 2 accumulation steps gives the same 32 samples per update in far fewer passes. Gradient accumulation works in both directions: it lets a small GPU imitate a large batch, and it lets me keep the update size fixed while the batch size changes with the hardware.</p>
+
+      <p>Three other things keep memory down: the frozen backbone needs no gradients and no optimizer state, the detach above removes the backbone from the backward pass, and autocast does the math in bfloat16.</p>
+
+      <p>The first updates of a fine-tune are the riskiest. The gradient norm starts near 3 and falls to about 0.4 within the first 60 updates. A full-size learning rate during that stretch could wreck the pretrained weights, so the warmup keeps those steps small. The cosine decay at the end lets the weights settle.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/pi05/wandb-warmup.png" alt="Three charts over the first 200 updates: the learning rate ramping up linearly to 2.5e-5 by update 100, the gradient norm falling from about 3 to about 0.4, and the training loss falling from about 0.8 to about 0.15" width="2128" height="466" loading="lazy">
+        <figcaption><b>The first 200 updates.</b> The learning rate ramps up while the gradient norm and the training loss fall quickly.</figcaption>
+      </figure>
+
+      <h2>The first run was underfit</h2>
+
+      <p>The first cloud run used 1,000 weight updates. At 32 samples per update that is 32,000 samples, or about 5.7 passes over the roughly 5,600 training frames. The loss went down, but a falling loss says little about whether the arm would do the task.</p>
+
+      <p>So I wrote an offline evaluation. It feeds recorded camera frames and joint states to the policy, takes the 50-step chunk the policy predicts, and compares it with what I actually did on the leader arm at that moment. It also scores a baseline that does nothing: it keeps commanding the arm's current position. A policy that has learned the task should beat that easily.</p>
+
+      <p>It did not. Over the 0.4 seconds that get executed, the policy's average error on the arm joints was about 10 degrees on episodes it had trained on. Holding still was off by about 5.5 degrees. Across all joints and the gripper, the policy's error was 1.67 times the baseline's. A policy that is worse than standing still on its own training data has not learned the demonstrations yet. That is underfitting, and the fix is more training.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/pi05/error-vs-horizon.png" alt="Two charts of prediction error against how far ahead the policy predicts, for the arm joints and for the gripper fingers. Over the first 0.4 seconds, the policy's error on both training and held-out episodes is above the hold-still baseline." width="1800" height="750" loading="lazy">
+        <figcaption><b>Error against look-ahead, first run.</b> In the shaded 0.4 s that gets executed, the policy (blue and orange) is less accurate than holding still (grey).</figcaption>
+      </figure>
+
+      <h2>Training longer</h2>
+
+      <p>I raised the run to 6,000 updates, about 34 passes over the data, with the learning rate at its peak for most of it. The training loss fell from about 0.70 in the first updates to about 0.013 in the last. In simulation the arm now picks up the cube and drops it in the tray, as in the video at the top.</p>
+
+      <p>The validation loss tells a second story. On the held-out episode it was lowest between about 750 and 2,000 updates, around 0.07, and then climbed to 0.144 by the end while the training loss kept falling. A gap like that is the usual sign of overfitting: past roughly 2,000 updates the model is fitting the 70 training episodes more closely than it generalizes. One held-out episode is a noisy measure, and a loss on predicted action chunks is not the same thing as task success. But the trend is steady. The first run trained too little, this one probably too much, and the best checkpoint for this dataset is likely somewhere in between.</p>
+
+      <figure class="case-figure">
+        <img src="../assets/pi05/loss-6000.png" alt="Two charts over 6,000 updates. Validation loss dips to about 0.07 near 750 updates, stays low until about 2,000, then rises to 0.144. Training loss falls steadily from about 0.8 to near 0.01." width="2042" height="925" loading="lazy">
+        <figcaption><b>The 6,000-update run.</b> Validation loss (left) bottoms out early and then rises. Training loss (right) keeps falling.</figcaption>
+      </figure>
+
+      <div class="hard">
+        <span class="hard-label">What I would change next</span>
+        <p>Save checkpoints more often and choose one by validation loss and by success in simulation, not just the last one. Record more demonstrations with more variety in where the cube and tray start. Measure a success rate over many resets instead of judging from one clip. Then try the policy on the real arm.</p>
+      </div>
+
+      <h2>What I learned</h2>
+
+      <p><strong>A loss curve is not an evaluation.</strong> The first run had a falling loss and a policy that was worse than doing nothing. Comparing against a hold-still baseline made that obvious in one chart.</p>
+
+      <p><strong>Freeze what already works.</strong> With 71 demonstrations there is not enough data to improve a 3-billion-parameter backbone, only to damage it. Training the action expert alone was cheaper, and it was enough for this task.</p>
+
+      <p><strong>Memory is a design constraint.</strong> Batch size, gradient accumulation, precision, and what stays in the gradient graph all had to be chosen around the GPU. Knowing why the backbone's activations were being kept, and that it was safe to detach them, mattered more than a bigger machine.</p>
+
+    </div>
+
+    <aside class="facts">
+      <dl>
+        <dt>Robot</dt>
+        <dd>Pioneer bimanual arm rig (left arm), WATonomous humanoid team</dd>
+        <dt>Task</dt>
+        <dd>"Pick up the cube and place it in the tray"</dd>
+        <dt>Model</dt>
+        <dd>π₀.5 from LeRobot's pi05_base: frozen PaliGemma backbone, trained action expert</dd>
+        <dt>Data</dt>
+        <dd>71 demonstrations, 5,654 frames at 25 fps, three 256 × 256 cameras</dd>
+        <dt>Training</dt>
+        <dd>6,000 updates of 32 samples, AdamW, warmup and cosine decay</dd>
+        <dt>Compute</dt>
+        <dd>One 48 GB cloud GPU</dd>
+        <dt>My part</dt>
+        <dd>Leader-arm recorder, scene and cameras, training and evaluation scripts</dd>
+      </dl>
+      <a class="btn btn-primary" href="https://github.com/WATonomous/pioneer_humanoid/tree/main/src/robot_learning/humanoid_il/pi0.5" target="_blank" rel="noopener">Read the code</a>
+      <a class="btn btn-ghost" href="https://huggingface.co/datasets/notmaxxx/pioneer_vla_pick_place" target="_blank" rel="noopener">Dataset</a>
+      <a class="btn btn-ghost" href="https://huggingface.co/notmaxxx/pi05_pioneer_pick_place_delta" target="_blank" rel="noopener">Checkpoint</a>
+    </aside>
+  </div>
+
+  </div> <!-- /.project-card -->
+
+  <div class="wrap">
+    <div class="next">
+      Next project: <a href="brackey-way.html">The Brackey Way, an autonomous sandwich-assembly robot</a>
+    </div>
+  </div>
+
+</main>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-sig">Max Yuan<small>Mechatronics Engineering · University of Waterloo</small></p>
+    <nav class="footer-links" aria-label="Elsewhere">
+      <a href="mailto:maxyuan081205@gmail.com">Email</a>
+      <a href="https://github.com/NotMax08" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="../resume.pdf" target="_blank" rel="noopener">Résumé</a>
+    </nav>
+    <p class="footer-note">© <span data-year>2026</span> Max Yuan</p>
+  </div>
+</footer>
+
+<button class="btn btn-icon" id="toTop" type="button" aria-label="Back to top"><svg class="i" aria-hidden="true"><use href="#i-arrow-up"/></svg></button>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+</body>
+</html>
