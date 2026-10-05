@@ -1198,7 +1198,7 @@ button.skill:hover,.skill.is-on{color:var(--accent-ink);border-color:var(--accen
   background:var(--surface-2);
 }
 .hard-label{display:block;margin-bottom:.45rem;font-size:.9rem;font-weight:600;color:var(--accent-ink)}
-.hard p:last-child{margin-bottom:0}
+.hard p:last-child,.hard ul:last-child,.hard li:last-child{margin-bottom:0}
 
 .facts{
   position:sticky;
