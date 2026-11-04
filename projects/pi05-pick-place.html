@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#FDF6E3">
 <meta name="color-scheme" content="light">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23CFE3F1'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%231F4E73' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23EEE8D5'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%23C4622F' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <!-- bump ?v= whenever style.css or main.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="../style.css?v=2026-10-21">
+<link rel="stylesheet" href="../style.css?v=2026-11-03">
 <script>document.documentElement.classList.add('js');</script>
-<script src="../main.js?v=2026-10-21" defer></script>
+<script src="../main.js?v=2026-11-03" defer></script>
 </head>
 
 <body class="case-page">
@@ -293,14 +293,6 @@
           <li>Try the policy on the real arm.</li>
         </ul>
       </div>
-
-      <h2>What I learned</h2>
-
-      <ul>
-        <li><strong>A loss curve is not an evaluation.</strong> The first run had a falling loss and a policy that was worse than doing nothing. One chart against a hold-still baseline made that obvious.</li>
-        <li><strong>Freeze what already works.</strong> 71 demonstrations cannot improve a backbone trained on internet-scale data, only damage it. Training the action head alone was enough for this task.</li>
-        <li><strong>Memory is a design constraint.</strong> Batch size, gradient accumulation and precision all had to be chosen around the GPU.</li>
-      </ul>
 
     </div>
 
