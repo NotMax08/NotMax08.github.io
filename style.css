@@ -1,8 +1,9 @@
 /* =========================================================
    Max Yuan · portfolio
    Shared styles for index.html and every project page.
-   A plain one-column personal page on a pale sky-blue ground (#EEF6FC),
-   deep navy text, and every accent drawn from the same sky blue.
+   A plain one-column personal page on a very light cream ground
+   (#FBF8F1), deep navy text, and pale sky blue (#EEF6FC) for tags,
+   panels and highlights.
    One type family: DM Sans; JetBrains Mono only in code.
    ========================================================= */
 
@@ -11,14 +12,14 @@
 :root{
   color-scheme:light;
 
-  --bg:#EEF6FC;
-  --surface:#E6F1FA;
-  --surface-2:#DCEBF7;
-  --tint:#DCEBF7;
+  --bg:#FBF8F1;
+  --surface:#EEF6FC;
+  --surface-2:#E1EEF8;
+  --tint:#E1EEF8;
 
-  --line:#D9E8F3;
-  --line-2:#C6DBEB;
-  --line-3:#A3C1D8;
+  --line:#E2E6E6;
+  --line-2:#D0DCE5;
+  --line-3:#A9C2D6;
 
   --ink:#12324A;
   --ink-2:#3E5A70;
@@ -136,7 +137,7 @@ em{font-style:normal}
 .nav{
   position:sticky;top:0;z-index:100;
   height:var(--nav-h);
-  background:rgba(238,246,252,.94);
+  background:rgba(251,248,241,.94);
   -webkit-backdrop-filter:blur(8px);
   backdrop-filter:blur(8px);
   border-bottom:1px solid transparent;
