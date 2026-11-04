@@ -257,6 +257,86 @@
         <figcaption><b>The first 200 updates.</b> The learning rate ramps up while the gradient norm and the training loss fall quickly.</figcaption>
       </figure>
 
+      <h2 id="detach">Detaching the frozen backbone</h2>
+
+      <p>In π₀.5 the VLM and the action expert run side by side through 18 layers, and in each layer they share one attention step so the action tokens can read the image and prompt tokens. Because of that shared step, PyTorch treats every VLM activation as part of the training graph and keeps it in memory for the backward pass, even though the VLM's weights are frozen.</p>
+
+      <p>None of that is needed. The attention mask stops the image and prompt tokens from looking at the action tokens, so the VLM's outputs never depend on anything being trained. I wrapped LeRobot's layer function to call <code>.detach()</code> on the VLM's output after every layer. The action expert's gradients stay exactly the same, but PyTorch no longer stores the VLM's activations or backpropagates through the 2B-parameter backbone, which saves a lot of GPU memory.</p>
+
+<pre><code>_compute_layer_complete = pi05_modeling.compute_layer_complete
+
+def _compute_layer_frozen_prefix(*args, **kwargs):
+    prefix_out, suffix_out = _compute_layer_complete(*args, **kwargs)
+    return [prefix_out.detach(), suffix_out]
+
+pi05_modeling.compute_layer_complete = _compute_layer_frozen_prefix</code></pre>
+
+      <div class="fsm">
+        <svg viewBox="0 0 840 290" role="img" aria-label="Diagram of the detach trick. The VLM and the action expert each have 18 layers. In every layer the action expert reads keys and values from the VLM, but not the other way round. The VLM's output is detached after every layer, so gradients flow back through the action expert only.">
+          <defs>
+            <marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="t-muted"></path>
+            </marker>
+            <marker id="ahb2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" class="t-learned"></path>
+            </marker>
+          </defs>
+          <g font-family="DM Sans, sans-serif">
+
+            <!-- row labels -->
+            <text x="4" y="62" font-size="18" font-weight="600" class="t-ink">VLM</text>
+            <text x="4" y="84" font-size="14.5" class="t-muted">image + prompt tokens</text>
+            <text x="4" y="198" font-size="18" font-weight="600" class="t-ink">Action expert</text>
+            <text x="4" y="220" font-size="14.5" class="t-muted">action tokens</text>
+
+            <!-- VLM layers: frozen, output detached after each one -->
+            <rect x="170" y="40" width="130" height="52" rx="10" class="st-done" stroke-width="1.5" stroke-dasharray="6 4"></rect>
+            <text x="235" y="72" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 1</text>
+            <rect x="340" y="40" width="130" height="52" rx="10" class="st-done" stroke-width="1.5" stroke-dasharray="6 4"></rect>
+            <text x="405" y="72" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 2</text>
+            <text x="575" y="71" text-anchor="middle" font-size="18" class="t-muted">…</text>
+            <rect x="680" y="40" width="130" height="52" rx="10" class="st-done" stroke-width="1.5" stroke-dasharray="6 4"></rect>
+            <text x="745" y="72" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 18</text>
+
+            <line x1="300" y1="66" x2="336" y2="66" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <line x1="470" y1="66" x2="540" y2="66" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <line x1="610" y1="66" x2="676" y2="66" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <text x="318" y="28" text-anchor="middle" font-size="14" font-weight="600" class="t-learned">detach</text>
+            <text x="505" y="28" text-anchor="middle" font-size="14" font-weight="600" class="t-learned">detach</text>
+            <text x="643" y="28" text-anchor="middle" font-size="14" font-weight="600" class="t-learned">detach</text>
+
+            <!-- shared attention: the expert reads the VLM, never the other way -->
+            <line x1="235" y1="92" x2="235" y2="172" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <line x1="405" y1="92" x2="405" y2="172" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <line x1="745" y1="92" x2="745" y2="172" class="ln" stroke-width="1.6" marker-end="url(#ah2)"></line>
+            <text x="243" y="137" font-size="14" class="t-muted">keys, values</text>
+            <text x="413" y="137" font-size="14" class="t-muted">keys, values</text>
+            <text x="753" y="137" font-size="14" class="t-muted">keys, values</text>
+
+            <!-- action expert layers: trained -->
+            <rect x="170" y="176" width="130" height="52" rx="10" class="st-learned" stroke-width="1.5"></rect>
+            <text x="235" y="208" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 1</text>
+            <rect x="340" y="176" width="130" height="52" rx="10" class="st-learned" stroke-width="1.5"></rect>
+            <text x="405" y="208" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 2</text>
+            <text x="575" y="207" text-anchor="middle" font-size="18" class="t-muted">…</text>
+            <rect x="680" y="176" width="130" height="52" rx="10" class="st-learned" stroke-width="1.5"></rect>
+            <text x="745" y="208" text-anchor="middle" font-size="17" font-weight="600" class="t-ink">Layer 18</text>
+
+            <line x1="300" y1="202" x2="336" y2="202" class="ln-learned" stroke-width="1.8" marker-end="url(#ahb2)"></line>
+            <line x1="470" y1="202" x2="540" y2="202" class="ln-learned" stroke-width="1.8" marker-end="url(#ahb2)"></line>
+            <line x1="610" y1="202" x2="676" y2="202" class="ln-learned" stroke-width="1.8" marker-end="url(#ahb2)"></line>
+
+            <!-- backward pass -->
+            <line x1="810" y1="252" x2="174" y2="252" class="ln-learned" stroke-width="1.6" stroke-dasharray="5 4" marker-end="url(#ahb2)"></line>
+            <text x="490" y="280" text-anchor="middle" font-size="15" class="t-learned">gradients flow back through the action expert only</text>
+          </g>
+        </svg>
+        <div class="fsm-legend">
+          <span><i class="lg-frozen"></i>frozen: activations not stored</span>
+          <span><i class="lg-learned"></i>trained: activations kept for backprop</span>
+        </div>
+      </div>
+
       <h2>The first run was underfit</h2>
 
       <ul>
