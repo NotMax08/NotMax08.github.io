@@ -279,6 +279,13 @@ button.skill:hover{border-color:var(--line-3);color:var(--ink)}
 .links a,.links .plain-link{color:var(--ink-2);font-size:.95rem;text-align:left}
 .links a:hover,.links .plain-link:hover{color:var(--link)}
 
+/* ---------- visitor map ---------- */
+
+.sec[hidden]{display:none}
+.visitor-map{border:1px solid var(--line-2);border-radius:4px;overflow:hidden;background:var(--surface)}
+.visitor-map:empty,.visitor-map:has(> script:only-child){min-height:120px}
+.visitor-map #mapmyvisitors-widget:hover{text-decoration:none}
+
 /* ---------- footer, toast ---------- */
 
 .site-footer{margin-top:clamp(2rem,6vw,3rem)}

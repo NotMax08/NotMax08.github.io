@@ -99,6 +99,30 @@
     chip.addEventListener('click', show);
   });
 
+  /* ---------- visitor map (MapMyVisitors), loaded when scrolled near ---------- */
+
+  const visitors = $('#visitors');
+  const mmvCode = visitors?.dataset.mmv.trim();
+  if (visitors && mmvCode) {
+    visitors.hidden = false;
+    const loadMap = () => {
+      const s = document.createElement('script');
+      s.id = 'mapmyvisitors';   // the widget finds itself by this id and draws right after it
+      // co = ocean, cl = land, ct = text; w=a fills the column
+      s.src = 'https://mapmyvisitors.com/map.js?d=' + encodeURIComponent(mmvCode) +
+        '&co=eef6fc&cl=a9c2d6&ct=12324a&w=a';
+      $('.visitor-map', visitors).append(s);
+    };
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) { io.disconnect(); loadMap(); }
+      }, { rootMargin: '400px 0px' });
+      io.observe(visitors);
+    } else {
+      loadMap();
+    }
+  }
+
   $$('[data-year]').forEach(el => { el.textContent = String(new Date().getFullYear()); });
 
   // Old links from the previous site layout land in the right place.
