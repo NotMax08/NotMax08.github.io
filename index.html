@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Max Yuan · Robotics</title>
 <meta name="description" content="Max Yuan, Mechatronics Engineering student at the University of Waterloo. Fine-tuning π₀.5 for robot manipulation on the WATonomous humanoid team, quadruped locomotion with PPO in Isaac Lab, and ROS2 Nav2 autonomy.">
-<meta name="theme-color" content="#FBF8F1">
+<meta name="theme-color" content="#EEC9AE">
 <meta name="color-scheme" content="light">
 <meta property="og:title" content="Max Yuan · Robotics">
 <meta property="og:description" content="π₀.5 fine-tuning for manipulation on the WATonomous humanoid team, quadruped locomotion with PPO, and ROS2 autonomy. 1st place at the BOTS hackathon.">
@@ -13,19 +13,55 @@
 <meta property="og:url" content="https://notmax08.github.io/">
 <meta property="og:image" content="https://notmax08.github.io/assets/photos/bracket-toaster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23CFE5F6'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%231D659C' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23F4CBA9'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%23A64F28' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&display=swap" rel="stylesheet">
-<!-- bump ?v= whenever style.css or main.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-11-09">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
+<!-- bump ?v= whenever style.css, main.js, transition.js or the world's files change: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
+<link rel="stylesheet" href="style.css?v=2026-11-14b">
+<link rel="stylesheet" href="playground.css?v=2026-11-14b">
 <script>document.documentElement.classList.add('js');</script>
-<script src="main.js?v=2026-11-09" defer></script>
+<script src="main.js?v=2026-11-14b" defer></script>
+<script src="transition.js?v=2026-11-14b" defer></script>
+<!-- the 3D world at the top of the page -->
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
+<script type="module" src="playground.js?v=2026-11-14b"></script>
 </head>
 
 <body class="home">
 
 <a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ========== the world ========== -->
+<section class="world" data-mode="home" aria-label="Robot world">
+  <canvas class="w-canvas" id="world" aria-label="A painted 3D world with robots at project stations. The project list is further down the page."></canvas>
+  <div class="w-labels" id="labels" aria-hidden="true"></div>
+
+  <p class="w-hud w-tl"><a class="w-name" href="#about">Max Yuan</a><span>robot learning lab</span></p>
+  <nav class="w-hud w-tr" aria-label="Site">
+    <a href="#projects">projects ↓</a>
+    <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
+    <a href="playground.html">full screen</a>
+  </nav>
+  <p class="w-hud w-bl" id="w-weather">Waterloo, ON</p>
+  <p class="w-hud w-br" id="w-clock"></p>
+
+  <section class="w-card" id="card" aria-live="polite" hidden>
+    <button class="w-card-close" type="button" aria-label="Close">×</button>
+    <p class="w-card-robot"></p>
+    <h2 class="w-card-title"></h2>
+    <p class="w-card-line"></p>
+    <ul class="w-card-tags"></ul>
+    <a class="w-card-go" href="#">Imagine it →</a>
+  </section>
+
+  <div class="w-dock">
+    <p class="w-hint" id="hint">Click a station or the floor to drive the BracketBot. W A S D work too.</p>
+    <nav class="w-stations" id="stations" aria-label="Project stations"></nav>
+  </div>
+
+  <p class="w-status" id="status" role="status">Loading robots…</p>
+</section>
 
 <main id="main" tabindex="-1">
 <div class="col">

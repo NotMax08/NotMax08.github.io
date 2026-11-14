@@ -1,16 +1,25 @@
 /* =========================================================
-   Max Yuan · robot playground
-   A small world of robot stations, one per project. You drive a
-   BracketBot (click the floor, click a station, or use the arrow
-   keys); when it parks at a station, that station's robot does a
-   short task from the project and the project card opens.
+   Max Yuan · the robot world
+   A small world of robot stations, one per project, painted at
+   golden hour. You drive a BracketBot (click the floor, click a
+   station, or use the keys); when it parks at a station, that
+   station's robot does a short task from the project and the
+   project card opens. Opening a project makes the world imagine
+   the future first (see transition.js).
+   It runs full screen on playground.html and as the opening view
+   of the home page (data-mode="home" on the host element).
    Robots load from their real URDFs; motion is scripted with IK.
    ========================================================= */
 
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
-import { loadURDF, makeArm } from './urdf.js?v=2026-11-14';   // bump with playground.html's ?v=
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { loadURDF, makeArm } from './urdf.js?v=2026-11-14b';   // bump with the pages' ?v=
 
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 const $ = sel => document.querySelector(sel);
@@ -21,18 +30,65 @@ const ease = t => 0.5 - 0.5 * Math.cos(Math.PI * clamp(t, 0, 1));
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const DOWN = V(0, -1, 0);
 const damp = (a, b, k, dt) => lerp(a, b, 1 - Math.exp(-k * dt));
+const params = new URLSearchParams(location.search);
 
-// Dream Labs playground palette
+const canvas = $('#world');
+const host = canvas.parentElement;
+const EMBED = host.dataset.mode === 'home';      // on the home page: the page scrolls past it
+
+// props: warm pastels that sit in golden-hour light
 const C = {
-  bg: '#fbfaf7', floor: '#f3efe6', top: '#fbf8f2', ink: '#1c1c1c',
-  sky: '#8bc7fc', skyTint: '#d6ebfd', skyDeep: '#3b86d1',
-  grass: '#7de290', grassTint: '#d3f5da',
-  lavender: '#af98ef', lavTint: '#e3dafa',
-  sunshine: '#ffe885', sunTint: '#fdf3c4',
-  sherbert: '#fc9ea0', sherbTint: '#ffd5d6',
-  creamsicle: '#ffb06c', creamTint: '#ffe3cb',
-  butter: '#f7cb7e', clayPeach: '#f8d3a9',
+  top: '#f8f1e7', ink: '#1c1c1c',
+  sky: '#9cc6e6', skyTint: '#d9e8f2', skyDeep: '#3b86d1',
+  grass: '#93cf86', grassTint: '#d6ecc9',
+  lavender: '#b7a5e0', lavTint: '#e6ddf1',
+  sunshine: '#f4d978', sunTint: '#f7ebc0',
+  sherbert: '#f19c91', sherbTint: '#f8d6cd',
+  creamsicle: '#f3a568', creamTint: '#f7dcc4',
+  butter: '#f2c47a', clayPeach: '#f4cfa6',
+  lime: '#c2f04f',
 };
+
+/* ---------------------------------------------------------
+   The light follows Waterloo: day, golden hour or night,
+   dimmer when it's overcast there (Open-Meteo, no key)
+   --------------------------------------------------------- */
+
+const LOOKS = {
+  day: {
+    sky: ['#e7e3ea', '#f0ddd2', '#eec9ae'], floor: '#e8cbb3',
+    sun: '#ffe6cc', sunI: 2.3, sunPos: [5, 6.5, 2.5], hemi: ['#f3eef4', '#d6a887', 1.05], env: 0.4,
+    patch: '#fff1c8', patchA: 0.62, exposure: 1.0,
+  },
+  golden: {
+    sky: ['#e4dce6', '#f1cdb6', '#eea77f'], floor: '#e6b998',
+    sun: '#ffc995', sunI: 2.7, sunPos: [6.5, 3.4, 2.2], hemi: ['#efe1e6', '#c98763', 0.9], env: 0.35,
+    patch: '#ffdb98', patchA: 0.75, exposure: 1.0,
+  },
+  night: {
+    sky: ['#191726', '#272338', '#3d3350'], floor: '#4b4357',
+    sun: '#a8b6ea', sunI: 0.7, sunPos: [-4, 7, 3], hemi: ['#5d5b85', '#2a2433', 0.7], env: 0.22,
+    patch: '#b8c4ff', patchA: 0.16, exposure: 1.05,
+  },
+};
+const WATERLOO = { lat: 43.4643, lon: -80.5204, tz: 'America/Toronto' };
+const lookNow = { name: 'day', overcast: 0, weather: null };
+
+function hourIn(tz) {
+  const parts = new Intl.DateTimeFormat('en-CA', { timeZone: tz, hour: 'numeric', minute: 'numeric', hour12: false }).formatToParts(new Date());
+  const h = Number(parts.find(p => p.type === 'hour').value) % 24;
+  const m = Number(parts.find(p => p.type === 'minute').value);
+  return h + m / 60;
+}
+function pickLook(sunrise, sunset) {
+  if (params.get('light') && LOOKS[params.get('light')]) return params.get('light');
+  const h = hourIn(WATERLOO.tz);
+  const rise = sunrise ?? 7;
+  const set = sunset ?? 17.5;
+  if (h < rise - 0.5 || h > set + 0.6) return 'night';
+  if (Math.abs(h - rise) < 1.3 || Math.abs(h - set) < 1.5) return 'golden';
+  return 'day';
+}
 
 const status = $('#status');
 const setStatus = (text, done = false) => {
@@ -44,17 +100,16 @@ const setStatus = (text, done = false) => {
    Renderer, scene, light
    --------------------------------------------------------- */
 
-const canvas = $('#world');
 let renderer;
 try {
   renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
 } catch (e) {
-  setStatus('This browser could not start WebGL. The home page lists every project.');
-  status.innerHTML = 'This browser could not start WebGL. The <a href="index.html">home page</a> lists every project.';
+  status.innerHTML = 'This browser could not start WebGL. <a href="index.html#projects">Every project is listed here.</a>';
   throw e;
 }
-const isSmall = () => window.innerWidth < 640;
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall() ? 1.75 : 2));
+const isSmall = () => host.clientWidth < 640;
+let pixelRatio = Math.min(window.devicePixelRatio, isSmall() ? 1.5 : 1.75);
+renderer.setPixelRatio(pixelRatio);
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.toneMappingExposure = 1.0;
@@ -62,25 +117,114 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(C.bg);
-scene.fog = new THREE.Fog(C.bg, 13, 30);
+scene.fog = new THREE.Fog('#eec9ae', 13, 30);
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-scene.environmentIntensity = 0.45;
+scene.environmentIntensity = 0.4;
 
-scene.add(new THREE.HemisphereLight('#ffffff', '#ece6da', 1.0));
-const sun = new THREE.DirectionalLight('#ffffff', 2.6);
-sun.position.set(3.5, 8, 5);
+const hemi = new THREE.HemisphereLight('#ffffff', '#d6a887', 1.0);
+scene.add(hemi);
+const sun = new THREE.DirectionalLight('#ffffff', 2.4);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
-Object.assign(sun.shadow.camera, { left: -6, right: 6, top: 6, bottom: -6, near: 1, far: 20 });
+Object.assign(sun.shadow.camera, { left: -6.5, right: 6.5, top: 6.5, bottom: -6.5, near: 0.5, far: 24 });
 sun.shadow.bias = -0.0004;
 sun.shadow.normalBias = 0.02;
-sun.shadow.radius = 4;
+sun.shadow.radius = 5;
 sun.shadow.blurSamples = 12;
-scene.add(sun);
+scene.add(sun, sun.target);
 
 const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 60);
+
+// the sky: a gradient behind everything, in screen space like a painted backdrop
+const skyCanvas = document.createElement('canvas');
+skyCanvas.width = 4;
+skyCanvas.height = 256;
+const skyTex = new THREE.CanvasTexture(skyCanvas);
+skyTex.colorSpace = THREE.SRGBColorSpace;
+scene.background = skyTex;
+function paintSky(stops) {
+  const g = skyCanvas.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 256);
+  grad.addColorStop(0, stops[0]);
+  grad.addColorStop(0.38, stops[1]);
+  grad.addColorStop(0.72, stops[2]);
+  grad.addColorStop(1, stops[2]);
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 4, 256);
+  skyTex.needsUpdate = true;
+}
+
+/* ---------- the painted look: Kuwahara brush strokes, and the "imagining" shift ---------- */
+
+const PaintShader = {
+  uniforms: {
+    tDiffuse: { value: null },
+    res: { value: new THREE.Vector2(1, 1) },
+    spread: { value: 1.25 },
+    paint: { value: 1 },
+    imagine: { value: 0 },
+    time: { value: 0 },
+  },
+  vertexShader: /* glsl */`
+    varying vec2 vUv;
+    void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`,
+  fragmentShader: /* glsl */`
+    uniform sampler2D tDiffuse;
+    uniform vec2 res;
+    uniform float spread, paint, imagine, time;
+    varying vec2 vUv;
+    vec3 kuwahara(vec2 uv) {
+      vec2 px = spread / res;
+      vec3 m0 = vec3(0.0), m1 = vec3(0.0), m2 = vec3(0.0), m3 = vec3(0.0);
+      vec3 s0 = vec3(0.0), s1 = vec3(0.0), s2 = vec3(0.0), s3 = vec3(0.0);
+      for (int j = 0; j <= 3; j++) {
+        for (int i = 0; i <= 3; i++) {
+          vec2 o = vec2(float(i), float(j)) * px;
+          vec3 c;
+          c = texture2D(tDiffuse, uv + vec2(-o.x, -o.y)).rgb; m0 += c; s0 += c * c;
+          c = texture2D(tDiffuse, uv + vec2( o.x, -o.y)).rgb; m1 += c; s1 += c * c;
+          c = texture2D(tDiffuse, uv + vec2(-o.x,  o.y)).rgb; m2 += c; s2 += c * c;
+          c = texture2D(tDiffuse, uv + vec2( o.x,  o.y)).rgb; m3 += c; s3 += c * c;
+        }
+      }
+      m0 /= 16.0; m1 /= 16.0; m2 /= 16.0; m3 /= 16.0;
+      float v0 = dot(s0 / 16.0 - m0 * m0, vec3(1.0));
+      float v1 = dot(s1 / 16.0 - m1 * m1, vec3(1.0));
+      float v2 = dot(s2 / 16.0 - m2 * m2, vec3(1.0));
+      float v3 = dot(s3 / 16.0 - m3 * m3, vec3(1.0));
+      vec3 m = m0; float v = v0;
+      if (v1 < v) { v = v1; m = m1; }
+      if (v2 < v) { v = v2; m = m2; }
+      if (v3 < v) { v = v3; m = m3; }
+      return m;
+    }
+    void main() {
+      vec3 base = texture2D(tDiffuse, vUv).rgb;
+      vec3 col = paint > 0.5 ? kuwahara(vUv) : base;
+      col *= vec3(1.025, 1.0, 0.965);                       // a warm grade
+      if (imagine > 0.001) {
+        // the world turns into the model's latent picture of it: blocky, lime on black, scanned
+        float blk = mix(1.0, 16.0, imagine * imagine);
+        vec2 b = blk / res;
+        vec2 uv2 = (floor(vUv / b) + 0.5) * b;
+        vec3 c2 = texture2D(tDiffuse, uv2).rgb;
+        float l = dot(c2, vec3(0.3, 0.59, 0.11));
+        vec3 latent = mix(vec3(0.004, 0.006, 0.004), vec3(0.54, 0.87, 0.08), smoothstep(0.12, 0.85, l));
+        col = mix(col, latent, smoothstep(0.2, 1.0, imagine));
+        col *= 1.0 - imagine * 0.35 * step(0.5, fract(gl_FragCoord.y * 0.5));
+        col *= 1.0 - 0.55 * imagine * imagine;
+      }
+      gl_FragColor = vec4(col, 1.0);
+    }`,
+};
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+const paintPass = new ShaderPass(PaintShader);
+composer.addPass(paintPass);
+composer.addPass(new OutputPass());
+const PAINT = paintPass.uniforms;
+let usePost = true;
 
 /* ---------------------------------------------------------
    Materials and small builders
@@ -91,12 +235,12 @@ const cached = (key, make) => {
   if (!matCache.has(key)) matCache.set(key, make());
   return matCache.get(key);
 };
-// glossy toy plastic, like the Dream Labs robots and props
+// soft toy plastic: a little gloss, mostly matte so the paint filter reads
 const robotMat = hex => cached(`r${hex}`, () => new THREE.MeshPhysicalMaterial({
-  color: hex, roughness: 0.45, metalness: 0, clearcoat: 0.3, clearcoatRoughness: 0.3,
+  color: hex, roughness: 0.55, metalness: 0, clearcoat: 0.2, clearcoatRoughness: 0.4,
 }));
 const propMat = hex => cached(`p${hex}`, () => new THREE.MeshPhysicalMaterial({
-  color: hex, roughness: 0.38, metalness: 0, clearcoat: 0.5, clearcoatRoughness: 0.2,
+  color: hex, roughness: 0.6, metalness: 0, clearcoat: 0.25, clearcoatRoughness: 0.4,
 }));
 const matte = hex => cached(`m${hex}`, () => new THREE.MeshStandardMaterial({ color: hex, roughness: 0.95, metalness: 0 }));
 
@@ -124,10 +268,11 @@ function roundedRect(w, d, r) {
   s.quadraticCurveTo(x, y, x + r, y);
   return s;
 }
+// a faint rug under each station, half way between its colour and the floor
 function rug(w, d, color, r = 0.16) {
   const g = new THREE.ShapeGeometry(roundedRect(w, d, r), 8);
   g.rotateX(-Math.PI / 2);
-  const m = mesh(g, matte(color), { shadow: false });
+  const m = mesh(g, new THREE.MeshStandardMaterial({ color, roughness: 1, transparent: true, opacity: 0.45, depthWrite: false }), { shadow: false });
   m.position.y = 0.002;
   return m;
 }
@@ -143,17 +288,84 @@ function counter(w, d, h, color) {
 }
 
 /* ---------------------------------------------------------
-   Floor
+   Floor, and window light falling across it
    --------------------------------------------------------- */
 
-const floor = mesh(new THREE.CircleGeometry(40, 96), matte(C.floor), { shadow: false });
+const floorMat = new THREE.MeshStandardMaterial({ color: '#e8cbb3', roughness: 1, metalness: 0 });
+const floor = mesh(new THREE.CircleGeometry(40, 96), floorMat, { shadow: false });
 floor.rotation.x = -Math.PI / 2;
 scene.add(floor);
-// a pale plaza in the middle, where the BracketBot starts
-const plaza = mesh(new THREE.CircleGeometry(1.15, 72), matte('#f7f3ea'), { shadow: false });
+// a slightly paler plaza in the middle, where the BracketBot starts
+const plazaMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 1, transparent: true, opacity: 0.16, depthWrite: false });
+const plaza = mesh(new THREE.CircleGeometry(1.15, 72), plazaMat, { shadow: false });
 plaza.rotation.x = -Math.PI / 2;
 plaza.position.y = 0.001;
 scene.add(plaza);
+
+// tall window panes, slanted by a low sun, drawn soft and laid on the floor
+function windowLight() {
+  const cv = document.createElement('canvas');
+  cv.width = 1024;
+  cv.height = 512;
+  const g = cv.getContext('2d');
+  g.filter = 'blur(7px)';
+  g.fillStyle = '#fff';
+  const panes = 7;
+  for (let i = 0; i < panes; i += 1) {
+    for (let row = 0; row < 2; row += 1) {
+      const x = 70 + i * 128;
+      const y = 60 + row * 210;
+      const w = 104;
+      const h = 180;
+      const skew = 70;
+      g.beginPath();
+      g.moveTo(x + skew, y);
+      g.lineTo(x + w + skew, y);
+      g.lineTo(x + w, y + h);
+      g.lineTo(x, y + h);
+      g.closePath();
+      g.globalAlpha = 0.75 + 0.25 * Math.sin(i * 1.7 + row);
+      g.fill();
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  const mat = new THREE.MeshBasicMaterial({
+    map: tex, color: '#fff3d1', transparent: true, opacity: 0.5,
+    blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(10.5, 5.2), mat);
+  m.rotation.x = -Math.PI / 2;
+  m.rotation.z = 0.32;
+  m.position.set(-0.4, 0.004, 0.2);
+  m.renderOrder = 1;
+  scene.add(m);
+  return m;
+}
+const patches = windowLight();
+
+function applyLook(name, overcast = 0) {
+  const L = LOOKS[name];
+  lookNow.name = name;
+  lookNow.overcast = overcast;
+  const grey = c => new THREE.Color(c).lerp(new THREE.Color('#d2c9c6'), overcast * 0.22);
+  paintSky(L.sky.map(c => `#${grey(c).getHexString()}`));
+  scene.fog.color.copy(grey(L.sky[2]));
+  floorMat.color.set(grey(L.floor));
+  sun.color.set(L.sun);
+  sun.intensity = L.sunI * (1 - 0.3 * overcast);
+  sun.position.set(...L.sunPos);
+  hemi.color.set(L.hemi[0]);
+  hemi.groundColor.set(L.hemi[1]);
+  hemi.intensity = L.hemi[2] * (1 + 0.2 * overcast);
+  scene.environmentIntensity = L.env;
+  patches.material.color.set(L.patch);
+  patches.material.opacity = L.patchA * (1 - 0.35 * overcast);
+  renderer.toneMappingExposure = L.exposure;
+  plazaMat.opacity = name === 'night' ? 0.06 : 0.16;
+  host.classList.toggle('is-night', name === 'night');
+}
+applyLook(pickLook());
 
 /* ---------------------------------------------------------
    Tweens: a tiny promise-based timeline, advanced each frame
@@ -859,6 +1071,7 @@ function buildMaze(st) {
   const { dist, prev } = bfs(start);
   const route = [goal];
   while (route[0][0] !== start[0] || route[0][1] !== start[1]) route.unshift(prev.get(idx(...route[0])));
+  st.futurePath = route.map(([i, j]) => V(cx(i), Y + 0.05, cz(j)));     // what "imagining" this station traces
   const maxD = Math.max(...dist.values());
 
   // the planned path, as dots
@@ -1106,6 +1319,7 @@ const inGrid = (i, j) => i >= 0 && j >= 0 && i < GRID.n && j < GRID.n;
 
 function blockedAt(x, z, pad = BOT_R) {
   if (Math.hypot(x, z) > WORLD_R) return true;
+  if (PROP_OBSTACLES.some(o => Math.hypot(o.x - x, o.z - z) < o.r + pad)) return true;
   const p = V();
   for (const st of STATIONS) {
     p.set(x, 0, z);
@@ -1387,16 +1601,19 @@ function stepBot(dt) {
    --------------------------------------------------------- */
 
 const card = $('#card');
+let shown = null;
 function showCard(st) {
+  shown = st;
   card.style.setProperty('--tint', st.tint);
-  card.querySelector('.card-robot').textContent = st.robot;
-  card.querySelector('.card-title').textContent = st.title;
-  card.querySelector('.card-line').textContent = st.line;
-  const tags = card.querySelector('.card-tags');
+  card.querySelector('.w-card-robot').textContent = st.robot;
+  card.querySelector('.w-card-title').textContent = st.title;
+  card.querySelector('.w-card-line').textContent = st.line;
+  const tags = card.querySelector('.w-card-tags');
   tags.replaceChildren(...st.tags.map(t => Object.assign(document.createElement('li'), { textContent: t })));
-  const go = card.querySelector('.card-go');
+  const go = card.querySelector('.w-card-go');
   go.href = st.href;
-  go.textContent = st.external ? 'Open on Devpost ↗' : 'Open project →';
+  go.textContent = st.external ? 'Open on Devpost ↗' : 'Imagine it →';
+  go.title = st.external ? '' : 'Opens the project page';
   if (st.external) { go.target = '_blank'; go.rel = 'noopener'; } else { go.removeAttribute('target'); go.removeAttribute('rel'); }
   card.hidden = false;
 }
@@ -1419,9 +1636,14 @@ function undock() {
   setCurrent(null);
   camFocus = null;
 }
-card.querySelector('.card-close').addEventListener('click', () => {
+card.querySelector('.w-card-close').addEventListener('click', () => {
   card.hidden = true;
   camFocus = null;
+});
+card.querySelector('.w-card-go').addEventListener('click', e => {
+  if (!shown || shown.external || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+  e.preventDefault();
+  imagineFromWorld(shown);
 });
 
 /* ---------------------------------------------------------
@@ -1432,7 +1654,7 @@ const labelsEl = $('#labels');
 const stationsEl = $('#stations');
 STATIONS.forEach(st => {
   const label = document.createElement('button');
-  label.className = 'label';
+  label.className = 'w-label';
   label.type = 'button';
   label.tabIndex = -1;
   label.textContent = st.title;
@@ -1458,7 +1680,7 @@ function setCurrent(st) {
 const bubbles = [];
 function say(text, where, dur) {
   const el = document.createElement('div');
-  el.className = 'bubble';
+  el.className = 'w-bubble';
   el.textContent = text;
   labelsEl.append(el);
   const b = { el, where, life: dur };
@@ -1466,19 +1688,20 @@ function say(text, where, dur) {
   requestAnimationFrame(() => el.classList.add('is-on'));
 }
 
+// labels live in a layer the size of the world's host, so positions are host pixels
 const proj = V();
 function placeOverlay(el, world, dy = 0) {
   proj.copy(world).project(camera);
   const behind = proj.z > 1;
-  const x = (proj.x * 0.5 + 0.5) * window.innerWidth;
-  const y = (-proj.y * 0.5 + 0.5) * window.innerHeight + dy;
+  const x = (proj.x * 0.5 + 0.5) * host.clientWidth;
+  const y = (-proj.y * 0.5 + 0.5) * host.clientHeight + dy;
   el.style.transform = `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(-50%, -100%)`;
   return !behind;
 }
 function stepOverlays(dt) {
   STATIONS.forEach(st => {
     const ok = placeOverlay(st.label, st.at(0, st.anchorY, 0));
-    const far = !ok || !!camFocus;      // the card names the station in focus
+    const far = !ok || !!camFocus || imagining;      // the card names the station in focus
     st.label.classList.toggle('is-far', far);
   });
   for (let i = bubbles.length - 1; i >= 0; i -= 1) {
@@ -1494,7 +1717,7 @@ function stepOverlays(dt) {
 }
 
 const hint = $('#hint');
-function hideHint() { hint.classList.add('is-gone'); }
+function hideHint() { hint?.classList.add('is-gone'); }
 
 /* ---------------------------------------------------------
    Camera: an overview that follows the robot a little, and
@@ -1504,27 +1727,29 @@ function hideHint() { hint.classList.add('is-gone'); }
 let camFocus = null;
 const cam = { target: V(0, 0.3, 0.2), r: 10, el: 0.62, az: 0 };
 const user = { az: 0, el: 0, zoom: 1 };
+const aspectNow = () => host.clientWidth / Math.max(1, host.clientHeight);
 
 function overview() {
-  const aspect = window.innerWidth / window.innerHeight;
+  const aspect = aspectNow();
   if (aspect < 0.9) {
     // a phone held upright can't fit the whole ring: look down from higher, follow the robot more,
     // and leave the edges to dragging and the station buttons
     return { target: V(bot.x * 0.55, 0.2, 0.5 + bot.z * 0.4), r: 15.5, el: 0.92, az: 0 };
   }
   const fit = aspect < 1.2 ? 1.2 / aspect : 1;
-  return { target: V(bot.x * 0.2, 0.2, 0.75 + bot.z * 0.15), r: 12.6 * Math.min(fit, 1.6), el: 0.62, az: 0 };
+  return { target: V(bot.x * 0.2, 0.0, 0.35 + bot.z * 0.15), r: 13.4 * Math.min(fit, 1.6), el: 0.47, az: 0 };
 }
 function focusView(st) {
   const fwd = V(0, 0, 1).applyQuaternion(st.group.quaternion);
   const az = Math.atan2(fwd.x, fwd.z) + (st.camTurn ?? 0.95);
-  const aspect = window.innerWidth / window.innerHeight;
+  const aspect = aspectNow();
   const fit = aspect < 1 ? 1.35 / aspect : 1;
   const mid = st.at(0, 0.45, st.dock * 0.2);
   return { target: mid, r: (st.camR ?? 2.9) * Math.min(fit, 2.2), el: st.camEl ?? 0.55, az };
 }
+let camOverride = null;
 function stepCamera(dt) {
-  const want = camFocus ? focusView(camFocus) : overview();
+  const want = camOverride || (camFocus ? focusView(camFocus) : overview());
   const k = reduceMotion ? 20 : 2.4;
   cam.target.x = damp(cam.target.x, want.target.x, k, dt);
   cam.target.y = damp(cam.target.y, want.target.y, k, dt);
@@ -1542,6 +1767,381 @@ function stepCamera(dt) {
   // haze only the floor beyond the world, however far the camera is
   scene.fog.near = cam.r + 4;
   scene.fog.far = cam.r + 20;
+}
+
+/* ---------------------------------------------------------
+   Imagining the future: before a project opens, the world
+   samples rollouts from the robot's tool, shows where each one
+   ends up, then turns into the model's latent picture and hands
+   over to the "imagining the future" screen (transition.js)
+   --------------------------------------------------------- */
+
+// where each station's action is heading, in station coordinates
+const GOALS = {
+  pi05: [0.17, 0.47, 0.1],
+  rico: [0.02, 0.62, 0.17],
+  ftc: [0.2, 0.62, 0.06],
+  brackey: [-0.03, 0.56, 0.08],
+};
+let imagining = false;
+let futureGroup = null;
+const futureMat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, fog: false, blending: THREE.AdditiveBlending });
+
+function futuresFor(st) {
+  let chosen;
+  if (st.futurePath) {
+    chosen = st.futurePath.map(p => st.group.localToWorld(p.clone()));
+  } else if (st.id === 'quad') {
+    chosen = Array.from({ length: 25 }, (_, i) => {
+      const a = (i / 24) * Math.PI * 2;
+      return st.at(Math.cos(a) * 0.42, 0.32, -Math.sin(a) * 0.42);
+    });
+  } else {
+    const tool = st.id === 'brackey' ? bot.armR?.tcp : st.arms?.[0]?.tcp;
+    const from = tool ? tool.getWorldPosition(V())
+      : st.id === 'studybuddy' ? st.at(0.06, 0.54, -0.04) : bot.headWorld(V());
+    const to = GOALS[st.id] ? st.at(...GOALS[st.id])
+      : st.id === 'studybuddy' ? bot.headWorld(V()) : st.at(0, st.anchorY * 0.6, 0);
+    const mid = from.clone().lerp(to, 0.5).add(V(0, 0.12 + from.distanceTo(to) * 0.3, 0));
+    chosen = [from, mid, to];
+  }
+  const base = new THREE.CatmullRomCurve3(chosen).getPoints(60);
+  const len = new THREE.CatmullRomCurve3(chosen).getLength();
+  const out = [base];
+  for (let k = 1; k < 9; k += 1) {
+    const ph = [Math.random() * 6, Math.random() * 6, Math.random() * 6];
+    const fr = [1 + Math.random() * 2, 1 + Math.random() * 2, 1 + Math.random() * 2];
+    const amp = (0.05 + Math.random() * 0.12) * Math.max(0.6, len);
+    out.push(base.map((p, i) => {
+      const t = i / (base.length - 1);
+      const g = Math.sin(Math.PI * Math.min(1, t * 1.3)) * 0.6 + t * 0.7;   // rollouts drift apart, most at the end
+      return p.clone().add(V(
+        Math.sin(t * fr[0] * 3 + ph[0]) * amp * g,
+        Math.sin(t * fr[1] * 3 + ph[1]) * amp * g * 0.6,
+        Math.sin(t * fr[2] * 3 + ph[2]) * amp * g,
+      ));
+    }));
+  }
+  return out;
+}
+
+async function imagineFromWorld(st) {
+  if (imagining) return;
+  if (reduceMotion || !window.wamImagine) {
+    if (window.wamImagine) window.wamImagine(st.href); else location.href = st.href;
+    return;
+  }
+  imagining = true;
+  host.classList.add('is-imagining');
+  hideHint();
+  card.hidden = true;
+  futureGroup = new THREE.Group();
+  scene.add(futureGroup);
+  const paths = futuresFor(st);
+  // each rollout is a thin bright core in a soft halo; the chosen one is the boldest
+  const tubes = [];
+  paths.forEach((pts, i) => {
+    const curve = new THREE.CatmullRomCurve3(pts);
+    [[i === 0 ? 0.012 : 0.0065, i === 0 ? 1 : 0.7], [i === 0 ? 0.032 : 0.018, i === 0 ? 0.28 : 0.14]].forEach(([r, a], layer) => {
+      const geo = new THREE.TubeGeometry(curve, 90, r, 6, false);
+      geo.setDrawRange(0, 0);
+      const m = new THREE.Mesh(geo, futureMat(i === 0 ? C.lime : '#e9ffb8', a));
+      m.renderOrder = 5 + layer;
+      m.userData.i = i;
+      futureGroup.add(m);
+      tubes.push(m);
+    });
+  });
+  // where each rollout leaves the world: small wire boxes, the predicted states
+  const ends = paths.map((pts, i) => {
+    const m = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.05, 0.05),
+      new THREE.MeshBasicMaterial({ color: i === 0 ? C.lime : '#f4ffd6', wireframe: true, transparent: true, opacity: i === 0 ? 1 : 0.7, fog: false }));
+    m.position.copy(pts[pts.length - 1]);
+    m.rotation.set(Math.random() * 3, Math.random() * 3, 0);
+    m.visible = false;
+    futureGroup.add(m);
+    return m;
+  });
+  const fx = k => {
+    if (usePost) PAINT.imagine.value = k;
+    else canvas.style.filter = `grayscale(${k}) brightness(${1 - 0.6 * k}) contrast(${1 + 0.4 * k})`;
+  };
+  await tween(0.85, k => {
+    tubes.forEach(t => {
+      const i = t.userData.i;
+      const kk = clamp(k * 1.2 - (i ? 0.04 * i : 0), 0, 1);
+      t.geometry.setDrawRange(0, Math.floor(t.geometry.index.count * ease(kk)));
+    });
+    ends.forEach((e, i) => { e.visible = k > 0.8 - (i ? 0 : 0.05); e.rotation.y += 0.05; });
+    fx(0.22 * k);
+  });
+  await tween(0.5, k => {
+    ends.forEach(e => { e.rotation.y += 0.08; });
+    fx(0.22 + 0.78 * k * k);
+  });
+  const end = paths[0][paths[0].length - 1].clone().project(camera);
+  const rect = canvas.getBoundingClientRect();
+  window.wamImagine(st.href, {
+    title: st.title, skipTraces: true,
+    from: { x: rect.left + (end.x * 0.5 + 0.5) * rect.width, y: rect.top + (-end.y * 0.5 + 0.5) * rect.height },
+  });
+}
+// back from the project with the back button: wake up from the dream
+window.addEventListener('pageshow', e => {
+  if (!e.persisted) return;
+  imagining = false;
+  host.classList.remove('is-imagining');
+  PAINT.imagine.value = 0;
+  canvas.style.filter = '';
+  if (futureGroup) { scene.remove(futureGroup); futureGroup = null; }
+  if (bot.docked) card.hidden = false;
+});
+
+/* ---------------------------------------------------------
+   The garden: grass, wildflowers, cattails, a cube tree,
+   and the lab's whiteboard
+   --------------------------------------------------------- */
+
+const PROP_OBSTACLES = [];     // world circles {x, z, r}
+let seedG = 81205;
+const rnd = () => { seedG = (seedG * 16807) % 2147483647; return seedG / 2147483647; };
+
+function colored(geo, color) {
+  const g = geo.index ? geo.toNonIndexed() : geo;
+  const n = g.getAttribute('position').count;
+  const c = new THREE.Color(color);
+  const arr = new Float32Array(n * 3);
+  for (let i = 0; i < n; i += 1) { arr[i * 3] = c.r; arr[i * 3 + 1] = c.g; arr[i * 3 + 2] = c.b; }
+  g.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+  if (!g.getAttribute('uv')) g.setAttribute('uv', new THREE.BufferAttribute(new Float32Array(n * 2), 2));
+  return g;
+}
+
+function buildGarden() {
+  const parts = [];
+  const GREENS = ['#5f7a3b', '#7c9845', '#9fb35a', '#4d6934', '#86a24c', '#a9b862'];
+  const pickGreen = () => GREENS[Math.floor(rnd() * GREENS.length)];
+  const free = (x, z, pad) => {
+    if (Math.hypot(x, z) < 1.25 || Math.hypot(x, z) > 5.6) return false;
+    if (blockedAt(x, z, pad)) return false;
+    if (STATIONS.some(st => Math.hypot(st.dockWorld.x - x, st.dockWorld.z - z) < 0.5)) return false;
+    return !PROP_OBSTACLES.some(o => Math.hypot(o.x - x, o.z - z) < o.r + pad);
+  };
+  const spot = (pad, tries = 40) => {
+    for (let t = 0; t < tries; t += 1) {
+      const a = rnd() * Math.PI * 2;
+      const r = 1.3 + Math.sqrt(rnd()) * 4.1;
+      const x = Math.cos(a) * r;
+      const z = Math.sin(a) * r;
+      if (free(x, z, pad)) return [x, z];
+    }
+    return null;
+  };
+  function blade(x, z, h, color, lean = 0.5) {
+    const g = new THREE.ConeGeometry(0.008 + rnd() * 0.005, h, 3, 1);
+    g.translate(0, h / 2, 0);
+    g.rotateZ((rnd() - 0.5) * lean);
+    g.rotateX((rnd() - 0.5) * lean);
+    g.rotateY(rnd() * Math.PI);
+    g.translate(x, 0, z);
+    parts.push(colored(g, color));
+  }
+  function tuft(x, z, n = 7, h = 0.16) {
+    for (let i = 0; i < n; i += 1) blade(x + (rnd() - 0.5) * 0.09, z + (rnd() - 0.5) * 0.09, h * (0.55 + rnd() * 0.7), pickGreen(), 0.7);
+  }
+  function flower(x, z, color) {
+    const h = 0.1 + rnd() * 0.1;
+    blade(x, z, h, '#6c8a3e', 0.2);
+    const head = new THREE.IcosahedronGeometry(0.014 + rnd() * 0.006, 0);
+    head.translate(x, h, z);
+    parts.push(colored(head, color));
+  }
+  function cattail(x, z) {
+    const h = 0.3 + rnd() * 0.14;
+    const stem = new THREE.CylinderGeometry(0.0025, 0.0035, h, 5);
+    stem.translate(0, h / 2, 0);
+    stem.rotateZ((rnd() - 0.5) * 0.2);
+    stem.translate(x, 0, z);
+    parts.push(colored(stem, '#6f8a42'));
+    const head = new THREE.CapsuleGeometry(0.011, 0.05, 3, 6);
+    head.translate(x, h - 0.04, z);
+    parts.push(colored(head, '#8a5a3c'));
+  }
+
+  // the cube tree: its fruit are the cubes the robots pick
+  const tree = new THREE.Group();
+  const trunk = mesh(new THREE.CylinderGeometry(0.03, 0.055, 0.78, 9), propMat('#7b5b45'));
+  trunk.position.y = 0.39;
+  const branch = mesh(new THREE.CylinderGeometry(0.016, 0.024, 0.3, 7), propMat('#7b5b45'));
+  branch.position.set(0.08, 0.66, 0);
+  branch.rotation.z = -0.7;
+  tree.add(trunk, branch);
+  const leafColors = ['#6f8d3f', '#86a24c', '#9bb456', '#5f7a3b'];
+  [[0, 0.98, 0, 0.24], [0.18, 0.9, 0.06, 0.2], [-0.16, 0.9, -0.04, 0.19], [0.04, 1.14, -0.05, 0.18], [-0.05, 0.86, 0.17, 0.17], [0.08, 0.84, -0.18, 0.16]]
+    .forEach(([x, y, z, r], i) => {
+      const leaf = mesh(new THREE.IcosahedronGeometry(r, 1), new THREE.MeshStandardMaterial({ color: leafColors[i % 4], roughness: 0.9, flatShading: true }));
+      leaf.position.set(x, y, z);
+      tree.add(leaf);
+    });
+  const fruitColors = [C.sunshine, C.sherbert, C.sky, C.lavender, C.creamsicle];
+  for (let i = 0; i < 13; i += 1) {
+    const a = rnd() * Math.PI * 2;
+    const y = 0.78 + rnd() * 0.3;
+    const r = 0.2 + rnd() * 0.08;
+    const fruit = box(0.042, 0.042, 0.042, fruitColors[i % fruitColors.length], 0.008);
+    fruit.position.set(Math.cos(a) * r, y, Math.sin(a) * r);
+    fruit.rotation.set(rnd(), rnd(), rnd());
+    tree.add(fruit);
+  }
+  const mound = mesh(new THREE.SphereGeometry(0.16, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), matte('#b08466'));
+  mound.scale.y = 0.25;
+  tree.add(mound);
+  tree.position.set(1.5, 0, 1.2);
+  scene.add(tree);
+  PROP_OBSTACLES.push({ x: 1.5, z: 1.2, r: 0.3 });
+
+  // grass and flowers, scattered where nothing stands
+  for (let i = 0; i < 34; i += 1) {
+    const p = spot(0.16);
+    if (!p) continue;
+    const n = 1 + Math.floor(rnd() * 3);
+    for (let k = 0; k < n; k += 1) tuft(p[0] + (rnd() - 0.5) * 0.18, p[1] + (rnd() - 0.5) * 0.18, 8 + Math.floor(rnd() * 6), 0.2);
+  }
+  const FLOWERS = ['#d9473f', '#e8b83a', '#f4efe6', '#e8873a', '#c86aa0'];
+  for (let i = 0; i < 16; i += 1) {
+    const p = spot(0.14);
+    if (!p) continue;
+    const c = FLOWERS[Math.floor(rnd() * FLOWERS.length)];
+    for (let k = 0; k < 4 + rnd() * 4; k += 1) flower(p[0] + (rnd() - 0.5) * 0.14, p[1] + (rnd() - 0.5) * 0.14, c);
+    tuft(p[0], p[1], 4);
+  }
+  // cattails by the maze and around the pen
+  [byId.maze, byId.quad].forEach(st => {
+    for (let i = 0; i < 3; i += 1) {
+      const a = rnd() * Math.PI * 2;
+      const x = st.group.position.x + Math.cos(a) * (st.id === 'quad' ? 1.1 : 0.95);
+      const z = st.group.position.z + Math.sin(a) * (st.id === 'quad' ? 1.1 : 0.95);
+      if (!free(x, z, 0.08)) continue;
+      for (let k = 0; k < 4; k += 1) cattail(x + (rnd() - 0.5) * 0.1, z + (rnd() - 0.5) * 0.1);
+      tuft(x, z, 6, 0.2);
+    }
+  });
+  // around the tree's foot
+  for (let i = 0; i < 4; i += 1) tuft(1.5 + (rnd() - 0.5) * 0.4, 1.2 + (rnd() - 0.5) * 0.4, 5);
+
+  const merged = mergeGeometries(parts, false);
+  merged.computeVertexNormals();
+  const garden = mesh(merged, new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85, side: THREE.DoubleSide }));
+  scene.add(garden);
+}
+
+// the lab whiteboard on an easel, with today's to-do list in marker
+async function buildWhiteboard() {
+  try {
+    await Promise.race([document.fonts.load('600 64px Caveat'), new Promise(r => setTimeout(r, 1500))]);
+  } catch (e) { /* draw with the fallback hand */ }
+  const cv = document.createElement('canvas');
+  cv.width = 1024;
+  cv.height = 704;
+  const g = cv.getContext('2d');
+  g.fillStyle = '#f8f6f1';
+  g.fillRect(0, 0, 1024, 704);
+  // ghosts of old notes, half wiped
+  g.globalAlpha = 0.08;
+  g.fillStyle = '#5a6a8a';
+  g.font = '600 54px Caveat, "Comic Sans MS", cursive';
+  g.fillText('q = J⁺ (x* − x)', 560, 640);
+  g.fillText('loss ↓', 640, 120);
+  g.globalAlpha = 1;
+  g.fillStyle = '#2b2b30';
+  g.font = '700 130px Caveat, "Comic Sans MS", cursive';
+  g.fillText("max's lab", 60, 140);
+  g.strokeStyle = '#d0743f';
+  g.lineWidth = 11;
+  g.beginPath();
+  g.moveTo(60, 172);
+  g.bezierCurveTo(260, 158, 420, 190, 540, 170);
+  g.stroke();
+  const items = [
+    ['✓', 'make toast', '#3f8f4a'],
+    ['✓', 'walk the Go2', '#3f8f4a'],
+    ['☐', 'solve the maze', '#2b2b30'],
+    ['☐', 'imagine the future', '#b14a2a'],
+  ];
+  g.font = '700 84px Caveat, "Comic Sans MS", cursive';
+  items.forEach(([mark, text, color], i) => {
+    const y = 290 + i * 104;
+    g.fillStyle = color;
+    g.fillText(mark, 70, y);
+    g.fillStyle = '#2b2b30';
+    g.fillText(text, 150, y);
+  });
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  const edge = propMat('#d9d5cd');
+  const boardMats = [edge, edge, edge, edge, new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55 }), edge];
+  const easel = new THREE.Group();
+  const board = mesh(new THREE.BoxGeometry(0.9, 0.62, 0.02), boardMats);
+  board.position.set(0, 0.8, 0);
+  board.rotation.x = -0.16;
+  const leg = (x, z, rx, rz) => {
+    const l = mesh(new THREE.CylinderGeometry(0.009, 0.011, 1.0, 6), propMat('#8a6a52'));
+    l.position.set(x, 0.49, z);
+    l.rotation.set(rx, 0, rz);
+    easel.add(l);
+  };
+  leg(-0.36, 0.05, -0.16, 0.1);
+  leg(0.36, 0.05, -0.16, -0.1);
+  leg(0, -0.2, 0.32, 0);
+  const tray = box(0.84, 0.02, 0.05, '#d9d5cd', 0.008);
+  tray.position.set(0, 0.49, 0.06);
+  easel.add(board, tray);
+  [C.skyDeep, '#b14a2a', '#2b2b30'].forEach((c, i) => {
+    const pen = cyl(0.007, 0.007, 0.1, c, 8);
+    pen.rotation.z = Math.PI / 2;
+    pen.position.set(-0.12 + i * 0.12, 0.507, 0.06);
+    easel.add(pen);
+  });
+  easel.position.set(-1.3, 0, 1.25);
+  easel.rotation.y = 0.35;
+  scene.add(easel);
+  PROP_OBSTACLES.push({ x: -1.3, z: 1.25, r: 0.38 });
+}
+
+/* ---------------------------------------------------------
+   Corner notes: Waterloo's time and weather
+   --------------------------------------------------------- */
+
+const clockEl = $('#w-clock');
+const weatherEl = $('#w-weather');
+const clockFmt = new Intl.DateTimeFormat('en-US', { timeZone: WATERLOO.tz, hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+function tickClock() {
+  if (clockEl) clockEl.textContent = `${clockFmt.format(new Date()).toLowerCase()} in Waterloo`;
+}
+tickClock();
+setInterval(tickClock, 1000);
+const WEATHER = [
+  [0, 'clear', '☀'], [1, 'mostly clear', '☀'], [2, 'partly cloudy', '⛅'], [3, 'overcast', '☁'],
+  [48, 'fog', '☁'], [57, 'drizzle', '☂'], [67, 'rain', '☂'], [77, 'snow', '❄'], [82, 'showers', '☂'],
+  [86, 'snow showers', '❄'], [99, 'thunderstorms', '☂'],
+];
+async function fetchWeather() {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${WATERLOO.lat}&longitude=${WATERLOO.lon}`
+    + '&current=temperature_2m,weather_code,cloud_cover&daily=sunrise,sunset&timezone=America%2FToronto&forecast_days=1';
+  try {
+    const r = await fetch(url);
+    if (!r.ok) return;
+    const j = await r.json();
+    const hours = s => { const [h, m] = s.slice(11, 16).split(':').map(Number); return h + m / 60; };
+    const code = j.current.weather_code;
+    const [, word, glyph] = WEATHER.find(([max]) => code <= max) || WEATHER[3];
+    const overcast = clamp((j.current.cloud_cover ?? 0) / 100, 0, 1) * (code >= 3 ? 1 : 0.6);
+    const look = pickLook(hours(j.daily.sunrise[0]), hours(j.daily.sunset[0]));
+    applyLook(look, params.get('light') ? 0 : overcast);
+    lookNow.weather = word;
+    if (weatherEl) weatherEl.textContent = `${look === 'night' && code <= 1 ? '☾' : glyph} Waterloo, ON · ${Math.round(j.current.temperature_2m)}°C · ${word}`;
+  } catch (e) { /* offline: keep the default light */ }
 }
 
 /* ---------------------------------------------------------
@@ -1579,6 +2179,7 @@ const drag = { on: false, x: 0, y: 0, moved: 0, id: null };
 const pointers = new Map();
 let pinch0 = 0;
 canvas.addEventListener('pointerdown', e => {
+  if (imagining) return;
   pointers.set(e.pointerId, [e.clientX, e.clientY]);
   if (pointers.size === 2) {
     const [a, b] = [...pointers.values()];
@@ -1588,14 +2189,17 @@ canvas.addEventListener('pointerdown', e => {
   drag.x = e.clientX;
   drag.y = e.clientY;
   drag.moved = 0;
-  try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+  // on the home page a touch may be the start of a scroll, so don't hold on to it
+  if (!EMBED || e.pointerType === 'mouse') {
+    try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* pointer already gone */ }
+  }
 });
 canvas.addEventListener('pointermove', e => {
   if (pointers.has(e.pointerId)) pointers.set(e.pointerId, [e.clientX, e.clientY]);
   if (pointers.size === 2) {
     const [a, b] = [...pointers.values()];
     const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-    if (pinch0 > 0) user.zoom = clamp(d / pinch0, 0.45, 1.6);
+    if (pinch0 > 0 && !EMBED) user.zoom = clamp(d / pinch0, 0.45, 1.6);
     drag.moved = 99;
     return;
   }
@@ -1608,7 +2212,7 @@ canvas.addEventListener('pointermove', e => {
     if (drag.moved > 6) {
       canvas.classList.add('turning');
       user.az -= dx * 0.005;
-      user.el = clamp(user.el + dy * 0.003, -0.4, 0.55);
+      if (!EMBED || e.pointerType === 'mouse') user.el = clamp(user.el + dy * 0.003, -0.4, 0.55);
     }
     return;
   }
@@ -1622,7 +2226,7 @@ const endDrag = e => {
   if (!drag.on) return;
   drag.on = false;
   canvas.classList.remove('turning');
-  if (drag.moved <= 6 && e.type === 'pointerup') {
+  if (drag.moved <= 6 && e.type === 'pointerup' && !imagining) {
     const p = pick(e);
     if (!p) return;
     hideHint();
@@ -1632,22 +2236,27 @@ const endDrag = e => {
 };
 canvas.addEventListener('pointerup', endDrag);
 canvas.addEventListener('pointercancel', endDrag);
-canvas.addEventListener('wheel', e => {
-  e.preventDefault();
-  user.zoom = clamp(user.zoom * Math.exp(e.deltaY * 0.0012), 0.45, 1.6);
-}, { passive: false });
+if (!EMBED) {
+  canvas.addEventListener('wheel', e => {
+    e.preventDefault();
+    user.zoom = clamp(user.zoom * Math.exp(e.deltaY * 0.0012), 0.45, 1.6);
+  }, { passive: false });
+}
 
-const DRIVE_KEYS = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd']);
+// full screen: arrows and WASD; on the home page only WASD, so the arrows still scroll the page
+const DRIVE_KEYS = new Set(EMBED ? ['w', 'a', 's', 'd'] : ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'w', 'a', 's', 'd']);
+let onScreen = true;
 window.addEventListener('keydown', e => {
-  if (e.target.closest && e.target.closest('input, textarea')) return;
+  if (e.target.closest && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if (!onScreen || imagining) return;
   const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
   if (DRIVE_KEYS.has(k) && !e.metaKey && !e.ctrlKey && !e.altKey) {
-    if (k.startsWith('Arrow') && document.activeElement && document.activeElement.closest('.stations')) return;
+    if (k.startsWith('Arrow') && document.activeElement && document.activeElement.closest('.w-stations')) return;
     keys.add(k);
     hideHint();
     e.preventDefault();
   }
-  if (k === 'Escape') {
+  if (k === 'Escape' && !card.hidden) {
     card.hidden = true;
     camFocus = null;
   }
@@ -1656,15 +2265,25 @@ window.addEventListener('keyup', e => keys.delete(e.key.length === 1 ? e.key.toL
 window.addEventListener('blur', () => keys.clear());
 
 function resize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
+  const w = Math.max(1, host.clientWidth);
+  const h = Math.max(1, host.clientHeight);
+  renderer.setPixelRatio(pixelRatio);
   renderer.setSize(w, h, false);
+  composer.setPixelRatio(pixelRatio);
+  composer.setSize(w, h);
+  PAINT.res.value.set(w * pixelRatio, h * pixelRatio);
   camera.aspect = w / h;
   camera.fov = w < 640 ? 38 : 30;
   camera.updateProjectionMatrix();
 }
-window.addEventListener('resize', resize);
+if ('ResizeObserver' in window) new ResizeObserver(resize).observe(host);
+else window.addEventListener('resize', resize);
 resize();
+
+// on the home page, stop drawing once it has scrolled away
+if ('IntersectionObserver' in window) {
+  new IntersectionObserver(entries => { onScreen = entries[0].isIntersecting; }, { threshold: 0.02 }).observe(host);
+}
 
 /* ---------------------------------------------------------
    Start
@@ -1672,13 +2291,39 @@ resize();
 
 let last = performance.now();
 let paused = false;
+// quality: if the painted look is too slow on this machine, draw fewer pixels, then skip the paint
+const perf = { n: 0, sum: 0, stage: params.get('quality') === 'high' ? 9 : 0 };
+function watchPerf(dt) {
+  if (perf.stage > 1) return;
+  perf.n += 1;
+  if (perf.n < 30) return;
+  perf.sum += dt;
+  if (perf.n < 120) return;
+  const avg = perf.sum / 90;
+  perf.n = 0;
+  perf.sum = 0;
+  if (avg < 1 / 40) { perf.stage = 9; return; }
+  if (perf.stage === 0) {
+    pixelRatio = 1;
+    PAINT.spread.value = 1.0;
+    resize();
+    perf.stage = 1;
+  } else {
+    usePost = false;
+    perf.stage = 2;
+  }
+}
 function frame(now = performance.now()) {
-  const dt = Math.min((now - last) / 1000, 0.05);
+  const raw = (now - last) / 1000;
   last = now;
+  if (!onScreen && !imagining) return;
+  const dt = Math.min(raw, 0.05);
   if (!paused) tick(dt);
   stepCamera(dt);
   stepOverlays(dt);
-  renderer.render(scene, camera);
+  PAINT.time.value = now / 1000;
+  if (usePost) composer.render(dt); else renderer.render(scene, camera);
+  watchPerf(Math.min(raw, 0.2));   // a long pause (tab hidden) is not a slow frame
 }
 function tick(dt) {
   stepBot(dt);
@@ -1694,6 +2339,7 @@ function tick(dt) {
 }
 
 async function start() {
+  fetchWeather();
   const [so, yam, piper, go2] = await Promise.all([
     loadRobot('so101'), loadRobot('yam'), loadRobot('piper'), loadRobot('go2'), buildBot(),
   ]);
@@ -1708,6 +2354,8 @@ async function start() {
     st.group.updateMatrixWorld(true);
     st.dockWorld = st.group.localToWorld(V(0, 0, st.dock));
   });
+  await buildWhiteboard();
+  buildGarden();
   buildGrid();
   makeHitBoxes();
   const o = overview();
@@ -1724,12 +2372,14 @@ async function start() {
 
 start().catch(e => {
   console.error(e);
-  status.innerHTML = 'The robots could not load. The <a href="index.html">home page</a> lists every project.';
+  status.innerHTML = 'The robots could not load. <a href="index.html#projects">Every project is listed here.</a>';
 });
 
 // for testing from the console
 window.__pg = {
-  bot, STATIONS, byId, goToStation, driveTo, arrive, camera, scene, cam, user,
+  bot, STATIONS, byId, goToStation, driveTo, arrive, camera, scene, cam, user, applyLook, imagineFromWorld, PAINT, perf,
+  look(x, y, z, r, el, az) { camOverride = x === undefined ? null : { target: V(x, y, z), r, el, az }; },
+  get usePost() { return usePost; },
   // run the world forward without drawing (tests on slow software GL)
   async ff(seconds, dt = 1 / 30) {
     paused = true;
