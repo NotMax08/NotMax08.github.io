@@ -5,167 +5,139 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Max Yuan · Robotics</title>
 <meta name="description" content="Max Yuan, Mechatronics Engineering student at the University of Waterloo. Fine-tuning π₀.5 for robot manipulation on the WATonomous humanoid team, quadruped locomotion with PPO in Isaac Lab, and ROS2 Nav2 autonomy.">
-<meta name="theme-color" content="#05070a">
-<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light">
 <meta property="og:title" content="Max Yuan · Robotics">
 <meta property="og:description" content="π₀.5 fine-tuning for manipulation on the WATonomous humanoid team, quadruped locomotion with PPO, and ROS2 autonomy. 1st place at the BOTS hackathon.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://notmax08.github.io/">
 <meta property="og:image" content="https://notmax08.github.io/assets/photos/bracket-toaster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2305070a'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%239fd0f5' stroke-width='5' stroke-linecap='square'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23171717'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='50' cy='14' r='4' fill='%236ea8ff'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
-<!-- bump ?v= whenever style.css, main.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-11-14c">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<!-- bump ?v= whenever style.css, main.js, home.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
+<link rel="stylesheet" href="style.css?v=2026-11-14d">
 <script>document.documentElement.classList.add('js');</script>
-<script src="main.js?v=2026-11-14c" defer></script>
-<script src="transition.js?v=2026-11-14c" defer></script>
+<script src="main.js?v=2026-11-14d" defer></script>
+<script src="transition.js?v=2026-11-14d" defer></script>
+<script src="home.js?v=2026-11-14d" defer></script>
 </head>
 
 <body class="home">
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- ========== hero: a field of imagined rollouts behind the name (drawn by main.js) ========== -->
-<header class="hero" id="about">
-  <canvas class="hero-field" aria-hidden="true"></canvas>
-  <div class="hero-top">
-    <span class="where">~/max-yuan · Waterloo, ON</span>
-    <nav aria-label="Site">
-      <a href="#experience">experience</a>
-      <a href="#projects">projects</a>
-      <a href="#skills">skills</a>
-      <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
-    </nav>
-  </div>
-  <div class="col hero-inner">
-    <div>
-      <p class="hero-kicker">&gt; robot learning<span class="cursor">_</span></p>
-      <h1>Max<br>Yuan</h1>
-      <p class="hero-bio" id="contact">Mechatronics Engineering at the University of Waterloo. Fine-tuning VLAs on the WATonomous humanoid team. Open to robotics and ML co-op roles.</p>
-      <p class="interests"><span class="br">[</span> robot learning<span class="dot" aria-hidden="true">·</span>VLAs<span class="dot" aria-hidden="true">·</span>world action models<span class="dot" aria-hidden="true">·</span>reinforcement learning <span class="br">]</span></p>
-      <p class="hero-meta">
-        <button class="plain-link" type="button" data-copy>maxyuan081205@gmail.com</button><span class="sep" aria-hidden="true">/</span>
-        <a href="https://github.com/NotMax08" target="_blank" rel="noopener">github ↗</a><span class="sep" aria-hidden="true">/</span>
-        <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
-      </p>
-    </div>
-    <figure class="hero-photo">
-      <span class="shot vf"><img src="assets/photos/max-lab.jpg" width="1080" height="1350" alt="Max giving a thumbs up in the lab, with two robot arms on a stand behind him"></span>
-      <figcaption><b>o_t</b> · the present, observed</figcaption>
-    </figure>
-  </div>
-  <a class="hero-down" href="#experience">scroll ↓</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="i-gh" viewBox="0 0 24 24"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.8 1.19 1.83 1.19 3.09 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></symbol>
+  <symbol id="i-in" viewBox="0 0 24 24"><path fill="currentColor" d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28ZM5.34 7.43a2.06 2.06 0 1 1 0-4.13 2.06 2.06 0 0 1 0 4.13ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0Z"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></symbol>
+</svg>
+
+<header class="top on-hero" id="top">
+  <span class="top-l"><a href="https://github.com/NotMax08" target="_blank" rel="noopener" aria-label="GitHub"><svg aria-hidden="true"><use href="#i-gh"/></svg></a></span>
+  <a class="top-name" href="#about">Max Yuan<i aria-hidden="true"></i></a>
+  <span class="top-r"><a href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener" aria-label="LinkedIn"><svg aria-hidden="true"><use href="#i-in"/></svg></a></span>
 </header>
+
+<!-- ========== hero: a diffusion sample of a project clip; it denoises under the cursor (home.js) ========== -->
+<section class="hero" aria-label="Introduction">
+  <div class="hero-card" id="hero">
+    <video class="hero-src" src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
+    <canvas class="hero-gl" aria-hidden="true"></canvas>
+    <div class="hero-shade" aria-hidden="true"></div>
+    <p class="hero-line" id="hero-line">Fine-tuning VLAs at WATonomous. Previously Team Canada at FIRST Worlds.</p>
+    <a class="hero-down" href="#about" aria-label="Scroll to the rest of the page"></a>
+    <p class="hero-sub">Studying Mechatronics Engineering<br>at the University of Waterloo</p>
+    <a class="hero-sample" id="hero-sample" href="projects/brackey-way.html"><span class="k">sample 01</span><span class="v">The Brackey Way</span></a>
+    <button class="hero-mail" type="button" data-copy aria-label="Copy my email address"><svg aria-hidden="true"><use href="#i-mail"/></svg></button>
+    <div class="hero-read" aria-hidden="true"></div>
+  </div>
+</section>
 
 <main id="main" tabindex="-1">
 <div class="col">
 
+  <!-- ========== about ========== -->
+  <section class="sec" id="about" aria-labelledby="about-h">
+    <h2 id="about-h"><span>About</span></h2>
+    <div class="about" id="contact">
+      <p>I study Mechatronics Engineering at the University of Waterloo. On the WATonomous humanoid team I fine-tune π₀.5, a vision-language-action model, so the robot's left arm can pick up a cube and place it in a tray in Isaac Sim.</p>
+      <p>Before that I was co-captain and lead programmer of FTC team 18844, Team Canada at FIRST Worlds 2025. I also build robots at hackathons: <a href="projects/brackey-way.html">a dual-arm robot that makes a sandwich</a> won 1st place at BOTS.</p>
+      <p>I'm interested in robot learning, VLAs, world action models and reinforcement learning, and I'm open to robotics and ML co-op roles. <button class="plain-link" type="button" data-copy>Copy my email</button> or read my <a href="resume.pdf" target="_blank" rel="noopener">résumé</a>.</p>
+    </div>
+  </section>
+
   <!-- ========== experience ========== -->
   <section class="sec" id="experience" aria-labelledby="experience-h">
     <h2 id="experience-h"><span>Experience</span></h2>
-    <ol class="jobs">
-      <li class="job now">
-        <div class="job-meta"><span>Sept 2026 – now</span><span class="where">Waterloo, ON</span></div>
-        <div class="job-body">
-          <h3>Robot learning <span class="at">@</span> <a href="https://www.watonomous.ca/" target="_blank" rel="noopener">WATonomous</a></h3>
-          <p>π₀.5 pick and place for the humanoid arm <a class="bracket" href="projects/pi05-pick-place.html">[project]</a></p>
-          <ul class="badges"><li>π₀.5</li><li>LeRobot</li><li>Isaac Sim</li></ul>
-        </div>
-      </li>
-      <li class="job now">
-        <div class="job-meta"><span>Sept 2026 – Apr 2031</span><span class="where">Waterloo, ON</span></div>
-        <div class="job-body">
-          <h3>Mechatronics Engineering <span class="at">@</span> UWaterloo</h3>
-          <p>BASc, Honours Co-op</p>
-        </div>
-      </li>
-      <li class="job">
-        <div class="job-meta"><span>Sept 2023 – Apr 2025</span></div>
-        <div class="job-body">
-          <h3>Co-captain, lead programmer <span class="at">@</span> FTC 18844</h3>
-          <p>Team Canada at FIRST Worlds 2025 <a class="bracket" href="projects/ftc-18844.html">[project]</a></p>
-          <ul class="badges"><li>Java</li><li>OpenCV</li><li>PID control</li></ul>
-        </div>
-      </li>
-    </ol>
+    <ul class="rows">
+      <li><a href="projects/pi05-pick-place.html">WATonomous</a>, Robot learning on the humanoid team <span class="yr">26</span></li>
+      <li>University of Waterloo, Mechatronics Engineering <span class="what">(BASc, co-op)</span> <span class="yr">26–31</span></li>
+      <li><a href="projects/ftc-18844.html">FTC 18844</a>, Co-captain and lead programmer, Team Canada at Worlds <span class="yr">23–25</span></li>
+    </ul>
   </section>
 
   <!-- ========== projects ========== -->
-  <section class="sec" id="projects" aria-labelledby="projects-h">
+  <section class="sec sec-wide" id="projects" aria-labelledby="projects-h">
     <h2 id="projects-h"><span>Projects</span></h2>
     <div class="projects">
 
-      <article class="proj">
-        <a class="proj-media" href="projects/pi05-pick-place.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 01 · imagine →</span>
+      <article class="proj proj-wide">
+        <a class="proj-card" href="projects/pi05-pick-place.html">
+          <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>π₀.5 pick and place</b><small>A VLA fine-tuned for a humanoid arm</small></span></span>
+          <span class="proj-bot"><span class="proj-tags">π₀.5 · LeRobot · Isaac Sim</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/pi05-pick-place.html">π₀.5 pick and place</a></h3>
-        <p>A VLA fine-tuned for a humanoid arm</p>
-        <ul class="badges"><li>π₀.5</li><li>LeRobot</li><li>Isaac Sim</li></ul>
       </article>
 
       <article class="proj">
-        <a class="proj-media" href="projects/brackey-way.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 02 · imagine →</span>
+        <a class="proj-card" href="projects/brackey-way.html">
+          <video src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>The Brackey Way</b><small>A dual-arm robot that makes a sandwich</small></span><span class="proj-award">1st, BOTS</span></span>
+          <span class="proj-bot"><span class="proj-tags">π₀ · OpenCV · IK</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/brackey-way.html">The Brackey Way</a></h3>
-        <p>A dual-arm robot that makes a sandwich <span class="award-note">· 1st, BOTS</span></p>
-        <ul class="badges"><li>π₀</li><li>OpenCV</li><li>Inverse kinematics</li></ul>
       </article>
 
       <article class="proj">
-        <a class="proj-media" href="projects/quadruped-ppo.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 03 · imagine →</span>
+        <a class="proj-card" href="projects/quadruped-ppo.html">
+          <video src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>Go2 locomotion</b><small>A quadruped walking policy, trained from scratch</small></span></span>
+          <span class="proj-bot"><span class="proj-tags">Isaac Lab · PPO · rsl_rl</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/quadruped-ppo.html">Go2 locomotion</a></h3>
-        <p>A quadruped walking policy, trained from scratch</p>
-        <ul class="badges"><li>Isaac Lab</li><li>PPO</li><li>rsl_rl</li></ul>
       </article>
 
       <article class="proj">
-        <a class="proj-media" href="projects/maze-nav2.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/loops/nav.mp4" poster="assets/loops/nav.jpg" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 04 · imagine →</span>
+        <a class="proj-card" href="projects/maze-nav2.html">
+          <video src="assets/loops/nav.mp4" poster="assets/loops/nav.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>Maze navigation</b><small>Maps an unseen maze, then drives to the goal</small></span></span>
+          <span class="proj-bot"><span class="proj-tags">ROS2 · Nav2 · SLAM Toolbox</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/maze-nav2.html">Maze navigation</a></h3>
-        <p>Maps an unseen maze, then drives to the goal</p>
-        <ul class="badges"><li>ROS2</li><li>Nav2</li><li>SLAM Toolbox</li></ul>
       </article>
 
       <article class="proj">
-        <a class="proj-media" href="projects/rico-arm.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/loops/rico.mp4" poster="assets/loops/rico.jpg" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 05 · imagine →</span>
+        <a class="proj-card" href="projects/rico-arm.html">
+          <video src="assets/loops/rico.mp4" poster="assets/loops/rico.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>RICO</b><small>An arm that hands you the tool you ask for</small></span></span>
+          <span class="proj-bot"><span class="proj-tags">YOLOv8 · IK · Groq LLM</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/rico-arm.html">RICO</a></h3>
-        <p>An arm that hands you the tool you ask for</p>
-        <ul class="badges"><li>YOLOv8</li><li>Inverse kinematics</li><li>Groq LLM</li></ul>
       </article>
 
       <article class="proj">
-        <a class="proj-media" href="projects/ftc-18844.html" tabindex="-1" aria-hidden="true">
-          <video src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-loop></video>
-          <span class="t">rollout 06 · imagine →</span>
+        <a class="proj-card" href="projects/ftc-18844.html">
+          <video src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <span class="proj-top"><span><b>FTC team 18844</b><small>Pathing and vision for a FIRST Worlds robot</small></span></span>
+          <span class="proj-bot"><span class="proj-tags">Java · PID control · OpenCV</span><span class="proj-go">Imagine it →</span></span>
         </a>
-        <h3><a href="projects/ftc-18844.html">FTC team 18844</a></h3>
-        <p>Pathing and vision for a FIRST Worlds robot</p>
-        <ul class="badges"><li>Java</li><li>PID control</li><li>OpenCV</li></ul>
       </article>
 
       <article class="proj" id="studybuddy">
-        <a class="proj-media" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
+        <a class="proj-card" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">
           <img src="assets/studybuddy/turret.jpg" alt="" width="1200" height="1600" loading="lazy">
-          <span class="t">rollout 07 · ↗ devpost</span>
+          <span class="proj-top"><span><b>StudyBuddy 9520</b><small>A turret that fires when you get distracted</small></span><span class="proj-award">2nd, RythmHacks</span></span>
+          <span class="proj-bot"><span class="proj-tags">YOLOv8 · C++ · PID control</span><span class="proj-go">Devpost ↗</span></span>
         </a>
-        <h3><a href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">StudyBuddy 9520</a> <span class="ext">↗</span></h3>
-        <p>A turret that fires when you get distracted <span class="award-note">· 2nd, RythmHacks</span></p>
-        <ul class="badges"><li>YOLOv8</li><li>C++</li><li>PID control</li></ul>
       </article>
 
     </div>
@@ -174,11 +146,11 @@
   <!-- ========== awards ========== -->
   <section class="sec" id="awards" aria-labelledby="awards-h">
     <h2 id="awards-h"><span>Awards</span></h2>
-    <ul class="list">
-      <li><span class="date">Sept 2026</span><span><b>1st place, BOTS hackathon</b> · <a href="projects/brackey-way.html">The Brackey Way</a></span></li>
-      <li><span class="date">Oct 2025</span><span><b>2nd place, RythmHacks</b> · <a href="#studybuddy">StudyBuddy 9520</a></span></li>
-      <li><span class="date">2025</span><span><b>1st place Connect Award, FIRST Worlds</b> · FTC 18844</span></li>
-      <li><span class="date"></span><span><b>2nd place Inspire Award, Ontario Provincials</b> · FTC 18844</span></li>
+    <ul class="rows">
+      <li>1st place, BOTS hackathon <span class="what">for</span> <a href="projects/brackey-way.html">The Brackey Way</a> <span class="yr">Sept 26</span></li>
+      <li>2nd place, RythmHacks <span class="what">for</span> <a href="#studybuddy">StudyBuddy 9520</a> <span class="yr">Oct 25</span></li>
+      <li>1st place Connect Award, FIRST Worlds <span class="what">with FTC 18844</span> <span class="yr">25</span></li>
+      <li>2nd place Inspire Award, Ontario Provincials <span class="what">with FTC 18844</span></li>
     </ul>
   </section>
 
@@ -187,7 +159,7 @@
     <h2 id="skills-h"><span>Skills</span></h2>
     <div>
       <p class="sec-note">Hover a skill to see where I used it.</p>
-    <div class="skill-groups">
+      <div class="skill-groups">
         <div class="skill-group">
           <h3>Languages</h3>
           <div>
@@ -276,17 +248,6 @@
     </div>
   </section>
 
-  <!-- ========== links ========== -->
-  <section class="sec" id="links" aria-labelledby="links-h">
-    <h2 id="links-h"><span>Links</span></h2>
-    <div class="links">
-      <a href="https://github.com/NotMax08" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">LinkedIn</a>
-      <a href="mailto:maxyuan081205@gmail.com">Email</a>
-      <a href="resume.pdf" target="_blank" rel="noopener">Résumé</a>
-    </div>
-  </section>
-
   <!-- ========== visitors ========== -->
   <!-- MapMyVisitors map. Paste the d= code from the mapmyvisitors.com embed snippet into data-mmv;
        the section stays hidden while it is empty. -->
@@ -301,13 +262,36 @@
 </div>
 </main>
 
-<footer class="site-footer">
-  <div class="col footer-inner">
-    <p>© <span data-year>2026</span> Max Yuan</p>
+<footer class="foot" id="links">
+  <div class="foot-inner">
+    <div>
+      <p class="name">Max Yuan</p>
+      <p class="muted">Last updated Nov 14, 2026</p>
+      <p class="clock">Waterloo, ON · <b data-clock>--:--</b></p>
+    </div>
+    <div>
+      <h2>Links</h2>
+      <ul>
+        <li><a href="https://github.com/NotMax08" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://linkedin.com/in/max-yuan-a0b34b36b" target="_blank" rel="noopener">LinkedIn</a></li>
+        <li><a href="mailto:maxyuan081205@gmail.com">Email</a></li>
+        <li><a href="resume.pdf" target="_blank" rel="noopener">Résumé</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Now</h2>
+      <ul>
+        <li>Robot learning, WATonomous</li>
+        <li>Mechatronics Engineering, UWaterloo</li>
+        <li class="muted">Open to robotics and ML co-op roles</li>
+        <li class="muted">© <span data-year>2026</span></li>
+      </ul>
+    </div>
   </div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<ol class="alog" id="alog" aria-hidden="true"></ol>
 
 </body>
 </html>
