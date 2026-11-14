@@ -5,81 +5,63 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Max Yuan · Robotics</title>
 <meta name="description" content="Max Yuan, Mechatronics Engineering student at the University of Waterloo. Fine-tuning π₀.5 for robot manipulation on the WATonomous humanoid team, quadruped locomotion with PPO in Isaac Lab, and ROS2 Nav2 autonomy.">
-<meta name="theme-color" content="#EEC9AE">
-<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#05070a">
+<meta name="color-scheme" content="dark">
 <meta property="og:title" content="Max Yuan · Robotics">
 <meta property="og:description" content="π₀.5 fine-tuning for manipulation on the WATonomous humanoid team, quadruped locomotion with PPO, and ROS2 autonomy. 1st place at the BOTS hackathon.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://notmax08.github.io/">
 <meta property="og:image" content="https://notmax08.github.io/assets/photos/bracket-toaster.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23F4CBA9'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%23A64F28' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2305070a'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%239fd0f5' stroke-width='5' stroke-linecap='square'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
-<!-- bump ?v= whenever style.css, main.js, transition.js or the world's files change: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-11-14b">
-<link rel="stylesheet" href="playground.css?v=2026-11-14b">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
+<!-- bump ?v= whenever style.css, main.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
+<link rel="stylesheet" href="style.css?v=2026-11-14c">
 <script>document.documentElement.classList.add('js');</script>
-<script src="main.js?v=2026-11-14b" defer></script>
-<script src="transition.js?v=2026-11-14b" defer></script>
-<!-- the 3D world at the top of the page -->
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>
-<script type="module" src="playground.js?v=2026-11-14b"></script>
+<script src="main.js?v=2026-11-14c" defer></script>
+<script src="transition.js?v=2026-11-14c" defer></script>
 </head>
 
 <body class="home">
 
 <a class="skip-link" href="#main">Skip to content</a>
 
-<!-- ========== the world ========== -->
-<section class="world" data-mode="home" aria-label="Robot world">
-  <canvas class="w-canvas" id="world" aria-label="A painted 3D world with robots at project stations. The project list is further down the page."></canvas>
-  <div class="w-labels" id="labels" aria-hidden="true"></div>
-
-  <p class="w-hud w-tl"><a class="w-name" href="#about">Max Yuan</a><span>robot learning lab</span></p>
-  <nav class="w-hud w-tr" aria-label="Site">
-    <a href="#projects">projects ↓</a>
-    <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
-    <a href="playground.html">full screen</a>
-  </nav>
-  <p class="w-hud w-bl" id="w-weather">Waterloo, ON</p>
-  <p class="w-hud w-br" id="w-clock"></p>
-
-  <section class="w-card" id="card" aria-live="polite" hidden>
-    <button class="w-card-close" type="button" aria-label="Close">×</button>
-    <p class="w-card-robot"></p>
-    <h2 class="w-card-title"></h2>
-    <p class="w-card-line"></p>
-    <ul class="w-card-tags"></ul>
-    <a class="w-card-go" href="#">Imagine it →</a>
-  </section>
-
-  <div class="w-dock">
-    <p class="w-hint" id="hint">Click a station or the floor to drive the BracketBot. W A S D work too.</p>
-    <nav class="w-stations" id="stations" aria-label="Project stations"></nav>
+<!-- ========== hero: a field of imagined rollouts behind the name (drawn by main.js) ========== -->
+<header class="hero" id="about">
+  <canvas class="hero-field" aria-hidden="true"></canvas>
+  <div class="hero-top">
+    <span class="where">~/max-yuan · Waterloo, ON</span>
+    <nav aria-label="Site">
+      <a href="#experience">experience</a>
+      <a href="#projects">projects</a>
+      <a href="#skills">skills</a>
+      <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
+    </nav>
   </div>
-
-  <p class="w-status" id="status" role="status">Loading robots…</p>
-</section>
+  <div class="col hero-inner">
+    <div>
+      <p class="hero-kicker">&gt; robot learning<span class="cursor">_</span></p>
+      <h1>Max<br>Yuan</h1>
+      <p class="hero-bio" id="contact">Mechatronics Engineering at the University of Waterloo. Fine-tuning VLAs on the WATonomous humanoid team. Open to robotics and ML co-op roles.</p>
+      <p class="interests"><span class="br">[</span> robot learning<span class="dot" aria-hidden="true">·</span>VLAs<span class="dot" aria-hidden="true">·</span>world action models<span class="dot" aria-hidden="true">·</span>reinforcement learning <span class="br">]</span></p>
+      <p class="hero-meta">
+        <button class="plain-link" type="button" data-copy>maxyuan081205@gmail.com</button><span class="sep" aria-hidden="true">/</span>
+        <a href="https://github.com/NotMax08" target="_blank" rel="noopener">github ↗</a><span class="sep" aria-hidden="true">/</span>
+        <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
+      </p>
+    </div>
+    <figure class="hero-photo">
+      <span class="shot vf"><img src="assets/photos/max-lab.jpg" width="1080" height="1350" alt="Max giving a thumbs up in the lab, with two robot arms on a stand behind him"></span>
+      <figcaption><b>o_t</b> · the present, observed</figcaption>
+    </figure>
+  </div>
+  <a class="hero-down" href="#experience">scroll ↓</a>
+</header>
 
 <main id="main" tabindex="-1">
 <div class="col">
-
-  <!-- ========== header ========== -->
-  <header class="hero" id="about">
-    <div>
-      <h1>Max Yuan</h1>
-      <p class="hero-meta">
-        <span>Waterloo, ON</span><span class="sep" aria-hidden="true">·</span>
-        <button class="plain-link" type="button" data-copy>maxyuan081205@gmail.com</button><span class="sep" aria-hidden="true">|</span>
-        <a href="resume.pdf" target="_blank" rel="noopener">résumé ↗</a>
-      </p>
-      <p class="interests"><span class="br">[</span> robot learning<span class="dot" aria-hidden="true">·</span>VLAs<span class="dot" aria-hidden="true">·</span>world action models<span class="dot" aria-hidden="true">·</span>reinforcement learning <span class="br">]</span></p>
-      <p class="hero-bio" id="contact">Mechatronics Engineering at the University of Waterloo. Fine-tuning VLAs on the WATonomous humanoid team. Open to robotics and ML co-op roles.</p>
-    </div>
-    <img class="hero-photo" src="assets/photos/max-lab.jpg" width="1080" height="1350" alt="Max giving a thumbs up in the lab, with two robot arms on a stand behind him">
-  </header>
 
   <!-- ========== experience ========== -->
   <section class="sec" id="experience" aria-labelledby="experience-h">
@@ -119,6 +101,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/pi05-pick-place.html" tabindex="-1" aria-hidden="true">
           <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 01 · imagine →</span>
         </a>
         <h3><a href="projects/pi05-pick-place.html">π₀.5 pick and place</a></h3>
         <p>A VLA fine-tuned for a humanoid arm</p>
@@ -128,6 +111,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/brackey-way.html" tabindex="-1" aria-hidden="true">
           <video src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 02 · imagine →</span>
         </a>
         <h3><a href="projects/brackey-way.html">The Brackey Way</a></h3>
         <p>A dual-arm robot that makes a sandwich <span class="award-note">· 1st, BOTS</span></p>
@@ -137,6 +121,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/quadruped-ppo.html" tabindex="-1" aria-hidden="true">
           <video src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 03 · imagine →</span>
         </a>
         <h3><a href="projects/quadruped-ppo.html">Go2 locomotion</a></h3>
         <p>A quadruped walking policy, trained from scratch</p>
@@ -146,6 +131,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/maze-nav2.html" tabindex="-1" aria-hidden="true">
           <video src="assets/loops/nav.mp4" poster="assets/loops/nav.jpg" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 04 · imagine →</span>
         </a>
         <h3><a href="projects/maze-nav2.html">Maze navigation</a></h3>
         <p>Maps an unseen maze, then drives to the goal</p>
@@ -155,6 +141,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/rico-arm.html" tabindex="-1" aria-hidden="true">
           <video src="assets/loops/rico.mp4" poster="assets/loops/rico.jpg" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 05 · imagine →</span>
         </a>
         <h3><a href="projects/rico-arm.html">RICO</a></h3>
         <p>An arm that hands you the tool you ask for</p>
@@ -164,6 +151,7 @@
       <article class="proj">
         <a class="proj-media" href="projects/ftc-18844.html" tabindex="-1" aria-hidden="true">
           <video src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-loop></video>
+          <span class="t">rollout 06 · imagine →</span>
         </a>
         <h3><a href="projects/ftc-18844.html">FTC team 18844</a></h3>
         <p>Pathing and vision for a FIRST Worlds robot</p>
@@ -173,6 +161,7 @@
       <article class="proj" id="studybuddy">
         <a class="proj-media" href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true">
           <img src="assets/studybuddy/turret.jpg" alt="" width="1200" height="1600" loading="lazy">
+          <span class="t">rollout 07 · ↗ devpost</span>
         </a>
         <h3><a href="https://devpost.com/software/study-buddy-9520" target="_blank" rel="noopener">StudyBuddy 9520</a> <span class="ext">↗</span></h3>
         <p>A turret that fires when you get distracted <span class="award-note">· 2nd, RythmHacks</span></p>

@@ -8,16 +8,16 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..700&family=JetBrains+Mono:wght@400;500&family=Silkscreen&display=swap" rel="stylesheet">
-<meta name="theme-color" content="#F3EAE0">
-<meta name="color-scheme" content="light">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23F4CBA9'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%23A64F28' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#05070a">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%2305070a'/%3E%3Cpath d='M18 44V21l14 14 14-14v23' fill='none' stroke='%239fd0f5' stroke-width='5' stroke-linecap='square'/%3E%3C/svg%3E">
 <!-- bump ?v= whenever style.css, main.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="../style.css?v=2026-11-14b">
+<link rel="stylesheet" href="../style.css?v=2026-11-14c">
 <script>document.documentElement.classList.add('js');</script>
-<script src="../main.js?v=2026-11-14b" defer></script>
-<script src="../transition.js?v=2026-11-14b" defer></script>
+<script src="../main.js?v=2026-11-14c" defer></script>
+<script src="../transition.js?v=2026-11-14c" defer></script>
 <!-- arriving from "imagining the future": start dark so the predicted frame can dissolve into the page -->
-<style>html.wam-arriving,html.wam-arriving body{background:#0b0b0c}html.wam-arriving body>*:not(.wam){visibility:hidden}</style>
+<style>html.wam-arriving,html.wam-arriving body{background:#05070a}html.wam-arriving body>*:not(.wam){visibility:hidden}</style>
 <script>try{if(sessionStorage.getItem('wam-arrive'))document.documentElement.classList.add('wam-arriving')}catch(e){}</script>
 </head>
 
@@ -85,11 +85,11 @@
 
       <h3>Robot positioning</h3>
       <p>Scoring samples and specimens in autonomous needs precise, controlled movement. I used three PID controllers, one each for x, y, and heading. Their outputs are rotated by the robot's heading and converted into individual motor powers to drive the robot to its target position.</p>
-      <p><img src="../assets/ftc/pid.png" alt="PID output graphs" style="width:100%;max-width:520px;margin-top:8px;"></p>
+      <p><img class="plot" src="../assets/ftc/pid.png" alt="PID output graphs" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h3>Integral control</h3>
       <p>With only kP and kD, the robot stopped slightly short of the target because the correction became too small near the end. To fix this, I only turned on the integral term within a small range of the target (10–20 cm). This prevents the integral from building up during long moves and causing overshoot. Near the target, the integral term grows over time and pushes the robot the last small distance, then stops once the target is reached.</p>
-      <p><img src="../assets/ftc/integral_control.png" alt="Integral control PID push" style="width:100%;max-width:520px;margin-top:8px;"></p>
+      <p><img class="plot" src="../assets/ftc/integral_control.png" alt="Integral control PID push" style="width:100%;max-width:520px;margin-top:8px;"></p>
 
       <h2>Camera vision</h2>
       <p>A camera and a custom-trained neural network detector find the samples, and the camera angles are used to calculate each sample's x and y distance from the robot. A custom Python script also runs an OpenCV pipeline that uses HSV thresholds to find each sample's angle.</p>
