@@ -59,20 +59,24 @@
     return c === c.toUpperCase() ? g.toUpperCase() : g;
   };
   function wrapText(el) {
-    const text = el.textContent.trim();
+    // keep <br> as a line break: the visible copy is drawn with white-space: pre-line
+    const tmp = document.createElement('div');
+    tmp.innerHTML = el.innerHTML.replace(/<br\s*\/?>/gi, '\n');
+    const text = tmp.textContent.trim();
     el.textContent = '';
     const sr = document.createElement('span');
     sr.className = 'sr';
-    sr.textContent = text;
+    sr.textContent = text.replace(/\n/g, '. ');
     const vis = document.createElement('span');
     vis.setAttribute('aria-hidden', 'true');
+    vis.style.whiteSpace = 'pre-line';
     vis.textContent = text;
     el.append(sr, vis);
     return { text, vis, sr };
   }
   function resolve(t, text, dur = 1100) {
     t.text = text;
-    t.sr.textContent = text;
+    t.sr.textContent = text.replace(/\n/g, ". ");
     if (reduce) { t.vis.textContent = text; return Promise.resolve(); }
     const settle = [...text].map((_, i) => (i / text.length) * 0.55 + Math.random() * 0.45);
     const t0 = performance.now();

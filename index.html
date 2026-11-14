@@ -6,7 +6,9 @@
 <title>Max Yuan · Robotics</title>
 <meta name="description" content="Max Yuan, Mechatronics Engineering student at the University of Waterloo. Fine-tuning π₀.5 for robot manipulation on the WATonomous humanoid team, quadruped locomotion with PPO in Isaac Lab, and ROS2 Nav2 autonomy.">
 <meta name="theme-color" content="#ffffff">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="light dark">
+<!-- theme: the saved choice, else the system setting; set before anything is drawn -->
+<script>try{var t=localStorage.getItem('theme')||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');document.documentElement.dataset.theme=t;if(t==='dark'){var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#0a0a0a'}}catch(e){}</script>
 <meta property="og:title" content="Max Yuan · Robotics">
 <meta property="og:description" content="π₀.5 fine-tuning for manipulation on the WATonomous humanoid team, quadruped locomotion with PPO, and ROS2 autonomy. 1st place at the BOTS hackathon.">
 <meta property="og:type" content="website">
@@ -18,11 +20,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- bump ?v= whenever style.css, main.js, home.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-11-14e">
+<link rel="stylesheet" href="style.css?v=2026-11-14f">
 <script>document.documentElement.classList.add('js');</script>
-<script src="main.js?v=2026-11-14e" defer></script>
-<script src="transition.js?v=2026-11-14e" defer></script>
-<script src="home.js?v=2026-11-14e" defer></script>
+<script src="main.js?v=2026-11-14f" defer></script>
+<script src="transition.js?v=2026-11-14f" defer></script>
+<script src="home.js?v=2026-11-14f" defer></script>
 </head>
 
 <body class="home">
@@ -47,7 +49,7 @@
     <video class="hero-src" src="assets/hero/brackey.mp4" poster="assets/hero/brackey.jpg" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
     <canvas class="hero-gl" aria-hidden="true"></canvas>
     <div class="hero-shade" aria-hidden="true"></div>
-    <p class="hero-line" id="hero-line">Deploying VLAs and WAMs</p>
+    <p class="hero-line" id="hero-line">Robot Learning Research at TUHH<br>Deploying VLAs and WAMs</p>
     <a class="hero-down" href="#about" aria-label="Scroll to the rest of the page"></a>
     <p class="hero-sub">Studying Mechatronics Engineering<br>at the University of Waterloo</p>
     <a class="hero-sample" id="hero-sample" href="projects/brackey-way.html"><span class="k">sample 01</span><span class="v">The Brackey Way</span></a>
