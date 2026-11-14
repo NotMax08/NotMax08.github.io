@@ -114,11 +114,11 @@
   /* ---------- the samples the hero cycles through ---------- */
 
   const SAMPLES = [
-    { src: 'assets/brackey/card_loop.mp4', title: 'The Brackey Way', href: 'projects/brackey-way.html' },
-    { src: 'assets/loops/quad.mp4', title: 'Go2 locomotion', href: 'projects/quadruped-ppo.html' },
-    { src: 'assets/loops/rico.mp4', title: 'RICO', href: 'projects/rico-arm.html' },
-    { src: 'assets/loops/pi05.mp4?v=2', title: 'π₀.5 pick and place', href: 'projects/pi05-pick-place.html' },
-    { src: 'assets/loops/ftc.mp4', title: 'FTC team 18844', href: 'projects/ftc-18844.html' },
+    { src: 'assets/hero/brackey.mp4', title: 'The Brackey Way', href: 'projects/brackey-way.html' },
+    { src: 'assets/hero/quad.mp4', title: 'Go2 locomotion', href: 'projects/quadruped-ppo.html' },
+    { src: 'assets/hero/rico.mp4', title: 'RICO', href: 'projects/rico-arm.html' },
+    { src: 'assets/hero/pi05.mp4', title: 'π₀.5 pick and place', href: 'projects/pi05-pick-place.html' },
+    { src: 'assets/hero/ftc.mp4', title: 'FTC team 18844', href: 'projects/ftc-18844.html' },
   ];
   const HOLD = 9000;          // ms each sample stays before the next is drawn
 
@@ -173,17 +173,17 @@
 
     // coarse to fine: the noisier, the blurrier the picture under the noise
     vec2 uv = vUv * uScale + uOff;
-    vec3 x0 = uHasImg > 0.5 ? textureLod(uImg, uv, t * t * 7.5).rgb : vec3(0.11, 0.12, 0.14);
+    vec3 x0 = uHasImg > 0.5 ? textureLod(uImg, uv, t * t * 4.5).rgb : vec3(0.11, 0.12, 0.14);
 
     // Gaussian noise, a new draw every sampling step: soft blotches (smoothly
-    // interpolated between 6 px cells) plus a finer grain with a little colour
-    vec2 q = gl_FragCoord.xy / 6.0;
+    // interpolated between 3 px cells) plus a per-pixel grain with a little colour
+    vec2 q = gl_FragCoord.xy / 3.0;
     vec2 qi = floor(q);
     vec2 qf = smoothstep(0.0, 1.0, fract(q));
     float sd = uStep * 1.37;
     float soft = mix(mix(gauss(qi + sd), gauss(qi + vec2(1.0, 0.0) + sd), qf.x),
                      mix(gauss(qi + vec2(0.0, 1.0) + sd), gauss(qi + vec2(1.0, 1.0) + sd), qf.x), qf.y);
-    vec2 cell = floor(gl_FragCoord.xy / 2.0);
+    vec2 cell = floor(gl_FragCoord.xy);
     vec3 fine = vec3(gauss(cell + uStep * 2.11), gauss(cell + uStep * 3.07 + 9.1), gauss(cell + uStep * 4.13 + 21.3));
     fine = mix(vec3(fine.r), fine, 0.35);
     vec3 eps = vec3(soft) * 0.85 + fine * 0.4;
@@ -266,7 +266,7 @@
   let W = 0;
   let H = 0;
   function resize() {
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = card.clientWidth;
     H = card.clientHeight;
     canvas.width = Math.round(W * dpr);

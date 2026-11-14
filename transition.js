@@ -36,7 +36,8 @@
     'rico-arm': { title: 'RICO', key: 'rico' },
     'ftc-18844': { title: 'FTC team 18844', key: 'ftc' },
   };
-  const posterOf = key => new URL(`${ROOT}assets/loops/${key}.jpg`, location.href).href;
+  // full-resolution first frames of the clips (assets/hero); the maze clip only has its small poster
+  const posterOf = key => new URL(`${ROOT}assets/${key === 'nav' ? 'loops' : 'hero'}/${key}.jpg`, location.href).href;
   const ALL_KEYS = Object.values(FUTURES).map(f => f.key);
 
   function futureOf(href) {
@@ -153,35 +154,28 @@
   }
   const FULL = { cx: 0.5, cy: 0.5, z: 1 };
 
-  // a tile of fine grain, laid over noisy frames so they shimmer
-  const grain = document.createElement('canvas');
-  grain.width = grain.height = 128;
-  (() => {
-    const c = grain.getContext('2d');
-    const d = c.createImageData(128, 128);
-    for (let i = 0; i < d.data.length; i += 4) {
-      const v = Math.max(0, Math.min(255, 128 + gauss() * 70));
-      d.data[i] = d.data[i + 1] = d.data[i + 2] = v;
-      d.data[i + 3] = 255;
-    }
-    c.putImageData(d, 0, 0);
-  })();
+  // a table of Gaussian samples, read at a random stride so every frame gets fresh noise quickly
+  const GN = 1 << 18;
+  const GMASK = GN - 1;
+  const GT = new Float32Array(GN);
+  for (let i = 0; i < GN; i += 1) GT[i] = gauss();
 
   /* ---------- one frame of a diffusion sample ----------
      level 0 is pure noise, 1 is the picture. The picture is drawn
-     small and scaled up (so it comes back coarse to fine), mixed with
-     Gaussian noise as in the forward process with a cosine schedule,
-     and drifts towards a cool grey while it is noisy.            */
+     small and scaled up smoothly (so it comes back coarse to fine),
+     then every output pixel gets its own Gaussian noise as in the
+     forward process with a cosine schedule, and noisy frames drift
+     towards a cool grey.                                         */
 
   const scratch = document.createElement('canvas');
-  const sctx = scratch.getContext('2d', { willReadFrequently: true });
+  const sctx = scratch.getContext('2d');
 
   function paint(canvas, o) {
     const { W, H } = o;
     const level = Math.max(0, Math.min(1, o.level));
     if (canvas.width !== W) canvas.width = W;
     if (canvas.height !== H) canvas.height = H;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     const t = 1 - level;
     const scale = Math.max(0.035, level ** 2.3);
     const w = Math.max(3, Math.round(W * scale));
@@ -198,42 +192,35 @@
       sctx.drawImage(o.alt, ...cropOf(o.alt, W / H, o.altView || FULL), 0, 0, w, h);
       sctx.globalAlpha = 1;
     }
-    if (t > 0.001) {
-      const a = Math.cos(t * Math.PI / 2) ** 2;
-      const sa = Math.sqrt(a);
-      const sn = Math.sqrt(1 - a) * 0.5;
-      const data = sctx.getImageData(0, 0, w, h);
-      const d = data.data;
-      const grey = Math.min(0.85, t * 0.8);
-      for (let i = 0; i < d.length; i += 4) {
-        const e = gauss();
-        let r = sa * (d[i] / 127.5 - 1) + sn * (e + gauss() * 0.1);
-        let g = sa * (d[i + 1] / 127.5 - 1) + sn * (e + gauss() * 0.1);
-        let b = sa * (d[i + 2] / 127.5 - 1) + sn * (e + gauss() * 0.1);
-        const l = 0.299 * r + 0.587 * g + 0.114 * b;
-        r += (l * 0.95 - r) * grey;
-        g += (l * 0.99 - g) * grey;
-        b += (l * 1.06 - b) * grey;
-        d[i] = (r + 1) * 127.5;
-        d[i + 1] = (g + 1) * 127.5;
-        d[i + 2] = (b + 1) * 127.5;
-      }
-      sctx.putImageData(data, 0, 0);
-    }
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = 'high';
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
     ctx.drawImage(scratch, 0, 0, W, H);
-    if (t > 0.04) {
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = Math.min(0.55, t * 0.7);
-      const ox = Math.floor(Math.random() * 128);
-      const oy = Math.floor(Math.random() * 128);
-      for (let y = -oy; y < H; y += 128) for (let x = -ox; x < W; x += 128) ctx.drawImage(grain, x, y);
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = 1;
+    if (t < 0.001) return;
+    // x_t = sqrt(a) x_0 + sqrt(1 - a) eps, per pixel, mostly grey noise with a little colour
+    const a = Math.cos(t * Math.PI / 2) ** 2;
+    const sa = Math.sqrt(a);
+    const sn = Math.sqrt(1 - a) * 0.5;
+    const grey = Math.min(0.85, t * 0.8);
+    const data = ctx.getImageData(0, 0, W, H);
+    const d = data.data;
+    let k = Math.floor(Math.random() * GN);
+    const stride = (Math.floor(Math.random() * 2000) * 2 + 7919) & GMASK;
+    for (let i = 0; i < d.length; i += 4) {
+      k = (k + stride) & GMASK;
+      const e = GT[k];
+      const c = GT[(k + 104729) & GMASK] * 0.1;
+      let r = sa * (d[i] / 127.5 - 1) + sn * (e + c);
+      let g = sa * (d[i + 1] / 127.5 - 1) + sn * e;
+      let b = sa * (d[i + 2] / 127.5 - 1) + sn * (e - c);
+      const l = 0.299 * r + 0.587 * g + 0.114 * b;
+      r += (l * 0.95 - r) * grey;
+      g += (l * 0.99 - g) * grey;
+      b += (l * 1.06 - b) * grey;
+      d[i] = (r + 1) * 127.5;
+      d[i + 1] = (g + 1) * 127.5;
+      d[i + 2] = (b + 1) * 127.5;
     }
+    ctx.putImageData(data, 0, 0);
   }
 
   // imagined trajectories: a fan of smooth noisy paths from the cursor towards the goal
@@ -395,11 +382,11 @@
     const img = await Promise.race([imgP, sleep(250).then(() => null)]) || null;
     const encode = (async () => {
       if (!img || src.width < 40) { enc.style.opacity = '0'; return; }
-      const EW = Math.ceil(VW / 3);
-      const EH = Math.ceil(VH / 3);
-      for (const level of [1, 0.9, 0.78, 0.64, 0.5, 0.38, 0.26, 0.16]) {
+      const EW = Math.ceil(VW / 1.5);
+      const EH = Math.ceil(VH / 1.5);
+      for (const level of [1, 0.84, 0.66, 0.48, 0.32, 0.18]) {
         paint(enc, { W: EW, H: EH, img, level });
-        await sleep(70);
+        await sleep(60);
       }
       enc.style.opacity = '0';
     })();
@@ -514,12 +501,12 @@
     tag.className = 'wam-tag';
     tag.textContent = `t+${F} · denoising`;
     root.append(tag);
-    const W = Math.ceil(VW / 2);
-    const H = Math.ceil(VH / 2);
-    for (const level of [0.62, 0.72, 0.8, 0.87, 0.92, 0.96, 0.985]) {
+    const W = VW;
+    const H = VH;
+    for (const level of [0.66, 0.79, 0.88, 0.94, 0.98]) {
       if (skipped) return;
       paint(big, { W, H, img: image, level });
-      await sleep(80);
+      await sleep(45);
     }
     if (image) {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);

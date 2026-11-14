@@ -18,11 +18,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <!-- bump ?v= whenever style.css, main.js, home.js or transition.js changes: GitHub Pages caches for 10 min, and a stale stylesheet with new HTML breaks the layout -->
-<link rel="stylesheet" href="style.css?v=2026-11-14d">
+<link rel="stylesheet" href="style.css?v=2026-11-14e">
 <script>document.documentElement.classList.add('js');</script>
-<script src="main.js?v=2026-11-14d" defer></script>
-<script src="transition.js?v=2026-11-14d" defer></script>
-<script src="home.js?v=2026-11-14d" defer></script>
+<script src="main.js?v=2026-11-14e" defer></script>
+<script src="transition.js?v=2026-11-14e" defer></script>
+<script src="home.js?v=2026-11-14e" defer></script>
 </head>
 
 <body class="home">
@@ -44,10 +44,10 @@
 <!-- ========== hero: a diffusion sample of a project clip; it denoises under the cursor (home.js) ========== -->
 <section class="hero" aria-label="Introduction">
   <div class="hero-card" id="hero">
-    <video class="hero-src" src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
+    <video class="hero-src" src="assets/hero/brackey.mp4" poster="assets/hero/brackey.jpg" muted loop playsinline autoplay preload="auto" aria-hidden="true"></video>
     <canvas class="hero-gl" aria-hidden="true"></canvas>
     <div class="hero-shade" aria-hidden="true"></div>
-    <p class="hero-line" id="hero-line">Fine-tuning VLAs at WATonomous. Previously Team Canada at FIRST Worlds.</p>
+    <p class="hero-line" id="hero-line">Deploying VLAs and WAMs</p>
     <a class="hero-down" href="#about" aria-label="Scroll to the rest of the page"></a>
     <p class="hero-sub">Studying Mechatronics Engineering<br>at the University of Waterloo</p>
     <a class="hero-sample" id="hero-sample" href="projects/brackey-way.html"><span class="k">sample 01</span><span class="v">The Brackey Way</span></a>
@@ -86,7 +86,7 @@
 
       <article class="proj proj-wide">
         <a class="proj-card" href="projects/pi05-pick-place.html">
-          <video src="assets/loops/pi05.mp4?v=2" poster="assets/loops/pi05.jpg?v=2" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <video src="assets/hero/pi05.mp4" poster="assets/hero/pi05.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
           <span class="proj-top"><span><b>π₀.5 pick and place</b><small>A VLA fine-tuned for a humanoid arm</small></span></span>
           <span class="proj-bot"><span class="proj-tags">π₀.5 · LeRobot · Isaac Sim</span><span class="proj-go">Imagine it →</span></span>
         </a>
@@ -94,7 +94,7 @@
 
       <article class="proj">
         <a class="proj-card" href="projects/brackey-way.html">
-          <video src="assets/brackey/card_loop.mp4" poster="assets/loops/brackey.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <video src="assets/hero/brackey.mp4" poster="assets/hero/brackey.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
           <span class="proj-top"><span><b>The Brackey Way</b><small>A dual-arm robot that makes a sandwich</small></span><span class="proj-award">1st, BOTS</span></span>
           <span class="proj-bot"><span class="proj-tags">π₀ · OpenCV · IK</span><span class="proj-go">Imagine it →</span></span>
         </a>
@@ -102,7 +102,7 @@
 
       <article class="proj">
         <a class="proj-card" href="projects/quadruped-ppo.html">
-          <video src="assets/loops/quad.mp4" poster="assets/loops/quad.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <video src="assets/hero/quad.mp4" poster="assets/hero/quad.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
           <span class="proj-top"><span><b>Go2 locomotion</b><small>A quadruped walking policy, trained from scratch</small></span></span>
           <span class="proj-bot"><span class="proj-tags">Isaac Lab · PPO · rsl_rl</span><span class="proj-go">Imagine it →</span></span>
         </a>
@@ -118,7 +118,7 @@
 
       <article class="proj">
         <a class="proj-card" href="projects/rico-arm.html">
-          <video src="assets/loops/rico.mp4" poster="assets/loops/rico.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <video src="assets/hero/rico.mp4" poster="assets/hero/rico.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
           <span class="proj-top"><span><b>RICO</b><small>An arm that hands you the tool you ask for</small></span></span>
           <span class="proj-bot"><span class="proj-tags">YOLOv8 · IK · Groq LLM</span><span class="proj-go">Imagine it →</span></span>
         </a>
@@ -126,7 +126,7 @@
 
       <article class="proj">
         <a class="proj-card" href="projects/ftc-18844.html">
-          <video src="assets/loops/ftc.mp4" poster="assets/loops/ftc.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
+          <video src="assets/hero/ftc.mp4" poster="assets/hero/ftc.jpg" muted loop playsinline preload="none" data-loop aria-hidden="true"></video>
           <span class="proj-top"><span><b>FTC team 18844</b><small>Pathing and vision for a FIRST Worlds robot</small></span></span>
           <span class="proj-bot"><span class="proj-tags">Java · PID control · OpenCV</span><span class="proj-go">Imagine it →</span></span>
         </a>
