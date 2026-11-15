@@ -13,7 +13,7 @@
      5. its last frame grows to fill the screen and sharpens, and the
         real page comes into focus underneath it
 
-   Neutral greys and one blue, the same as the rest of the site.
+   Neutral greys and one pastel purple, the same as the rest of the site.
    Click, Esc or Enter skips. Reduced motion goes straight there.
    Shared by every page. window.wamImagine(href, opts) starts it.
    ========================================================= */
@@ -24,8 +24,8 @@
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const ROOT = document.documentElement.dataset.root || '';
   const KEY = 'wam-arrive';
-  const BLUE = '#6ea8ff';
-  const blueA = a => `rgba(110,168,255,${a})`;
+  const ACCENT = '#c3b1fa';
+  const accentA = a => `rgba(195,177,250,${a})`;
 
   // where each project lives, and the frame its future resolves to
   const FUTURES = {
@@ -61,7 +61,7 @@
   .wam-bg{position:fixed;overflow:hidden;background:#0a0a0a;border-radius:16px;
     transition:left .45s cubic-bezier(.7,0,.2,1),top .45s cubic-bezier(.7,0,.2,1),width .45s cubic-bezier(.7,0,.2,1),height .45s cubic-bezier(.7,0,.2,1),border-radius .45s cubic-bezier(.7,0,.2,1)}
   .wam-bg::after{content:"";position:absolute;inset:-20%;opacity:0;transition:opacity 1s ease;
-    background:radial-gradient(45% 40% at 50% 46%,rgba(47,111,228,.16),transparent 70%),radial-gradient(30% 30% at 70% 70%,rgba(110,168,255,.07),transparent 70%);
+    background:radial-gradient(45% 40% at 50% 46%,rgba(124,95,214,.17),transparent 70%),radial-gradient(30% 30% at 70% 70%,rgba(195,177,250,.07),transparent 70%);
     animation:wam-drift 9s ease-in-out infinite alternate}
   .wam.is-dark .wam-bg::after{opacity:1}
   .wam-enc{position:absolute;inset:0;width:100%;height:100%;transition:opacity .5s ease}
@@ -70,19 +70,19 @@
   .wam.is-dark .wam-panel{opacity:1;transform:translate(-50%,-50%)}
   .wam-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;margin-bottom:20px}
   .wam-title{margin:0 0 12px;font-size:clamp(24px,3.6vw,36px);font-weight:500;line-height:1.1;letter-spacing:-.025em;color:#fafafa}
-  .wam-title i{font-style:normal;display:inline-block;color:${BLUE};animation:wam-dot 1.2s ease-in-out infinite}
+  .wam-title i{font-style:normal;display:inline-block;color:${ACCENT};animation:wam-dot 1.2s ease-in-out infinite}
   .wam-title i:nth-child(2){animation-delay:.15s}
   .wam-title i:nth-child(3){animation-delay:.3s}
   .wam-log{margin:0;min-height:8em;font:12px/1.6 "Geist Mono",ui-monospace,monospace;color:#8a8a8a;white-space:pre-wrap}
-  .wam-log b{font-weight:500;color:${BLUE}}
+  .wam-log b{font-weight:500;color:${ACCENT}}
   .wam-z{display:grid;grid-template-columns:repeat(16,6px);gap:4px}
   .wam-z i{width:6px;height:6px;border-radius:50%;background:#222;transition:background-color .25s,box-shadow .25s}
   .wam-z i.h{background:#3a3a3d}
-  .wam-z i.on{background:${BLUE};box-shadow:0 0 6px ${blueA(0.7)}}
+  .wam-z i.on{background:${ACCENT};box-shadow:0 0 6px ${accentA(0.7)}}
   .wam-cap{margin:8px 0 0;font:10px/1.4 "Geist Mono",ui-monospace,monospace;color:#525252;text-align:right}
   .wam-prog{display:flex;align-items:center;gap:14px;margin:0 0 14px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#737373}
   .wam-prog-bar{flex:1;height:2px;border-radius:2px;background:#1f1f1f;overflow:hidden}
-  .wam-prog-bar i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#2f6fe4,${BLUE});box-shadow:0 0 10px ${blueA(0.7)}}
+  .wam-prog-bar i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#7c5fd6,${ACCENT});box-shadow:0 0 10px ${accentA(0.7)}}
   .wam-prog-txt{min-width:10em;text-align:right}
   .wam-row{display:grid;grid-template-columns:72px repeat(var(--F),minmax(0,1fr)) 92px;gap:8px;align-items:center;margin-bottom:8px;transition:opacity .5s ease,filter .5s ease}
   .wam-row>label{font:11px/1 "Geist Mono",ui-monospace,monospace;color:#737373}
@@ -94,17 +94,17 @@
   .wam-meter i{display:block;height:100%;width:0;background:#8a8a8a;border-radius:2px}
   .wam-row.lose{opacity:.26;filter:grayscale(1)}
   .wam-row.win>label,.wam-row.win .wam-score{color:#fafafa}
-  .wam-row.win .wam-meter i{background:${BLUE};box-shadow:0 0 8px ${blueA(0.8)}}
-  .wam-row.win .wam-cell canvas{box-shadow:0 0 0 1px ${blueA(0.45)}}
-  .wam-row.win .wam-cell.play canvas{transform:scale(1.07);box-shadow:0 0 0 1.5px ${BLUE},0 0 26px ${blueA(0.45)}}
+  .wam-row.win .wam-meter i{background:${ACCENT};box-shadow:0 0 8px ${accentA(0.8)}}
+  .wam-row.win .wam-cell canvas{box-shadow:0 0 0 1px ${accentA(0.45)}}
+  .wam-row.win .wam-cell.play canvas{transform:scale(1.07);box-shadow:0 0 0 1.5px ${ACCENT},0 0 26px ${accentA(0.45)}}
   .wam-axis{margin:4px 0 0}
   .wam-axis span{font:10px/1 "Geist Mono",ui-monospace,monospace;color:#525252;text-align:center}
-  .wam-grow{position:fixed;z-index:3;border-radius:6px;background:#141414;box-shadow:0 0 0 1.5px ${BLUE},0 0 40px ${blueA(0.4)};
+  .wam-grow{position:fixed;z-index:3;border-radius:6px;background:#141414;box-shadow:0 0 0 1.5px ${ACCENT},0 0 40px ${accentA(0.4)};
     transition:left .4s cubic-bezier(.7,0,.2,1),top .4s cubic-bezier(.7,0,.2,1),width .4s cubic-bezier(.7,0,.2,1),height .4s cubic-bezier(.7,0,.2,1),border-radius .4s ease,box-shadow .4s ease}
   .wam-skip{position:absolute;right:18px;bottom:16px;margin:0;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#525252;opacity:0;transition:opacity .3s}
   .wam.is-dark .wam-skip{opacity:1}
   .wam-tag{position:absolute;left:18px;top:16px;z-index:4;margin:0;display:flex;align-items:center;gap:8px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#fafafa;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-  .wam-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:${BLUE};box-shadow:0 0 8px ${BLUE}}
+  .wam-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 8px ${ACCENT}}
   @keyframes wam-dot{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
   @keyframes wam-drift{from{transform:translate(-3%,-2%)}to{transform:translate(3%,2%)}}
   @media (max-width:640px){
@@ -166,7 +166,7 @@
      then every output pixel gets its own Gaussian noise as in the
      forward process with a cosine schedule, with a little colour of
      its own in each channel; the picture under it drifts towards a
-     cool grey as it gets noisier.                                         */
+     lavender grey as it gets noisier.                                         */
 
   const scratch = document.createElement('canvas');
   const sctx = scratch.getContext('2d');
@@ -213,8 +213,8 @@
       let g = d[i + 1] / 127.5 - 1;
       let b = d[i + 2] / 127.5 - 1;
       const l = 0.299 * r + 0.587 * g + 0.114 * b;
-      r += (l * 0.95 - r) * grey;
-      g += (l * 0.99 - g) * grey;
+      r += (l * 0.99 - r) * grey;
+      g += (l * 0.96 - g) * grey;
       b += (l * 1.06 - b) * grey;
       d[i] = (sa * r + sn * (e + GT[(k + 104729) & GMASK] * 0.38) + 1) * 127.5;
       d[i + 1] = (sa * g + sn * (e + GT[(k + 7919) & GMASK] * 0.38) + 1) * 127.5;
@@ -266,19 +266,19 @@
           ctx.beginPath();
           ctx.moveTo(from.x, from.y);
           for (let j = 0; j < n; j += 1) ctx.lineTo(pts[j][0], pts[j][1]);
-          ctx.strokeStyle = chosen ? '#ffffff' : blueA(0.38);
+          ctx.strokeStyle = chosen ? '#ffffff' : accentA(0.38);
           ctx.lineWidth = chosen ? 2 : 1.2;
-          ctx.shadowColor = chosen ? blueA(1) : blueA(0.5);
+          ctx.shadowColor = chosen ? accentA(1) : accentA(0.5);
           ctx.shadowBlur = chosen ? 14 : 6;
           ctx.stroke();
           ctx.shadowBlur = 0;
           const [ex, ey] = pts[n - 1];
-          ctx.fillStyle = chosen ? '#ffffff' : blueA(0.7);
+          ctx.fillStyle = chosen ? '#ffffff' : accentA(0.7);
           ctx.beginPath();
           ctx.arc(ex, ey, chosen ? 3 : 2, 0, Math.PI * 2);
           ctx.fill();
         });
-        ctx.strokeStyle = blueA(0.9);
+        ctx.strokeStyle = accentA(0.9);
         ctx.lineWidth = 1.2;
         ctx.beginPath();
         ctx.arc(from.x, from.y, 6 + 10 * e, 0, Math.PI * 2);
@@ -383,8 +383,8 @@
     const img = await Promise.race([imgP, sleep(250).then(() => null)]) || null;
     const encode = (async () => {
       if (!img || src.width < 40) { enc.style.opacity = '0'; return; }
-      const EW = Math.ceil(VW / 1.5);
-      const EH = Math.ceil(VH / 1.5);
+      const EW = VW;
+      const EH = VH;
       for (const level of [1, 0.84, 0.66, 0.48, 0.32, 0.18]) {
         paint(enc, { W: EW, H: EH, img, level });
         await sleep(30);

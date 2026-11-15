@@ -5,13 +5,13 @@
    clip, 1 = pure noise); the clip is mixed with Gaussian noise the way
    a diffusion model's forward process does it, and blurred more where
    t is high so structure comes back coarse to fine. The noise carries
-   a little colour.
+   a little colour, and the highlights are a pastel purple.
 
-   Your cursor denoises the area around it, across tiles. The tile you
-   point at is sampled clean and a ripple runs out from where you
-   entered it; with nobody pointing, the tiles take turns. On load
-   every tile starts as pure noise and they resolve one after another,
-   behind a ripple from the corner.
+   Your cursor denoises a circle around it, the same circle across
+   every tile; the tile you point at shows its labels. With nobody
+   pointing, the tiles take turns being sampled clean. On load every
+   tile starts as pure noise and they resolve one after another,
+   behind a single ripple from the corner.
 
    Also here: the header colour over the hero, the hero line that
    resolves letter by letter, the action log in the corner, the clock.
@@ -179,7 +179,7 @@
     return sqrt(-2.0 * log(u1)) * cos(6.2831853 * u2);
   }
   vec3 hash3(vec2 p){ return vec3(hash(p), hash(p + 31.7), hash(p + 63.1)); }
-  vec3 hue(float h){ return 0.5 + 0.5 * cos(6.2831853 * (h + vec3(0.0, 0.33, 0.67))); }
+  const vec3 LILAC = vec3(0.80, 0.72, 1.0);   // the site's pastel purple
 
   vec3 tap(int i, vec2 uv, float lod){
     if (i == 1) return textureLod(uI1, uv, lod).rgb;
@@ -189,15 +189,15 @@
     return textureLod(uI5, uv, lod).rgb;
   }
 
-  // the intro tile's picture: a dark colour field that drifts slowly
+  // the intro tile's picture: a dark purple field that drifts slowly
   vec3 latent(vec2 p){
     float s = uTime * 0.07;
     float a = sin(p.x * 2.6 + s * 1.9 + sin(p.y * 2.1 - s));
     float b = sin(p.y * 3.1 - s * 1.4 + sin(p.x * 1.7 + s * 1.2));
-    vec3 c = vec3(0.04, 0.045, 0.06);
-    c += vec3(0.12, 0.26, 0.70) * smoothstep(-0.1, 1.0, a) * 0.2;
-    c += vec3(0.45, 0.16, 0.60) * smoothstep(0.35, 1.0, b) * 0.12;
-    c += vec3(0.05, 0.45, 0.45) * smoothstep(0.45, 1.0, a * b) * 0.1;
+    vec3 c = vec3(0.045, 0.042, 0.06);
+    c += vec3(0.42, 0.30, 0.85) * smoothstep(-0.1, 1.0, a) * 0.2;
+    c += vec3(0.70, 0.50, 0.90) * smoothstep(0.35, 1.0, b) * 0.1;
+    c += vec3(0.25, 0.20, 0.60) * smoothstep(0.45, 1.0, a * b) * 0.12;
     return c;
   }
 
@@ -208,7 +208,6 @@
     float tf = texture(uT, vec2(fc.x / uRes.x, 1.0 - fc.y / uRes.y)).r;
     float rd = distance(fc, uRip.xy);
     float ring = uRip.w * exp(-pow((rd - uRip.z * 900.0 * uDpr) / (46.0 * uDpr), 2.0)) * exp(-uRip.z * 1.8);
-    vec3 irid = hue(rd / (340.0 * uDpr) - uTime * 0.25);
     // the contour below only shows where the noise level changes, not on a whole tile at once
     float edgeW = smoothstep(0.0003, 0.0025, fwidth(tf + ring * 0.4));
 
@@ -223,7 +222,7 @@
       float s = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - uRad;
       if (s < 1.0) { idx = i; sd = s; R = r; break; }
     }
-    vec3 bg = uBg + irid * ring * 0.08;
+    vec3 bg = uBg + LILAC * ring * 0.06;
     if (idx < 0) { o = vec4(bg, 1.0); return; }
     float m = clamp(0.5 - sd, 0.0, 1.0);
     vec4 P = uTile[idx];
@@ -249,17 +248,17 @@
       x0 = vec3(0.11, 0.12, 0.14);
     }
     float l = dot(x0, vec3(0.299, 0.587, 0.114));
-    x0 = mix(x0, vec3(l) * vec3(0.95, 0.99, 1.05), t * 0.45);
+    x0 = mix(x0, vec3(l) * vec3(0.99, 0.96, 1.05), t * 0.45);
 
-    // Gaussian noise, a new draw every sampling step: soft 3 px blotches, a coarser
-    // RGB tint, per-pixel grain with some colour, and a rare bright RGB speck
+    // Gaussian noise, a new draw every sampling step: soft 2 px blotches, a slightly
+    // coarser RGB tint, per-pixel grain with some colour, and a rare lilac speck
     float st = uStep * 1.37;
-    vec2 q = fc / 3.0;
+    vec2 q = fc / 2.0;
     vec2 qi = floor(q);
     vec2 qf = smoothstep(0.0, 1.0, fract(q));
     float soft = mix(mix(gauss(qi + st), gauss(qi + vec2(1.0, 0.0) + st), qf.x),
                      mix(gauss(qi + vec2(0.0, 1.0) + st), gauss(qi + vec2(1.0, 1.0) + st), qf.x), qf.y);
-    vec2 k = fc / 9.0;
+    vec2 k = fc / 4.0;
     vec2 ki = floor(k);
     vec2 kf = smoothstep(0.0, 1.0, fract(k));
     vec3 tint = mix(mix(hash3(ki + st), hash3(ki + vec2(1.0, 0.0) + st), kf.x),
@@ -267,9 +266,8 @@
     vec2 cell = floor(fc);
     vec3 fine = vec3(gauss(cell + uStep * 2.11), gauss(cell + uStep * 3.07 + 9.1), gauss(cell + uStep * 4.13 + 21.3));
     fine = mix(vec3(fine.g), fine, 0.5);
-    vec3 eps = vec3(soft) * 0.85 + tint * 0.75 + fine * 0.42;
-    vec2 spc = floor(fc / (2.0 * uDpr));
-    eps += step(0.9965, hash(spc * 0.71 + uStep * 7.3)) * (hue(hash(spc + st)) * 2.0 - 0.6) * 2.2;
+    vec3 eps = vec3(soft) * 0.7 + tint * 0.6 + fine * 0.55;
+    eps += step(0.997, hash(cell * 0.71 + uStep * 7.3)) * LILAC * 2.6;
 
     // the forward process with a cosine schedule: x_t = sqrt(a) x_0 + sqrt(1 - a) eps
     float a = cos(t * 1.5707963);
@@ -278,14 +276,12 @@
     vec3 xt = sqrt(a) * (x0 * 2.0 - 1.0) + sqrt(1.0 - a) * eps * amp;
     vec3 c = clamp(xt * 0.5 + 0.5, 0.0, 1.0);
 
-    // where the clean patch meets the noise, a thin contour split into red, green and blue
-    float rr = smoothstep(0.10, 0.17, t) * (1.0 - smoothstep(0.17, 0.25, t));
-    float rg = smoothstep(0.15, 0.22, t) * (1.0 - smoothstep(0.22, 0.30, t));
-    float rb = smoothstep(0.20, 0.27, t) * (1.0 - smoothstep(0.27, 0.38, t));
-    c += vec3(rr * 0.55, rg * 0.45, rb) * 0.32 * edgeW;
+    // where the clean patch meets the noise, a thin lilac contour
+    float rim = smoothstep(0.12, 0.2, t) * (1.0 - smoothstep(0.24, 0.36, t));
+    c += LILAC * rim * 0.26 * edgeW;
 
     // the ripple catches the light as it passes
-    c += irid * ring * 0.16;
+    c += LILAC * ring * 0.14;
 
     o = vec4(mix(bg, c, m), 1.0);
   }`;
@@ -440,21 +436,20 @@
   /* ---------- focus: the tile being sampled clean ---------- */
 
   let rip = { x: 0, y: 0, t0: -1e9, s: 0 };
-  const ripple = (x, y, s) => { rip = { x, y, t0: performance.now(), s }; };
   const tileAt = (x, y) => tiles.findIndex(t => x >= t.x && x <= t.x + t.w && y >= t.y && y <= t.y + t.h);
 
   let focus = -1;
-  function setFocus(i, from) {
-    if (i === focus) return;
+  // auto: the tile is being sampled clean (nobody is pointing); otherwise it is only pointed at
+  let autoFocus = false;
+  function setFocus(i, auto = false) {
+    if (i === focus && auto === autoFocus) return;
     focus = i;
+    autoFocus = auto;
     tiles.forEach((t, j) => t.el.classList.toggle('is-focus', j === i));
-    if (i < 0) return;
-    const t = tiles[i];
-    ripple(from ? from.x : t.x + t.w / 2, from ? from.y : t.y + t.h / 2, from ? 1 : 0.6);
-    if (t.label) resolve(t.label, t.title, 520);
+    if (i > 0 && auto && tiles[i].label) resolve(tiles[i].label, tiles[i].title, 520);
   }
 
-  // on load: a ripple from the top-left corner, and every tile resolves as it passes
+  // on load: one ripple from the top-left corner, and every tile resolves as it passes
   const LOAD = performance.now() + 200;
   const SPEED = 0.9;          // css px per ms, the same as the ripple in the shader
   tiles.forEach(t => {
@@ -485,7 +480,7 @@
     pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
     card.classList.add('is-pointing');
     const i = tileAt(pointer.x, pointer.y);
-    setFocus(i > 0 ? i : -1, pointer);
+    setFocus(i > 0 ? i : -1);
     const now = performance.now();
     if (i > 0 && i !== lastLogged) { lastLogged = i; act(`attend ${tiles[i].title.length > 16 ? `${tiles[i].title.slice(0, 15)}…` : tiles[i].title}`); lastAct = now; }
     else if (now - lastAct > 6000) { lastAct = now; act('denoise hero'); }
@@ -533,7 +528,7 @@
 
     // nobody pointing: hand the focus to the next project
     if (!pointer && now >= autoAt) {
-      setFocus(ORDER[autoK % ORDER.length]);
+      setFocus(ORDER[autoK % ORDER.length], true);
       autoK += 1;
       autoAt = now + AUTO;
     }
@@ -570,11 +565,12 @@
     const kz = 1 - Math.exp(-dt / 0.5);
     tiles.forEach((tile, i) => {
       const focused = i === focus;
-      const cleanTo = tile.intro ? 0.3 : (focused ? 0.88 : 0);
-      const extraTo = !tile.intro && focus > 0 && !focused ? 0.12 : 0;
+      const sampled = focused && autoFocus;
+      const cleanTo = tile.intro ? 0.3 : (sampled ? 0.88 : 0);
+      const extraTo = !tile.intro && autoFocus && focus > 0 && !focused ? 0.12 : 0;
       tile.clean += (cleanTo - tile.clean) * kc;
       tile.extra += (extraTo - tile.extra) * kc;
-      tile.zoom += ((focused ? 1.05 : 1) - tile.zoom) * kz;
+      tile.zoom += ((focused ? 1.03 : 1) - tile.zoom) * kz;
       const sweep = sweepOf(tile, now);
       params.set([1 - (1 - sweep) * (1 - tile.extra), tile.clean, tile.intro || tile.hasImg ? 1 : 0, 0], i * 4);
 
@@ -631,7 +627,7 @@
   start();
 
   // test hook
-  window.__hero = { focus: i => setFocus(i), get current() { return focus; }, field: () => field, tiles };
+  window.__hero = { focus: (i, auto = true) => setFocus(i, auto), get current() { return focus; }, field: () => field, tiles };
 })();
 
 
