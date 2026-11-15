@@ -59,14 +59,14 @@
     font-family:"Geist","Geist Fallback",system-ui,sans-serif;color:#fafafa;-webkit-font-smoothing:antialiased}
   .wam canvas{display:block}
   .wam-bg{position:fixed;overflow:hidden;background:#0a0a0a;border-radius:16px;
-    transition:left .7s cubic-bezier(.7,0,.2,1),top .7s cubic-bezier(.7,0,.2,1),width .7s cubic-bezier(.7,0,.2,1),height .7s cubic-bezier(.7,0,.2,1),border-radius .7s cubic-bezier(.7,0,.2,1)}
+    transition:left .45s cubic-bezier(.7,0,.2,1),top .45s cubic-bezier(.7,0,.2,1),width .45s cubic-bezier(.7,0,.2,1),height .45s cubic-bezier(.7,0,.2,1),border-radius .45s cubic-bezier(.7,0,.2,1)}
   .wam-bg::after{content:"";position:absolute;inset:-20%;opacity:0;transition:opacity 1s ease;
     background:radial-gradient(45% 40% at 50% 46%,rgba(47,111,228,.16),transparent 70%),radial-gradient(30% 30% at 70% 70%,rgba(110,168,255,.07),transparent 70%);
     animation:wam-drift 9s ease-in-out infinite alternate}
   .wam.is-dark .wam-bg::after{opacity:1}
   .wam-enc{position:absolute;inset:0;width:100%;height:100%;transition:opacity .5s ease}
   .wam-trace{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  .wam-panel{position:absolute;left:50%;top:50%;width:min(980px,calc(100vw - 32px));transform:translate(-50%,-48%);opacity:0;transition:opacity .45s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+  .wam-panel{position:absolute;left:50%;top:50%;width:min(980px,calc(100vw - 32px));transform:translate(-50%,-48%);opacity:0;transition:opacity .3s ease,transform .4s cubic-bezier(.2,.7,.2,1)}
   .wam.is-dark .wam-panel{opacity:1;transform:translate(-50%,-50%)}
   .wam-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;margin-bottom:20px}
   .wam-title{margin:0 0 12px;font-size:clamp(24px,3.6vw,36px);font-weight:500;line-height:1.1;letter-spacing:-.025em;color:#fafafa}
@@ -100,7 +100,7 @@
   .wam-axis{margin:4px 0 0}
   .wam-axis span{font:10px/1 "Geist Mono",ui-monospace,monospace;color:#525252;text-align:center}
   .wam-grow{position:fixed;z-index:3;border-radius:6px;background:#141414;box-shadow:0 0 0 1.5px ${BLUE},0 0 40px ${blueA(0.4)};
-    transition:left .65s cubic-bezier(.7,0,.2,1),top .65s cubic-bezier(.7,0,.2,1),width .65s cubic-bezier(.7,0,.2,1),height .65s cubic-bezier(.7,0,.2,1),border-radius .65s ease,box-shadow .65s ease}
+    transition:left .4s cubic-bezier(.7,0,.2,1),top .4s cubic-bezier(.7,0,.2,1),width .4s cubic-bezier(.7,0,.2,1),height .4s cubic-bezier(.7,0,.2,1),border-radius .4s ease,box-shadow .4s ease}
   .wam-skip{position:absolute;right:18px;bottom:16px;margin:0;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#525252;opacity:0;transition:opacity .3s}
   .wam.is-dark .wam-skip{opacity:1}
   .wam-tag{position:absolute;left:18px;top:16px;z-index:4;margin:0;display:flex;align-items:center;gap:8px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#fafafa;text-shadow:0 1px 6px rgba(0,0,0,.6)}
@@ -117,7 +117,7 @@
   html.wam-arriving,html.wam-arriving body{background:#0a0a0a!important}
   html.wam-arriving body>*:not(.wam){visibility:hidden}
   html.wam-focus body>*:not(.wam){filter:blur(14px);opacity:0}
-  html.wam-focusing body>*:not(.wam){transition:filter .9s cubic-bezier(.2,.7,.2,1),opacity .7s ease}
+  html.wam-focusing body>*:not(.wam){transition:filter .65s cubic-bezier(.2,.7,.2,1),opacity .5s ease}
   `;
   document.head.append(style);
 
@@ -164,8 +164,9 @@
      level 0 is pure noise, 1 is the picture. The picture is drawn
      small and scaled up smoothly (so it comes back coarse to fine),
      then every output pixel gets its own Gaussian noise as in the
-     forward process with a cosine schedule, and noisy frames drift
-     towards a cool grey.                                         */
+     forward process with a cosine schedule, with a little colour of
+     its own in each channel; the picture under it drifts towards a
+     cool grey as it gets noisier.                                         */
 
   const scratch = document.createElement('canvas');
   const sctx = scratch.getContext('2d');
@@ -208,17 +209,16 @@
     for (let i = 0; i < d.length; i += 4) {
       k = (k + stride) & GMASK;
       const e = GT[k];
-      const c = GT[(k + 104729) & GMASK] * 0.1;
-      let r = sa * (d[i] / 127.5 - 1) + sn * (e + c);
-      let g = sa * (d[i + 1] / 127.5 - 1) + sn * e;
-      let b = sa * (d[i + 2] / 127.5 - 1) + sn * (e - c);
+      let r = d[i] / 127.5 - 1;
+      let g = d[i + 1] / 127.5 - 1;
+      let b = d[i + 2] / 127.5 - 1;
       const l = 0.299 * r + 0.587 * g + 0.114 * b;
       r += (l * 0.95 - r) * grey;
       g += (l * 0.99 - g) * grey;
       b += (l * 1.06 - b) * grey;
-      d[i] = (r + 1) * 127.5;
-      d[i + 1] = (g + 1) * 127.5;
-      d[i + 2] = (b + 1) * 127.5;
+      d[i] = (sa * r + sn * (e + GT[(k + 104729) & GMASK] * 0.38) + 1) * 127.5;
+      d[i + 1] = (sa * g + sn * (e + GT[(k + 7919) & GMASK] * 0.38) + 1) * 127.5;
+      d[i + 2] = (sa * b + sn * (e + GT[(k + 31337) & GMASK] * 0.38) + 1) * 127.5;
     }
     ctx.putImageData(data, 0, 0);
   }
@@ -291,14 +291,14 @@
     });
   }
 
-  function typeLine(el, html, perChar = 9) {
+  function typeLine(el, html, perChar = 4) {
     const line = document.createElement('span');
     el.append(line, '\n');
     const tmp = document.createElement('span');
     tmp.innerHTML = html;                 // type the text, then swap in the markup
     const text = tmp.textContent;
     return (async () => {
-      for (let i = 1; i <= text.length; i += 2) {
+      for (let i = 1; i <= text.length; i += 3) {
         line.textContent = text.slice(0, i);
         await sleep(perChar);
       }
@@ -329,7 +329,7 @@
     const narrow = VW < 640;
     const F = narrow ? 4 : 8;                          // frames per rollout
     const R = narrow || VH < 640 ? 3 : 4;             // rollouts
-    const STEPS = 4;                                   // denoising steps per frame
+    const STEPS = 3;                                   // denoising steps per frame
     const win = Math.floor(Math.random() * R);
 
     const root = document.createElement('div');
@@ -356,6 +356,7 @@
       </div>
       <p class="wam-skip">click to skip</p>`;
     document.body.append(root);
+    document.documentElement.classList.add('wam-on');   // the home page's hero stops drawing underneath
 
     let skipped = false;
     const go = () => {
@@ -386,7 +387,7 @@
       const EH = Math.ceil(VH / 1.5);
       for (const level of [1, 0.84, 0.66, 0.48, 0.32, 0.18]) {
         paint(enc, { W: EW, H: EH, img, level });
-        await sleep(60);
+        await sleep(30);
       }
       enc.style.opacity = '0';
     })();
@@ -394,14 +395,14 @@
     Object.assign(bg.style, { left: '0px', top: '0px', width: `${VW}px`, height: `${VH}px`, borderRadius: '0px' });
 
     // 2. a few futures, sampled from where the visitor acted
-    if (!opts.skipTraces) await drawTraces(traceCanvas, from, { x: VW * 0.5, y: VH * 0.58 }, 900);
-    else await sleep(700);
+    if (!opts.skipTraces) await drawTraces(traceCanvas, from, { x: VW * 0.5, y: VH * 0.58 }, 480);
+    else await sleep(400);
     await encode;
     if (skipped) return;
 
     // 3. the latent space: encode, then sample
     root.classList.add('is-dark');
-    traceCanvas.style.transition = 'opacity .8s';
+    traceCanvas.style.transition = 'opacity .5s';
     traceCanvas.style.opacity = '0.18';
     await typeLine(logEl, `&gt; imagine(action: <b>open "${name}"</b>)`);
     const tokens = [...root.querySelectorAll('.wam-z i')].sort(() => Math.random() - 0.5);
@@ -409,14 +410,14 @@
       for (let i = 0; i < tokens.length; i += 4) {
         tokens.slice(i, i + 4).forEach(t => t.classList.add('h'));
         if (i >= 8) tokens.slice(i - 8, i - 4).forEach(t => t.classList.add(Math.random() < 0.55 ? 'on' : 'h'));
-        await sleep(18);
+        await sleep(6);
       }
     })();
     await typeLine(logEl, '&gt; encode o_t → z_t ............ 96 tokens');
     await tok;
     if (skipped) return;
     await typeLine(logEl, `&gt; sample ${R} rollouts · ${F} frames · ${F * STEPS} denoising steps`);
-    const [image, alts] = await Promise.all([imgP, Promise.race([altP, sleep(900).then(() => [])])]);
+    const [image, alts] = await Promise.all([imgP, Promise.race([altP, sleep(500).then(() => [])])]);
     if (skipped) return;
 
     const v0 = { cx: rand(0.3, 0.7), cy: rand(0.35, 0.65), z: rand(1.9, 2.5) };    // the shared present
@@ -453,7 +454,7 @@
         const done = f * STEPS + s;
         progBar.style.width = `${(done / total) * 100}%`;
         progTxt.textContent = `denoising ${done}/${total}`;
-        await sleep(46);
+        await sleep(20);
       }
     }
     if (skipped) return;
@@ -465,7 +466,7 @@
     const bars = rows.map(row => row.querySelector('.wam-meter i'));
     const t0 = performance.now();
     while (!skipped) {
-      const k = Math.min(1, (performance.now() - t0) / 520);
+      const k = Math.min(1, (performance.now() - t0) / 300);
       const e = 1 - (1 - k) ** 3;
       nums.forEach((el, r) => { el.textContent = (scores[r] * e).toFixed(2); });
       bars.forEach((el, r) => { el.style.width = `${scores[r] * e * 100}%`; });
@@ -478,7 +479,7 @@
     for (let f = 0; f < F; f += 1) {
       if (skipped) return;
       grid[win].forEach((c, i) => c.classList.toggle('play', i === f));
-      await sleep(narrow ? 120 : 85);
+      await sleep(narrow ? 70 : 45);
     }
     if (skipped) return;
 
@@ -495,7 +496,7 @@
     big.getBoundingClientRect();
     Object.assign(big.style, { left: '0px', top: '0px', width: `${VW}px`, height: `${VH}px`, borderRadius: '0px', boxShadow: 'none' });
     root.querySelector('.wam-panel').style.opacity = '0';
-    await sleep(660);
+    await sleep(410);
     if (skipped) return;
     const tag = document.createElement('p');
     tag.className = 'wam-tag';
@@ -506,7 +507,7 @@
     for (const level of [0.66, 0.79, 0.88, 0.94, 0.98]) {
       if (skipped) return;
       paint(big, { W, H, img: image, level });
-      await sleep(45);
+      await sleep(24);
     }
     if (image) {
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -515,7 +516,7 @@
       big.getContext('2d').drawImage(image, ...cropOf(image, big.width / big.height, FULL), 0, 0, big.width, big.height);
     }
     tag.textContent = `t+${F} · future reached`;
-    await sleep(220);
+    await sleep(110);
     window.removeEventListener('keydown', onKey);
     if (!skipped) go();
   }
@@ -530,7 +531,7 @@
     if (!futureOf(a.href)) return;
     e.preventDefault();
     // grow from the card if a card was clicked
-    const box = a.matches('.proj-card') ? a : a.closest('.proj-card');
+    const box = a.closest('.proj-card, .ht');
     const r = box ? box.getBoundingClientRect() : null;
     imagine(a.href, {
       from: { x: e.clientX || window.innerWidth / 2, y: e.clientY || window.innerHeight / 2 },
@@ -577,12 +578,12 @@
       setTimeout(() => {
         html.classList.add('wam-focusing');
         requestAnimationFrame(() => html.classList.remove('wam-focus'));
-        root.style.transition = 'opacity 1s ease, filter 1s ease, transform 1.1s cubic-bezier(.2,.7,.2,1)';
+        root.style.transition = 'opacity .7s ease, filter .7s ease, transform .8s cubic-bezier(.2,.7,.2,1)';
         root.style.opacity = '0';
         root.style.filter = 'blur(18px)';
         root.style.transform = 'scale(1.04)';
-        setTimeout(() => { root.remove(); html.classList.remove('wam-focusing'); }, 1150);
-      }, 380);
+        setTimeout(() => { root.remove(); html.classList.remove('wam-focusing'); }, 850);
+      }, 180);
     });
   }
   arrive();
@@ -591,7 +592,7 @@
   window.addEventListener('pageshow', e => {
     if (e.persisted) {
       document.querySelectorAll('.wam').forEach(n => n.remove());
-      document.documentElement.classList.remove('wam-focus', 'wam-focusing');
+      document.documentElement.classList.remove('wam-focus', 'wam-focusing', 'wam-on');
       busy = false;
     }
   });

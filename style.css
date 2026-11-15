@@ -229,66 +229,93 @@ em{font-style:normal}
    Home
    ========================================================= */
 
-/* ---------- hero: a diffusion sample that denoises under the cursor (home.js) ---------- */
+/* ---------- hero: a grid of diffusion samples, one per project (home.js) ----------
+   One WebGL canvas draws every tile; the links on top only carry the
+   labels. The header sits on the card's top band. */
 
 .hero{padding:12px 12px 0}
 .hero-card{
   position:relative;overflow:hidden;
   width:min(100%,var(--col));
-  height:min(calc(100svh - 24px),var(--col));
-  min-height:520px;
+  height:min(calc(100svh - 24px),860px);
+  min-height:560px;
   margin:0 auto;
+  padding:calc(var(--nav-h) - 12px) 8px 8px;
   border-radius:var(--r);
-  background:#1b1d22;
+  background:#0a0a0a;
   color:#fff;
   isolation:isolate;
 }
-.hero-gl,.hero-src{position:absolute;inset:0;width:100%;height:100%;display:block}
-.hero-src{object-fit:cover}
-.hero-card.no-gl .hero-src{filter:saturate(.9)}
-.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.hero-gl{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block;pointer-events:none}
 .hero-card.no-gl .hero-gl{display:none}
-.hero-shade{
-  position:absolute;inset:0;pointer-events:none;
-  background:
-    radial-gradient(70% 55% at 50% 50%,rgba(0,0,0,.22),transparent 72%),
-    linear-gradient(to bottom,rgba(0,0,0,.32),transparent 22%,transparent 72%,rgba(0,0,0,.38));
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+.hero-grid{
+  position:relative;height:100%;
+  display:grid;gap:8px;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  grid-template-areas:"intro intro pi pi" "quad ftc pi pi" "bw bw rico rico";
 }
+.ht{position:relative;display:block;min-width:0;min-height:0;overflow:hidden;border-radius:12px;color:#fff}
+.ht:hover{color:#fff}
+.ht-intro{grid-area:intro}
+.ht-pi{grid-area:pi}
+.ht-quad{grid-area:quad}
+.ht-ftc{grid-area:ftc}
+.ht-bw{grid-area:bw}
+.ht-rico{grid-area:rico}
+/* the clip itself only shows when WebGL is missing; otherwise the canvas draws it */
+.ht-src{position:absolute;inset:0;z-index:0;width:100%;height:100%;max-width:none;object-fit:cover}
+.hero-card.no-gl .ht-intro{background:#16171a}
+.hero-card.no-gl .ht-src{filter:saturate(.9)}
+/* a little shade where the labels sit */
+.ht:not(.ht-intro)::after{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(to bottom,rgba(0,0,0,.42),transparent 34%,transparent 66%,rgba(0,0,0,.42));
+}
+.ht:not(.ht-intro)::before{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.07);transition:box-shadow .3s ease;
+}
+.ht.is-focus::before,.ht:focus-visible::before{box-shadow:inset 0 0 0 1px rgba(255,255,255,.22)}
+.ht:focus-visible{outline:none}
+.ht:focus-visible::before{box-shadow:inset 0 0 0 2px var(--blue-2)}
+
+.ht-top,.ht-bot{position:absolute;left:14px;right:14px;z-index:4;display:flex;justify-content:space-between;gap:.75rem;text-shadow:0 1px 10px rgba(0,0,0,.45)}
+.ht-top{top:12px;align-items:flex-start}
+.ht-bot{bottom:12px;align-items:flex-end}
+.ht-top b{display:flex;align-items:baseline;gap:.5rem;font-size:.86rem;font-weight:500;line-height:1.3}
+.ht-n{flex:none;font:400 .66rem/1 var(--font-mono);color:rgba(255,255,255,.62)}
+.ht-award{flex:none;padding:.08rem .5rem;border-radius:999px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.7rem;font-weight:500;text-shadow:none}
+.ht-tags{font:400 .68rem/1.4 var(--font-mono);color:rgba(255,255,255,.82)}
+.ht-go{
+  flex:none;padding:.26rem .65rem;border-radius:999px;
+  background:#fff;color:#171717;
+  font-size:.75rem;font-weight:500;text-shadow:none;white-space:nowrap;
+}
+.ht-tags,.ht-go{opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease,background-color .2s ease,color .2s ease}
+.ht.is-focus .ht-tags,.ht.is-focus .ht-go,.ht:hover .ht-tags,.ht:hover .ht-go,.ht:focus-visible .ht-tags,.ht:focus-visible .ht-go{opacity:1;transform:none}
+.ht:hover .ht-go{background:var(--blue-2);color:#0a0a0a}
+.ht-quad .ht-tags,.ht-ftc .ht-tags{display:none}
+.ht-quad .ht-bot,.ht-ftc .ht-bot{justify-content:flex-end}
+
+/* the intro tile: who I am, over a dark latent colour field */
+.ht-intro{display:flex;flex-direction:column;justify-content:space-between;padding:20px 22px 18px}
 .hero-line{
-  position:absolute;left:50%;top:50%;z-index:2;transform:translate(-50%,-50%);
-  width:min(90%,680px);margin:0;
-  font-size:clamp(1.7rem,4.4vw,2.6rem);font-weight:500;line-height:1.15;letter-spacing:-.025em;text-align:center;
+  position:relative;z-index:4;margin:0;
+  font-size:clamp(1.3rem,2.7vw,1.85rem);font-weight:500;line-height:1.14;letter-spacing:-.025em;
   text-shadow:0 1px 18px rgba(0,0,0,.35);
-  pointer-events:none;
 }
-.hero-down{
-  position:absolute;left:50%;top:calc(50% + clamp(3.4rem,6vw,4.3rem));z-index:2;transform:translateX(-50%);
-  width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-top:6px solid #fff;
-  opacity:.9;
-}
-.hero-sub{
-  position:absolute;left:20px;bottom:18px;z-index:2;margin:0;
-  font-size:.84rem;font-weight:500;line-height:1.35;
-  text-shadow:0 1px 10px rgba(0,0,0,.4);
-}
-.hero-sample{
-  position:absolute;right:52px;bottom:18px;z-index:2;
-  display:flex;align-items:baseline;gap:.5rem;
-  font-size:.84rem;font-weight:500;color:#fff;text-align:right;
-  text-shadow:0 1px 10px rgba(0,0,0,.4);
-}
-.hero-sample .k{font:400 .7rem/1 var(--font-mono);color:rgba(255,255,255,.7)}
-.hero-sample:hover{color:#fff}
-.hero-sample:hover .v{text-decoration:underline;text-underline-offset:3px}
-.hero-mail{
-  position:absolute;right:16px;bottom:15px;z-index:2;
-  padding:4px;border:0;background:none;color:#fff;cursor:pointer;opacity:.9;
-}
+.hero-foot{position:relative;z-index:4;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
+.hero-sub{margin:0;font-size:.84rem;font-weight:500;line-height:1.35;color:rgba(255,255,255,.86)}
+.hero-mail{flex:none;padding:4px;border:0;background:none;color:#fff;cursor:pointer;opacity:.9}
 .hero-mail:hover{opacity:.6}
 .hero-mail svg{width:17px;height:17px;display:block}
+
 /* a small readout that follows the cursor: the noise level where you are */
 .hero-read{
-  position:absolute;left:0;top:0;z-index:3;pointer-events:none;
+  position:absolute;left:0;top:0;z-index:6;pointer-events:none;
   padding:3px 6px;border-radius:4px;
   background:rgba(10,10,10,.55);
   -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
@@ -299,6 +326,23 @@ em{font-style:normal}
 .hero-read b{font-weight:500;color:var(--blue-2)}
 .hero-card.is-pointing .hero-read{opacity:1}
 .hero-card.is-pointing{cursor:crosshair}
+.hero-card.is-pointing .ht:not(.ht-intro){cursor:pointer}
+
+@media (max-width:640px){
+  .hero-card{height:auto;min-height:0}
+  .hero-grid{
+    height:auto;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    grid-template-rows:none;
+    grid-template-areas:"intro intro" "pi pi" "quad ftc" "bw bw" "rico rico";
+  }
+  .ht{aspect-ratio:16/10}
+  .ht-pi{aspect-ratio:4/3}
+  .ht-quad,.ht-ftc{aspect-ratio:3/4}
+  .ht-intro{aspect-ratio:auto;min-height:230px;gap:2.5rem}
+  .ht-tags{display:none}
+  .ht-go{opacity:1;transform:none}
+}
 
 /* ---------- sections: a grey label on the left, content on the right ---------- */
 
@@ -718,8 +762,7 @@ img.plot{background:#fff}
 
 @media (max-width:560px){
   .hero{padding:8px 8px 0}
-  .hero-card{height:calc(100svh - 16px);min-height:480px}
-  .hero-sample{right:auto;left:20px;bottom:64px;text-align:left}
+  .hero-card{padding-top:calc(var(--nav-h) - 8px)}
   .projects{grid-template-columns:minmax(0,1fr)}
   .proj-wide .proj-card{aspect-ratio:1/1}
   .proj-go{opacity:1;transform:none}

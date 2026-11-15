@@ -1,12 +1,17 @@
 /* =========================================================
    Max Yuan · home page
-   The hero is a diffusion sample of a project clip. Every pixel has
-   a noise level t (0 = the clip, 1 = pure noise); the image is mixed
-   with Gaussian noise the way a diffusion model's forward process
-   does it, and blurred more where t is high so structure comes back
-   coarse-to-fine. Your cursor denoises the area around it; behind it
-   the noise slowly returns. Every few seconds the whole card is
-   noised up and a different project is sampled.
+   The hero is a grid of diffusion samples, one tile per project, all
+   drawn by one WebGL canvas. Every pixel has a noise level t (0 = the
+   clip, 1 = pure noise); the clip is mixed with Gaussian noise the way
+   a diffusion model's forward process does it, and blurred more where
+   t is high so structure comes back coarse to fine. The noise carries
+   a little colour.
+
+   Your cursor denoises the area around it, across tiles. The tile you
+   point at is sampled clean and a ripple runs out from where you
+   entered it; with nobody pointing, the tiles take turns. On load
+   every tile starts as pure noise and they resolve one after another,
+   behind a ripple from the corner.
 
    Also here: the header colour over the hero, the hero line that
    resolves letter by letter, the action log in the corner, the clock.
@@ -18,6 +23,7 @@
   const $ = (sel, el = document) => el.querySelector(sel);
   const $$ = (sel, el = document) => Array.from(el.querySelectorAll(sel));
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 
   /* ---------- action log (bottom right): what the visitor has done so far ---------- */
 
@@ -51,7 +57,7 @@
   window.addEventListener('scroll', () => { if (!headQueued) { headQueued = true; requestAnimationFrame(head); } }, { passive: true });
   head();
 
-  /* ---------- the hero line resolves letter by letter, and stays a little noisy ---------- */
+  /* ---------- text that resolves letter by letter, and stays a little noisy ---------- */
 
   const GLYPHS = 'abcdefghijklmnopqrstuvwxyz';
   const rndGlyph = c => {
@@ -72,17 +78,20 @@
     vis.style.whiteSpace = 'pre-line';
     vis.textContent = text;
     el.append(sr, vis);
-    return { text, vis, sr };
+    return { text, vis, sr, run: 0 };
   }
-  function resolve(t, text, dur = 1100) {
+  // wait: ms it stays fully scrambled before the letters start to settle
+  function resolve(t, text, dur = 1100, wait = 0) {
     t.text = text;
-    t.sr.textContent = text.replace(/\n/g, ". ");
+    t.sr.textContent = text.replace(/\n/g, '. ');
     if (reduce) { t.vis.textContent = text; return Promise.resolve(); }
     const settle = [...text].map((_, i) => (i / text.length) * 0.55 + Math.random() * 0.45);
     const t0 = performance.now();
+    const run = ++t.run;
     return new Promise(res => {
       const step = now => {
-        const k = Math.min(1, (now - t0) / dur);
+        if (run !== t.run) { res(); return; }
+        const k = Math.min(1, (now - t0 - wait) / dur);
         let out = '';
         for (let i = 0; i < text.length; i += 1) {
           const c = text[i];
@@ -110,36 +119,31 @@
   }
   let heroOn = true;
   const line = wrapText($('#hero-line'));
-  const sampleLink = $('#hero-sample');
-  const sampleK = $('.k', sampleLink);
-  const sampleV = wrapText($('.v', sampleLink));
   resolve(line, line.text, 1500).then(() => flicker(line));
 
-  /* ---------- the samples the hero cycles through ---------- */
+  /* ---------- the tiles: the intro, then one per project ---------- */
 
-  const SAMPLES = [
-    { src: 'assets/hero/brackey.mp4', title: 'The Brackey Way', href: 'projects/brackey-way.html' },
-    { src: 'assets/hero/quad.mp4', title: 'Go2 locomotion', href: 'projects/quadruped-ppo.html' },
-    { src: 'assets/hero/rico.mp4', title: 'RICO', href: 'projects/rico-arm.html' },
-    { src: 'assets/hero/pi05.mp4', title: 'π₀.5 pick and place', href: 'projects/pi05-pick-place.html' },
-    { src: 'assets/hero/ftc.mp4', title: 'FTC team 18844', href: 'projects/ftc-18844.html' },
-  ];
-  const HOLD = 9000;          // ms each sample stays before the next is drawn
-
-  const vidA = $('.hero-src', card);
-  const vidB = vidA.cloneNode(false);
-  vidB.removeAttribute('src');
-  vidB.removeAttribute('poster');
-  vidB.removeAttribute('autoplay');
-  vidB.preload = 'auto';
-  vidB.muted = true;
-  vidA.muted = true;
-  card.insertBefore(vidB, vidA.nextSibling);
-  const vids = [vidA, vidB];
-  let active = 0;
-  let cur = 0;
-
-  const read = $('.hero-read', card);
+  const tiles = $$('.ht', card).map(el => {
+    const video = $('video', el);
+    const f = (el.dataset.focus || '0.5,0.5').split(',').map(Number);
+    const tEl = $('.ht-t', el);
+    return {
+      el,
+      video,
+      intro: !video,
+      fx: f[0],
+      fy: f[1],
+      title: tEl ? tEl.textContent.trim() : 'intro',
+      label: tEl ? wrapText(tEl) : null,
+      x: 0, y: 0, w: 1, h: 1,     // css px inside the card
+      delay: 0,                    // when its first sample starts (ms after load)
+      extra: 0,                    // added noise while another tile has the focus
+      clean: 0,                    // how far the focused tile is sampled
+      zoom: 1,
+      hasImg: false, iw: 16, ih: 9, dirty: true, lastT: -1, tex: null,
+    };
+  }).slice(0, 6);
+  const vids = tiles.filter(t => t.video).map(t => t.video);
 
   /* ---------- WebGL ---------- */
 
@@ -147,66 +151,143 @@
   const gl = !reduce && canvas.getContext('webgl2', { alpha: false, antialias: false, premultipliedAlpha: false });
   if (!gl) {
     card.classList.add('no-gl');
-    if (reduce) { vidA.pause(); vidA.removeAttribute('autoplay'); }
+    if (reduce) vids.forEach(v => { v.removeAttribute('autoplay'); v.pause(); });
     return;
   }
 
   const VS = `#version 300 es
   in vec2 p;
-  out vec2 vUv;
-  void main(){ vUv = p * 0.5 + 0.5; gl_Position = vec4(p, 0.0, 1.0); }`;
+  void main(){ gl_Position = vec4(p, 0.0, 1.0); }`;
 
   const FS = `#version 300 es
   precision highp float;
-  in vec2 vUv;
   out vec4 o;
-  uniform sampler2D uImg;
+  uniform sampler2D uI1, uI2, uI3, uI4, uI5;
   uniform sampler2D uT;
-  uniform vec2 uScale, uOff;
-  uniform float uG, uStep, uHasImg;
+  uniform vec2 uRes;
+  uniform vec4 uRect[6];     // each tile: x, y (from the bottom), w, h in device px
+  uniform vec4 uCrop[6];     // the part of its clip it shows: scale.xy, offset.xy
+  uniform vec4 uTile[6];     // x: extra noise, y: how clean, z: has a picture
+  uniform float uRad, uStep, uTime, uDpr;
+  uniform vec4 uRip;         // a ripple: x, y, age (s), strength
+  uniform vec3 uBg;
+
   float hash(vec2 p){ p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
   float gauss(vec2 p){
     float u1 = max(hash(p), 1e-4);
     float u2 = hash(p + 17.17);
     return sqrt(-2.0 * log(u1)) * cos(6.2831853 * u2);
   }
+  vec3 hash3(vec2 p){ return vec3(hash(p), hash(p + 31.7), hash(p + 63.1)); }
+  vec3 hue(float h){ return 0.5 + 0.5 * cos(6.2831853 * (h + vec3(0.0, 0.33, 0.67))); }
+
+  vec3 tap(int i, vec2 uv, float lod){
+    if (i == 1) return textureLod(uI1, uv, lod).rgb;
+    if (i == 2) return textureLod(uI2, uv, lod).rgb;
+    if (i == 3) return textureLod(uI3, uv, lod).rgb;
+    if (i == 4) return textureLod(uI4, uv, lod).rgb;
+    return textureLod(uI5, uv, lod).rgb;
+  }
+
+  // the intro tile's picture: a dark colour field that drifts slowly
+  vec3 latent(vec2 p){
+    float s = uTime * 0.07;
+    float a = sin(p.x * 2.6 + s * 1.9 + sin(p.y * 2.1 - s));
+    float b = sin(p.y * 3.1 - s * 1.4 + sin(p.x * 1.7 + s * 1.2));
+    vec3 c = vec3(0.04, 0.045, 0.06);
+    c += vec3(0.12, 0.26, 0.70) * smoothstep(-0.1, 1.0, a) * 0.2;
+    c += vec3(0.45, 0.16, 0.60) * smoothstep(0.35, 1.0, b) * 0.12;
+    c += vec3(0.05, 0.45, 0.45) * smoothstep(0.45, 1.0, a * b) * 0.1;
+    return c;
+  }
+
   void main(){
-    // noise level here: the field (0 = clean) pushed towards 1 by the global level
-    float t = texture(uT, vec2(vUv.x, 1.0 - vUv.y)).r;
-    t = clamp(t + uG * (1.0 - t), 0.0, 1.0);
+    vec2 fc = gl_FragCoord.xy;
 
-    // coarse to fine: the noisier, the blurrier the picture under the noise
-    vec2 uv = vUv * uScale + uOff;
-    vec3 x0 = uHasImg > 0.5 ? textureLod(uImg, uv, t * t * 4.5).rgb : vec3(0.11, 0.12, 0.14);
+    // the noise-level field (0 = clean), and the ripple running out from where a tile was entered
+    float tf = texture(uT, vec2(fc.x / uRes.x, 1.0 - fc.y / uRes.y)).r;
+    float rd = distance(fc, uRip.xy);
+    float ring = uRip.w * exp(-pow((rd - uRip.z * 900.0 * uDpr) / (46.0 * uDpr), 2.0)) * exp(-uRip.z * 1.8);
+    vec3 irid = hue(rd / (340.0 * uDpr) - uTime * 0.25);
+    // the contour below only shows where the noise level changes, not on a whole tile at once
+    float edgeW = smoothstep(0.0003, 0.0025, fwidth(tf + ring * 0.4));
 
-    // Gaussian noise, a new draw every sampling step: soft blotches (smoothly
-    // interpolated between 3 px cells) plus a per-pixel grain with a little colour
-    vec2 q = gl_FragCoord.xy / 3.0;
+    // which tile this pixel is in (rounded rectangles)
+    int idx = -1;
+    float sd = 1e4;
+    vec4 R = vec4(0.0, 0.0, 1.0, 1.0);
+    for (int i = 0; i < 6; i++) {
+      vec4 r = uRect[i];
+      vec2 hs = r.zw * 0.5;
+      vec2 d = abs(fc - r.xy - hs) - (hs - uRad);
+      float s = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - uRad;
+      if (s < 1.0) { idx = i; sd = s; R = r; break; }
+    }
+    vec3 bg = uBg + irid * ring * 0.08;
+    if (idx < 0) { o = vec4(bg, 1.0); return; }
+    float m = clamp(0.5 - sd, 0.0, 1.0);
+    vec4 P = uTile[idx];
+    vec2 luv = (fc - R.xy) / R.zw;
+
+    float t = tf + P.x * (1.0 - tf);
+    t *= 1.0 - P.y;
+    t = clamp(t + ring * 0.4, 0.0, 1.0);
+
+    // the picture: blurrier where it is noisy (coarse to fine), and a little split into R, G and B
+    vec2 ca = (luv - 0.5) * (0.003 + t * 0.012 + ring * 0.035);
+    vec3 x0;
+    if (idx == 0) {
+      vec2 p = vec2(luv.x * R.z / R.w, luv.y);
+      x0 = vec3(latent(p + ca * 3.0).r, latent(p).g, latent(p - ca * 3.0).b);
+    } else if (P.z > 0.5) {
+      vec4 C = uCrop[idx];
+      vec2 uv = luv * C.xy + C.zw;
+      vec2 cs = ca * C.xy;
+      float lod = t * t * 4.5;
+      x0 = vec3(tap(idx, uv + cs, lod).r, tap(idx, uv, lod).g, tap(idx, uv - cs, lod).b);
+    } else {
+      x0 = vec3(0.11, 0.12, 0.14);
+    }
+    float l = dot(x0, vec3(0.299, 0.587, 0.114));
+    x0 = mix(x0, vec3(l) * vec3(0.95, 0.99, 1.05), t * 0.45);
+
+    // Gaussian noise, a new draw every sampling step: soft 3 px blotches, a coarser
+    // RGB tint, per-pixel grain with some colour, and a rare bright RGB speck
+    float st = uStep * 1.37;
+    vec2 q = fc / 3.0;
     vec2 qi = floor(q);
     vec2 qf = smoothstep(0.0, 1.0, fract(q));
-    float sd = uStep * 1.37;
-    float soft = mix(mix(gauss(qi + sd), gauss(qi + vec2(1.0, 0.0) + sd), qf.x),
-                     mix(gauss(qi + vec2(0.0, 1.0) + sd), gauss(qi + vec2(1.0, 1.0) + sd), qf.x), qf.y);
-    vec2 cell = floor(gl_FragCoord.xy);
+    float soft = mix(mix(gauss(qi + st), gauss(qi + vec2(1.0, 0.0) + st), qf.x),
+                     mix(gauss(qi + vec2(0.0, 1.0) + st), gauss(qi + vec2(1.0, 1.0) + st), qf.x), qf.y);
+    vec2 k = fc / 9.0;
+    vec2 ki = floor(k);
+    vec2 kf = smoothstep(0.0, 1.0, fract(k));
+    vec3 tint = mix(mix(hash3(ki + st), hash3(ki + vec2(1.0, 0.0) + st), kf.x),
+                    mix(hash3(ki + vec2(0.0, 1.0) + st), hash3(ki + vec2(1.0, 1.0) + st), kf.x), kf.y) - 0.5;
+    vec2 cell = floor(fc);
     vec3 fine = vec3(gauss(cell + uStep * 2.11), gauss(cell + uStep * 3.07 + 9.1), gauss(cell + uStep * 4.13 + 21.3));
-    fine = mix(vec3(fine.r), fine, 0.35);
-    vec3 eps = vec3(soft) * 0.85 + fine * 0.4;
+    fine = mix(vec3(fine.g), fine, 0.5);
+    vec3 eps = vec3(soft) * 0.85 + tint * 0.75 + fine * 0.42;
+    vec2 spc = floor(fc / (2.0 * uDpr));
+    eps += step(0.9965, hash(spc * 0.71 + uStep * 7.3)) * (hue(hash(spc + st)) * 2.0 - 0.6) * 2.2;
 
     // the forward process with a cosine schedule: x_t = sqrt(a) x_0 + sqrt(1 - a) eps
     float a = cos(t * 1.5707963);
     a *= a;
-    vec3 xt = sqrt(a) * (x0 * 2.0 - 1.0) + sqrt(1.0 - a) * eps * 0.42;
+    float amp = idx == 0 ? 0.3 : 0.42;
+    vec3 xt = sqrt(a) * (x0 * 2.0 - 1.0) + sqrt(1.0 - a) * eps * amp;
     vec3 c = clamp(xt * 0.5 + 0.5, 0.0, 1.0);
 
-    // noisy areas drift towards a cool grey; clean areas keep their colour
-    float l = dot(c, vec3(0.299, 0.587, 0.114));
-    c = mix(c, vec3(l) * vec3(0.95, 0.99, 1.05), t * 0.5);
+    // where the clean patch meets the noise, a thin contour split into red, green and blue
+    float rr = smoothstep(0.10, 0.17, t) * (1.0 - smoothstep(0.17, 0.25, t));
+    float rg = smoothstep(0.15, 0.22, t) * (1.0 - smoothstep(0.22, 0.30, t));
+    float rb = smoothstep(0.20, 0.27, t) * (1.0 - smoothstep(0.27, 0.38, t));
+    c += vec3(rr * 0.55, rg * 0.45, rb) * 0.32 * edgeW;
 
-    // a thin blue contour where the clean patch meets the noise
-    float rim = smoothstep(0.14, 0.26, t) * (1.0 - smoothstep(0.26, 0.4, t));
-    c += vec3(0.30, 0.52, 1.0) * rim * 0.34;
+    // the ripple catches the light as it passes
+    c += irid * ring * 0.16;
 
-    o = vec4(c, 1.0);
+    o = vec4(mix(bg, c, m), 1.0);
   }`;
 
   const compile = (type, src) => {
@@ -236,70 +317,103 @@
   gl.enableVertexAttribArray(locP);
   gl.vertexAttribPointer(locP, 2, gl.FLOAT, false, 0, 0);
   const U = {};
-  ['uImg', 'uT', 'uScale', 'uOff', 'uG', 'uStep', 'uHasImg'].forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
+  ['uI1', 'uI2', 'uI3', 'uI4', 'uI5', 'uT', 'uRes', 'uRect', 'uCrop', 'uTile', 'uRad', 'uStep', 'uTime', 'uDpr', 'uRip', 'uBg']
+    .forEach(n => { U[n] = gl.getUniformLocation(prog, n); });
 
-  // the picture
-  const texImg = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, texImg);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.uniform1i(U.uImg, 0);
-  let hasImg = false;
-  let imgW = 16;
-  let imgH = 9;
+  const newTex = (unit, filter) => {
+    const tex = gl.createTexture();
+    gl.activeTexture(gl.TEXTURE0 + unit);
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    return tex;
+  };
+  // the clips: tile i (1..5) on texture unit i - 1
+  tiles.forEach((tile, i) => {
+    if (tile.intro) return;
+    tile.unit = i - 1;
+    tile.tex = newTex(tile.unit, gl.LINEAR_MIPMAP_LINEAR);
+    gl.uniform1i(U[`uI${i}`], tile.unit);
+  });
+  // the noise-level field, a small grid stretched over the card, on unit 5
+  const FIELD_UNIT = 5;
+  const texT = newTex(FIELD_UNIT, gl.LINEAR);
+  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+  gl.uniform1i(U.uT, FIELD_UNIT);
+  gl.uniform3f(U.uBg, 10 / 255, 10 / 255, 10 / 255);
 
-  // the noise-level field, a small grid stretched over the card
+  function upload(tile, src, w, h) {
+    gl.activeTexture(gl.TEXTURE0 + tile.unit);
+    gl.bindTexture(gl.TEXTURE_2D, tile.tex);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src);
+    gl.generateMipmap(gl.TEXTURE_2D);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+    tile.hasImg = true;
+    tile.iw = w;
+    tile.ih = h;
+  }
+  function uploadVideo(tile) {
+    const v = tile.video;
+    if (v.readyState < 2 || !v.videoWidth) return;
+    upload(tile, v, v.videoWidth, v.videoHeight);
+    tile.lastT = v.currentTime;
+    tile.dirty = false;
+  }
+  // until a clip can play, its poster stands in
+  tiles.forEach(tile => {
+    if (tile.intro || !tile.video.poster) return;
+    const img = new Image();
+    img.onload = () => { if (!tile.hasImg) upload(tile, img, img.naturalWidth, img.naturalHeight); };
+    img.src = tile.video.poster;
+  });
+
   const NX = 72;
   let NY = 72;
   let field = new Float32Array(NX * NY);
   let bytes = new Uint8Array(NX * NY);
-  const texT = gl.createTexture();
-  gl.activeTexture(gl.TEXTURE1);
-  gl.bindTexture(gl.TEXTURE_2D, texT);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
-  gl.uniform1i(U.uT, 1);
+  const BASE = 0.42;          // how noisy the tiles rest
+  field.fill(BASE);
 
-  const BASE = 0.5;           // how noisy the card rests
-  let W = 0;
-  let H = 0;
+  let W = 1;
+  let H = 1;
+  let dprX = 1;
+  let dprY = 1;
+  const rects = new Float32Array(24);
+  function measure() {
+    const c = card.getBoundingClientRect();
+    tiles.forEach((tile, i) => {
+      const r = tile.el.getBoundingClientRect();
+      tile.x = r.left - c.left;
+      tile.y = r.top - c.top;
+      tile.w = Math.max(1, r.width);
+      tile.h = Math.max(1, r.height);
+      rects.set([tile.x * dprX, (H - tile.y - tile.h) * dprY, tile.w * dprX, tile.h * dprY], i * 4);
+    });
+  }
   function resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = card.clientWidth;
-    H = card.clientHeight;
+    W = Math.max(1, card.clientWidth);
+    H = Math.max(1, card.clientHeight);
     canvas.width = Math.round(W * dpr);
     canvas.height = Math.round(H * dpr);
+    dprX = canvas.width / W;
+    dprY = canvas.height / H;
     gl.viewport(0, 0, canvas.width, canvas.height);
-    const ny = Math.max(24, Math.round(NX * (H / Math.max(1, W))));
+    const ny = Math.max(24, Math.round(NX * (H / W)));
     if (ny !== NY) {
       NY = ny;
       field = new Float32Array(NX * NY).fill(BASE);
       bytes = new Uint8Array(NX * NY);
     }
+    measure();
   }
-  field.fill(BASE);
   resize();
   if ('ResizeObserver' in window) new ResizeObserver(resize).observe(card);
   else window.addEventListener('resize', resize);
-
-  function uploadVideo(v) {
-    if (v.readyState < 2 || !v.videoWidth) return;
-    gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, texImg);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, v);
-    gl.generateMipmap(gl.TEXTURE_2D);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-    hasImg = true;
-    imgW = v.videoWidth;
-    imgH = v.videoHeight;
-  }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize);
 
   // stamp a soft round "denoise" into the field
   function denoise(px, py, radiusPx, strength, dt) {
@@ -323,112 +437,111 @@
     }
   }
 
+  /* ---------- focus: the tile being sampled clean ---------- */
+
+  let rip = { x: 0, y: 0, t0: -1e9, s: 0 };
+  const ripple = (x, y, s) => { rip = { x, y, t0: performance.now(), s }; };
+  const tileAt = (x, y) => tiles.findIndex(t => x >= t.x && x <= t.x + t.w && y >= t.y && y <= t.y + t.h);
+
+  let focus = -1;
+  function setFocus(i, from) {
+    if (i === focus) return;
+    focus = i;
+    tiles.forEach((t, j) => t.el.classList.toggle('is-focus', j === i));
+    if (i < 0) return;
+    const t = tiles[i];
+    ripple(from ? from.x : t.x + t.w / 2, from ? from.y : t.y + t.h / 2, from ? 1 : 0.6);
+    if (t.label) resolve(t.label, t.title, 520);
+  }
+
+  // on load: a ripple from the top-left corner, and every tile resolves as it passes
+  const LOAD = performance.now() + 200;
+  const SPEED = 0.9;          // css px per ms, the same as the ripple in the shader
+  tiles.forEach(t => {
+    t.delay = Math.hypot(t.x + t.w / 2, t.y + t.h / 2) / SPEED;
+    if (t.label) resolve(t.label, t.title, 900, 200 + t.delay);
+  });
+  rip = { x: 0, y: 0, t0: LOAD, s: 0.9 };
+  const SWEEP = 1100;
+  const ease = k => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
+  const sweepOf = (t, now) => 1 - ease(clamp((now - LOAD - t.delay) / SWEEP, 0, 1));
+  const loaded = Math.max(...tiles.map(t => t.delay)) + SWEEP + 500;
+
+  // with nobody pointing, the projects take turns
+  const ORDER = [1, 4, 2, 5, 3].filter(i => i < tiles.length);
+  let autoAt = performance.now() + 200 + loaded;
+  let autoK = 0;
+  const AUTO = 2600;
+
   /* ---------- pointer ---------- */
 
   let pointer = null;
   let last = null;
   let lastAct = 0;
+  let lastLogged = -1;
+  const read = $('.hero-read', card);
   card.addEventListener('pointermove', e => {
     const r = card.getBoundingClientRect();
     pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
     card.classList.add('is-pointing');
+    const i = tileAt(pointer.x, pointer.y);
+    setFocus(i > 0 ? i : -1, pointer);
     const now = performance.now();
-    if (now - lastAct > 6000) { lastAct = now; act('denoise hero'); }
+    if (i > 0 && i !== lastLogged) { lastLogged = i; act(`attend ${tiles[i].title.length > 16 ? `${tiles[i].title.slice(0, 15)}…` : tiles[i].title}`); lastAct = now; }
+    else if (now - lastAct > 6000) { lastAct = now; act('denoise hero'); }
   });
-  card.addEventListener('pointerleave', () => { pointer = null; last = null; card.classList.remove('is-pointing'); });
+  const leave = () => {
+    pointer = null;
+    last = null;
+    lastLogged = -1;
+    card.classList.remove('is-pointing');
+    setFocus(-1);
+    autoAt = performance.now() + 1200;
+  };
+  card.addEventListener('pointerleave', leave);
   card.addEventListener('pointerdown', e => {
     if (e.pointerType === 'touch') {
       const r = card.getBoundingClientRect();
       pointer = { x: e.clientX - r.left, y: e.clientY - r.top };
     }
   });
-  ['pointerup', 'pointercancel'].forEach(t => card.addEventListener(t, e => { if (e.pointerType === 'touch') { pointer = null; last = null; } }));
-
-  /* ---------- sampling a new project: noise everything, swap the clip, denoise ---------- */
-
-  let g = 1;                  // global extra noise: starts as pure noise, the first sample is drawn on load
-  let gFrom = 1;
-  let gTo = 0;
-  let gT0 = performance.now() + 150;
-  let gDur = 1700;
-  const ease = k => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
-  const tweenG = (to, dur) => new Promise(res => {
-    gFrom = g; gTo = to; gT0 = performance.now(); gDur = dur;
-    setTimeout(res, dur);
-  });
-  const waitReady = (v, ms) => new Promise(res => {
-    if (v.readyState >= 2) return res();
-    const done = () => { v.removeEventListener('loadeddata', done); res(); };
-    v.addEventListener('loadeddata', done);
-    setTimeout(done, ms);
-  });
-
-  function preload(i) {
-    const v = vids[1 - active];
-    if (v.dataset.src !== SAMPLES[i].src) {
-      v.dataset.src = SAMPLES[i].src;
-      v.src = SAMPLES[i].src;
-      v.load();
-    }
-  }
-  vidA.dataset.src = SAMPLES[0].src;
-
-  let swapping = false;
-  async function next() {
-    if (swapping) return;
-    swapping = true;
-    const n = (cur + 1) % SAMPLES.length;
-    preload(n);
-    await tweenG(1, 700);
-    const v = vids[1 - active];
-    await waitReady(v, 4000);
-    try { v.currentTime = 0; } catch (e) { /* not seekable yet */ }
-    const p = v.play();
-    if (p && p.catch) p.catch(() => {});
-    vids[active].pause();
-    active = 1 - active;
-    cur = n;
-    uploadVideo(v);
-    sampleK.textContent = `sample ${String(n + 1).padStart(2, '0')}`;
-    sampleLink.href = SAMPLES[n].href;
-    resolve(sampleV, SAMPLES[n].title, 900);
-    act(`sample ${String(n + 1).padStart(2, '0')}`);
-    await tweenG(0, 1500);
-    swapping = false;
-    lastSwap = performance.now();
-  }
-  let lastSwap = performance.now();
+  ['pointerup', 'pointercancel'].forEach(t => card.addEventListener(t, e => { if (e.pointerType === 'touch') leave(); }));
 
   /* ---------- the loop ---------- */
 
+  const hasRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
+  if (hasRVFC) {
+    tiles.forEach(tile => {
+      if (tile.intro) return;
+      const cb = () => { tile.dirty = true; tile.video.requestVideoFrameCallback(cb); };
+      tile.video.requestVideoFrameCallback(cb);
+    });
+  }
+
+  const crops = new Float32Array(24);
+  const params = new Float32Array(24);
   let raf = 0;
   let prev = performance.now();
-  let frameDirty = true;
-  if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
-    const watch = v => {
-      const cb = () => { if (v === vids[active]) frameDirty = true; v.requestVideoFrameCallback(cb); };
-      v.requestVideoFrameCallback(cb);
-    };
-    vids.forEach(watch);
-  }
-  const hasRVFC = 'requestVideoFrameCallback' in HTMLVideoElement.prototype;
 
   function frame(now) {
     raf = 0;
     if (!heroOn || document.hidden) return;
+    // a project transition is playing over the page: stop drawing and decoding underneath it
+    if (document.documentElement.classList.contains('wam-on')) { playAll(false); return; }
     const dt = Math.min(0.05, (now - prev) / 1000);
     prev = now;
 
-    // global level
-    if (now >= gT0) {
-      const k = Math.min(1, (now - gT0) / gDur);
-      g = gFrom + (gTo - gFrom) * ease(k);
+    // nobody pointing: hand the focus to the next project
+    if (!pointer && now >= autoAt) {
+      setFocus(ORDER[autoK % ORDER.length]);
+      autoK += 1;
+      autoAt = now + AUTO;
     }
 
-    // the field: noise returns everywhere, the cursor (or a wandering point) removes it
+    // the field: noise returns everywhere, the cursor removes it
     const relax = 1 - Math.exp(-dt / 1.7);
     for (let i = 0; i < field.length; i += 1) field[i] += (BASE - field[i]) * relax;
-    const rad = Math.max(70, Math.min(W, H) * 0.15);
+    const rad = Math.max(60, Math.min(W, H) * 0.13);
     if (pointer) {
       if (last) {
         const dx = pointer.x - last.x;
@@ -438,61 +551,89 @@
       }
       denoise(pointer.x, pointer.y, rad, 1, dt);
       last = { ...pointer };
-      // the readout: noise level and step under the cursor
-      const fx = Math.min(NX - 1, Math.max(0, Math.floor(pointer.x * NX / W)));
-      const fy = Math.min(NY - 1, Math.max(0, Math.floor(pointer.y * NX / W)));
-      const t = field[fy * NX + fx] + g * (1 - field[fy * NX + fx]);
+      const fx = clamp(Math.floor(pointer.x * NX / W), 0, NX - 1);
+      const fy = clamp(Math.floor(pointer.y * NX / W), 0, NY - 1);
+      const ti = tileAt(pointer.x, pointer.y);
+      let t = field[fy * NX + fx];
+      if (ti >= 0) t = (t + tiles[ti].extra * (1 - t)) * (1 - tiles[ti].clean);
       read.innerHTML = `<b>t</b> ${t.toFixed(2)} · step ${String(Math.round(t * 1000)).padStart(4, '0')}/1000`;
-      const rx = Math.min(W - 150, pointer.x + 16);
-      const ry = Math.min(H - 28, pointer.y + 16);
-      read.style.transform = `translate(${rx}px,${ry}px)`;
-    } else {
-      // nobody is pointing: a slow wandering patch keeps the picture alive
-      const s = now / 1000;
-      denoise(W * (0.5 + 0.3 * Math.sin(s * 0.37)), H * (0.5 + 0.28 * Math.sin(s * 0.53 + 1.3)), rad * 1.1, 0.55, dt);
+      read.style.transform = `translate(${Math.min(W - 150, pointer.x + 16)}px,${Math.min(H - 28, pointer.y + 16)}px)`;
     }
 
-    for (let i = 0; i < field.length; i += 1) bytes[i] = Math.max(0, Math.min(255, field[i] * 255));
-    gl.activeTexture(gl.TEXTURE1);
+    for (let i = 0; i < field.length; i += 1) bytes[i] = clamp(field[i] * 255, 0, 255);
+    gl.activeTexture(gl.TEXTURE0 + FIELD_UNIT);
     gl.bindTexture(gl.TEXTURE_2D, texT);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.R8, NX, NY, 0, gl.RED, gl.UNSIGNED_BYTE, bytes);
 
-    const v = vids[active];
-    if (!hasRVFC || frameDirty || !hasImg) { uploadVideo(v); frameDirty = false; }
+    // per tile: the load sweep, the focus, the clip
+    const kc = 1 - Math.exp(-dt / 0.22);
+    const kz = 1 - Math.exp(-dt / 0.5);
+    tiles.forEach((tile, i) => {
+      const focused = i === focus;
+      const cleanTo = tile.intro ? 0.3 : (focused ? 0.88 : 0);
+      const extraTo = !tile.intro && focus > 0 && !focused ? 0.12 : 0;
+      tile.clean += (cleanTo - tile.clean) * kc;
+      tile.extra += (extraTo - tile.extra) * kc;
+      tile.zoom += ((focused ? 1.05 : 1) - tile.zoom) * kz;
+      const sweep = sweepOf(tile, now);
+      params.set([1 - (1 - sweep) * (1 - tile.extra), tile.clean, tile.intro || tile.hasImg ? 1 : 0, 0], i * 4);
 
-    // cover-fit the clip
-    const A = W / Math.max(1, H);
-    const V = imgW / imgH;
-    let sx = 1;
-    let sy = 1;
-    if (V > A) sx = A / V; else sy = V / A;
-    gl.uniform2f(U.uScale, sx, sy);
-    gl.uniform2f(U.uOff, (1 - sx) / 2, (1 - sy) / 2);
-    gl.uniform1f(U.uG, g);
+      if (tile.intro) return;
+      const v = tile.video;
+      if (tile.dirty || !tile.hasImg || (!hasRVFC && v.currentTime !== tile.lastT)) uploadVideo(tile);
+      // cover-fit the clip, zoomed towards its focus point
+      const A = tile.w / tile.h;
+      const V = tile.iw / tile.ih;
+      let sx = 1;
+      let sy = 1;
+      if (V > A) sx = A / V; else sy = V / A;
+      sx /= tile.zoom;
+      sy /= tile.zoom;
+      crops.set([sx, sy, clamp(tile.fx - sx / 2, 0, 1 - sx), clamp(1 - tile.fy - sy / 2, 0, 1 - sy)], i * 4);
+    });
+
+    const age = Math.max(0, (now - rip.t0) / 1000);
+    gl.uniform2f(U.uRes, canvas.width, canvas.height);
+    gl.uniform4fv(U.uRect, rects);
+    gl.uniform4fv(U.uCrop, crops);
+    gl.uniform4fv(U.uTile, params);
+    gl.uniform1f(U.uRad, 12 * dprX);
+    gl.uniform1f(U.uDpr, dprX);
     gl.uniform1f(U.uStep, Math.floor(now / 83));
-    gl.uniform1f(U.uHasImg, hasImg ? 1 : 0);
+    gl.uniform1f(U.uTime, now / 1000);
+    gl.uniform4f(U.uRip, rip.x * dprX, (H - rip.y) * dprY, age, now < rip.t0 ? 0 : rip.s);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 
-    if (!swapping && !pointer && now - lastSwap > HOLD) next();
     raf = requestAnimationFrame(frame);
   }
   const start = () => { if (!raf) { prev = performance.now(); raf = requestAnimationFrame(frame); } };
+  const playAll = on => vids.forEach(v => {
+    if (!on) { v.pause(); return; }
+    const p = v.play();
+    if (p && p.catch) p.catch(() => {});
+  });
 
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(([e]) => {
       heroOn = e.isIntersecting;
-      vids[active][heroOn ? 'play' : 'pause']();
+      playAll(heroOn);
       if (heroOn) start();
     }).observe(card);
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden) start(); });
-  const p0 = vidA.play();
-  if (p0 && p0.catch) p0.catch(() => {});
+  // back from a project (page restored from the back/forward cache)
+  window.addEventListener('pageshow', e => {
+    if (!e.persisted) return;
+    document.documentElement.classList.remove('wam-on');
+    if (heroOn) { playAll(true); start(); }
+  });
+  playAll(true);
   start();
 
   // test hook
-  window.__hero = { next, get g() { return g; }, field: () => field };
+  window.__hero = { focus: i => setFocus(i), get current() { return focus; }, field: () => field, tiles };
 })();
+
 
 /* ---------- the rest of the page: log what the visitor does, the clock ---------- */
 
@@ -510,7 +651,7 @@
     document.querySelectorAll('main .sec[id]').forEach(s => io.observe(s));
   }
   const hovered = new Map();
-  document.querySelectorAll('.proj-card').forEach(a => {
+  document.querySelectorAll(".proj-card").forEach(a => {
     a.addEventListener('mouseenter', () => {
       const now = performance.now();
       if (now - (hovered.get(a) || -1e9) < 4000) return;
