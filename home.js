@@ -646,8 +646,27 @@
     }, { rootMargin: '-30% 0px -50% 0px' });
     document.querySelectorAll('main .sec[id]').forEach(s => io.observe(s));
   }
+  // the section you are reading (the last one whose top has passed 45% of the screen): its label turns purple
+  const secs = [...document.querySelectorAll('main .sec[id]')];
+  let hereQueued = false;
+  const markHere = () => {
+    hereQueued = false;
+    const line = window.innerHeight * 0.45;
+    let cur = null;
+    secs.forEach(s => { if (!s.hidden && s.getBoundingClientRect().top <= line) cur = s; });
+    if (cur && cur.getBoundingClientRect().bottom < 0) cur = null;
+    secs.forEach(s => s.classList.toggle('is-here', s === cur));
+  };
+  window.addEventListener('scroll', () => { if (!hereQueued) { hereQueued = true; requestAnimationFrame(markHere); } }, { passive: true });
+  markHere();
   const hovered = new Map();
   document.querySelectorAll(".proj-card").forEach(a => {
+    // where the cursor is on the card: the purple edge light follows it
+    a.addEventListener('pointermove', e => {
+      const r = a.getBoundingClientRect();
+      a.style.setProperty('--mx', `${e.clientX - r.left}px`);
+      a.style.setProperty('--my', `${e.clientY - r.top}px`);
+    });
     a.addEventListener('mouseenter', () => {
       const now = performance.now();
       if (now - (hovered.get(a) || -1e9) < 4000) return;

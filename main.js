@@ -80,11 +80,18 @@
     }
   }));
 
-  /* ---------- nav border once the page scrolls ---------- */
+  /* ---------- nav border once the page scrolls, and how far down you are (--sp, 0..1) ----------
+     --sp drives the purple hairline under the header. */
 
   const nav = $('#nav');
-  const onScroll = () => nav?.classList.toggle('scrolled', window.scrollY > 8);
-  window.addEventListener('scroll', onScroll, { passive: true });
+  let spQueued = false;
+  const onScroll = () => {
+    spQueued = false;
+    nav?.classList.toggle('scrolled', window.scrollY > 8);
+    const max = root.scrollHeight - window.innerHeight;
+    root.style.setProperty('--sp', max > 0 ? Math.min(1, window.scrollY / max).toFixed(4) : '0');
+  };
+  window.addEventListener('scroll', () => { if (!spQueued) { spQueued = true; requestAnimationFrame(onScroll); } }, { passive: true });
   onScroll();
 
   /* ---------- project clips: loop like a GIF while on screen ---------- */

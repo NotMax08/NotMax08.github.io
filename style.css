@@ -32,6 +32,14 @@
   --accent-2:#b8a3f2;
   --accent-soft:#f2edfd;
   --accent-line:rgba(124,95,214,.42);   /* link underlines */
+  /* purple gradients: violet -> lilac -> orchid, never other hues */
+  --grad:linear-gradient(100deg,#6a4cd0 0%,#8a5fdc 55%,#a95cc4 100%);
+  --grad-v:linear-gradient(180deg,#8a6cf0,#b07ad8);
+  --grad-soft:linear-gradient(100deg,rgba(124,95,214,.16),rgba(169,92,196,.14));
+  --glow:rgba(124,95,214,.16);
+  --glow-2:rgba(176,110,220,.10);
+  --glow-card:rgba(124,95,214,.38);
+  --accent-3:#a95cc4;          /* orchid: the far end of the gradients */
   --dark:#0a0a0a;
   --foot:#0a0a0a;
   --header:rgba(255,255,255,.86);
@@ -72,6 +80,13 @@
   --accent-2:#d5c8ff;
   --accent-soft:rgba(195,177,250,.14);
   --accent-line:rgba(195,177,250,.45);
+  --grad:linear-gradient(100deg,#a58bff 0%,#c9b6ff 50%,#ebc8f6 100%);
+  --grad-v:linear-gradient(180deg,#b29bff,#e6c4f4);
+  --grad-soft:linear-gradient(100deg,rgba(165,139,255,.24),rgba(235,200,246,.18));
+  --glow:rgba(124,95,214,.36);
+  --glow-2:rgba(196,130,230,.16);
+  --glow-card:rgba(140,108,240,.55);
+  --accent-3:#e3b8f0;
   --dark:#000000;
   --foot:#050505;
   --header:rgba(10,10,10,.82);
@@ -163,7 +178,7 @@ em{font-style:normal}
 .btn:hover{border-color:var(--line-3);background:var(--surface);color:var(--ink)}
 .btn svg{width:16px;height:16px;flex:none}
 .btn-primary{border-color:var(--ink);background:var(--ink);color:var(--on-ink)}
-.btn-primary:hover{border-color:var(--accent);background:var(--accent);color:var(--on-ink)}
+.btn-primary:hover{border-color:transparent;background:var(--grad);color:var(--on-ink);box-shadow:0 6px 22px -8px var(--glow-card)}
 .btn-ghost{background:transparent}
 
 .plain-link{padding:0;border:0;background:none;cursor:pointer;color:var(--ink)}
@@ -226,6 +241,15 @@ em{font-style:normal}
 .brand::after{content:"";display:inline-block;width:6px;height:6px;margin-left:.4rem;border-radius:50%;background:var(--accent-2);vertical-align:2px;box-shadow:0 0 10px var(--accent-2)}
 .nav-links a[aria-current="page"]{position:relative}
 .nav-links a[aria-current="page"]::after{content:"";position:absolute;left:50%;bottom:-7px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent-2)}
+/* a purple hairline under the header that fills as you scroll (--sp from main.js) */
+.top::after,.nav::after{
+  content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,var(--accent) 35%,#e9c6f6);
+  box-shadow:0 0 10px var(--accent-line);
+  transform-origin:0 50%;transform:scaleX(var(--sp,0));
+  opacity:0;transition:opacity .3s ease;
+}
+.top:not(.on-hero)::after,.nav.scrolled::after{opacity:1}
 .nav-links{display:flex;align-items:center;gap:clamp(.9rem,2.6vw,1.6rem)}
 .nav-links a{font-size:.84rem;color:var(--ink-3)}
 .nav-links a:hover,.nav-links a[aria-current="page"]{color:var(--ink)}
@@ -238,7 +262,20 @@ em{font-style:normal}
    One WebGL canvas draws every tile; the links on top only carry the
    labels. The header sits on the card's top band. */
 
-.hero{padding:12px 12px 0}
+.hero{position:relative;padding:12px 12px 0}
+/* a violet haze behind the card that spills onto the page and breathes slowly */
+.hero::before{
+  content:"";position:absolute;inset:-40px 4% -120px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(34% 46% at 30% 34%,var(--glow),transparent 72%),
+    radial-gradient(30% 42% at 72% 66%,var(--glow-2),transparent 72%),
+    radial-gradient(46% 22% at 50% 76%,var(--glow-2),transparent 75%);
+  animation:halo 12s ease-in-out infinite alternate;
+}
+@keyframes halo{
+  from{opacity:.7;transform:translate3d(-1.5%,0,0) scale(1)}
+  to{opacity:1;transform:translate3d(1.5%,1%,0) scale(1.04)}
+}
 .hero-card{
   position:relative;overflow:hidden;
   width:min(100%,var(--col));
@@ -250,6 +287,17 @@ em{font-style:normal}
   background:#0a0a0a;
   color:#fff;
   isolation:isolate;
+  box-shadow:0 40px 120px -50px var(--glow-card);
+}
+/* a gradient edge on the card: lilac at the top left, orchid at the bottom right */
+.hero-card::after{
+  content:"";position:absolute;inset:0;z-index:7;pointer-events:none;
+  padding:1px;border-radius:inherit;
+  background:linear-gradient(135deg,rgba(205,188,255,.7),rgba(195,177,250,.08) 30%,rgba(195,177,250,0) 55%,rgba(235,200,246,.12) 75%,rgba(235,200,246,.6));
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
 }
 .hero-gl{position:absolute;inset:0;z-index:1;width:100%;height:100%;display:block;pointer-events:none}
 .hero-card.no-gl .hero-gl{display:none}
@@ -274,10 +322,10 @@ em{font-style:normal}
 .ht-src{position:absolute;inset:0;z-index:0;width:100%;height:100%;max-width:none;object-fit:cover}
 .hero-card.no-gl .ht-intro{background:#16171a}
 .hero-card.no-gl .ht-src{filter:saturate(.9)}
-/* a little shade where the labels sit */
+/* a little shade where the labels sit, violet at the bottom */
 .ht:not(.ht-intro)::after{
   content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(0,0,0,.42),transparent 34%,transparent 66%,rgba(0,0,0,.42));
+  background:linear-gradient(to bottom,rgba(0,0,0,.42),transparent 34%,transparent 62%,rgba(34,16,78,.5));
 }
 .ht:not(.ht-intro)::before{
   content:"";position:absolute;inset:0;z-index:3;pointer-events:none;border-radius:inherit;
@@ -292,7 +340,7 @@ em{font-style:normal}
 .ht-bot{bottom:12px;align-items:flex-end}
 .ht-top b{display:flex;align-items:baseline;gap:.5rem;font-size:.86rem;font-weight:500;line-height:1.3}
 .ht-n{flex:none;font:400 .66rem/1 var(--font-mono);color:rgba(255,255,255,.62)}
-.ht-award{flex:none;padding:.08rem .5rem;border-radius:999px;background:rgba(255,255,255,.16);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.7rem;font-weight:500;text-shadow:none}
+.ht-award{flex:none;padding:.08rem .5rem;border-radius:999px;background:rgba(195,177,250,.24);box-shadow:inset 0 0 0 1px rgba(214,200,255,.35);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.7rem;font-weight:500;text-shadow:none}
 .ht-tags{font:400 .68rem/1.4 var(--font-mono);color:rgba(255,255,255,.82)}
 .ht-go{
   flex:none;padding:.26rem .65rem;border-radius:999px;
@@ -301,7 +349,7 @@ em{font-style:normal}
 }
 .ht-tags,.ht-go{opacity:0;transform:translateY(6px);transition:opacity .25s ease,transform .25s ease,background-color .2s ease,color .2s ease}
 .ht.is-focus .ht-tags,.ht.is-focus .ht-go,.ht:hover .ht-tags,.ht:hover .ht-go,.ht:focus-visible .ht-tags,.ht:focus-visible .ht-go{opacity:1;transform:none}
-.ht:hover .ht-go{background:var(--accent-2);color:#0a0a0a}
+.ht:hover .ht-go{background:linear-gradient(100deg,#b9a3ff,#e8cbf8);color:#0a0a0a;box-shadow:0 4px 18px -4px rgba(185,163,255,.7)}
 .ht-quad .ht-tags,.ht-ftc .ht-tags{display:none}
 .ht-quad .ht-bot,.ht-ftc .ht-bot{justify-content:flex-end}
 
@@ -311,6 +359,22 @@ em{font-style:normal}
   position:relative;z-index:4;margin:0;
   font-size:clamp(1.3rem,2.7vw,1.85rem);font-weight:500;line-height:1.14;letter-spacing:-.025em;
   text-shadow:0 1px 18px rgba(0,0,0,.35);
+}
+/* the headline fades from white into lilac and orchid, and a soft sheen passes over it now and then */
+.hero-line>span[aria-hidden]{
+  display:block;width:fit-content;
+  background:
+    linear-gradient(105deg,transparent 42%,rgba(255,255,255,.95) 50%,transparent 58%) 160% 0/250% 100% no-repeat,
+    linear-gradient(170deg,#fff 0%,#fff 34%,#e2d8ff 52%,#c3b1fa 74%,#ecc9f7 100%);
+  -webkit-background-clip:text;background-clip:text;
+  color:transparent;-webkit-text-fill-color:transparent;
+  text-shadow:none;
+  filter:drop-shadow(0 1px 14px rgba(0,0,0,.3));
+  animation:sheen 7s cubic-bezier(.4,0,.2,1) 2.2s infinite;
+}
+@keyframes sheen{
+  0%{background-position:160% 0,0 0}
+  35%,100%{background-position:-60% 0,0 0}
 }
 .hero-foot{position:relative;z-index:4;display:flex;align-items:flex-end;justify-content:space-between;gap:1rem}
 .hero-sub{margin:0;font-size:.84rem;font-weight:500;line-height:1.35;color:rgba(255,255,255,.86)}
@@ -358,23 +422,43 @@ em{font-style:normal}
   margin-bottom:clamp(3.5rem,7vw,5rem);
 }
 .sec h2{margin:0;padding-top:.05rem;font-size:.9rem;font-weight:500;color:var(--ink-4)}
-.sec h2 span{display:block;position:sticky;top:calc(var(--nav-h) + 1rem)}
+.sec h2 span{
+  display:block;width:fit-content;position:sticky;top:calc(var(--nav-h) + 1rem);
+  background:var(--grad);-webkit-background-clip:text;background-clip:text;
+  transition:color .5s ease;
+}
+/* the section you are reading: the label fades into the purple gradient and a short bar grows in front */
+.sec h2 span::before{
+  content:"";display:inline-block;width:0;height:2px;margin-right:0;border-radius:2px;
+  background:var(--grad);vertical-align:.28em;
+  transition:width .5s cubic-bezier(.2,.7,.2,1),margin .5s cubic-bezier(.2,.7,.2,1);
+}
+.sec.is-here h2 span{color:transparent}
+.sec.is-here h2 span::before{width:14px;margin-right:.5rem}
 .date{margin:0;font-size:.84rem;color:var(--ink-4);white-space:nowrap}
 .award-note{color:var(--ink-3)}
 
 /* about: two short columns */
 .about{columns:2 16rem;column-gap:2.25rem;font-size:.9rem;line-height:1.6;color:var(--ink-2)}
 .about p{margin:0 0 1rem;break-inside:avoid}
-.about a,.about .plain-link{color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
-.about a:hover,.about .plain-link:hover{color:var(--accent);text-decoration-color:var(--accent)}
+/* links in the text: a purple gradient underline that rises into a highlighter mark on hover */
+.about a,.about .plain-link,.rows a,.skill-used a,.case-body>div a:not(.btn){
+  color:var(--ink);text-decoration:none;
+  padding-bottom:1px;
+  background:var(--grad) 0 100%/100% 1px no-repeat,var(--grad-soft) 0 100%/100% 0 no-repeat;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+  transition:background-size .35s cubic-bezier(.2,.7,.2,1),color .2s ease;
+}
+.about a:hover,.about .plain-link:hover,.rows a:hover,.skill-used a:hover,.case-body>div a:not(.btn):hover{
+  color:var(--ink);
+  background-size:100% 1px,100% 62%;
+}
 
 /* experience, awards: one line each, years in grey */
 .rows{margin:0;padding:0;list-style:none}
 .rows li{padding:.18rem 0;font-size:.97rem;line-height:1.55;color:var(--ink)}
 .rows li .yr{margin-left:.35rem;color:var(--ink-4)}
 .rows li .what{color:var(--ink-3)}
-.rows a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
-.rows a:hover{color:var(--accent);text-decoration-color:var(--accent)}
 
 /* ---------- projects: rounded cards, clips playing inside ---------- */
 
@@ -390,7 +474,21 @@ em{font-style:normal}
   background:var(--surface);
   color:#fff;
   isolation:isolate;
+  transition:box-shadow .4s ease;
 }
+/* the card's edge lights up in lilac where the cursor is (--mx/--my from home.js) */
+.proj-card::before{
+  content:"";position:absolute;inset:0;z-index:3;pointer-events:none;
+  padding:1px;border-radius:inherit;
+  background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(226,212,255,.95),rgba(195,177,250,.35) 45%,rgba(195,177,250,.06) 75%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:0;transition:opacity .35s ease;
+}
+.proj-card:hover::before,.proj-card:focus-visible::before{opacity:1}
+.proj-card:hover{box-shadow:0 22px 60px -28px var(--glow-card)}
 .proj-wide .proj-card{aspect-ratio:2/1}
 .proj-card img,.proj-card video{
   position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
@@ -398,14 +496,18 @@ em{font-style:normal}
 }
 .proj-card::after{
   content:"";position:absolute;inset:0;z-index:1;pointer-events:none;
-  background:linear-gradient(to bottom,rgba(0,0,0,.58),rgba(0,0,0,.12) 30%,transparent 45%,transparent 62%,rgba(0,0,0,.5));
+  background:
+    radial-gradient(240px circle at var(--mx,50%) var(--my,50%),rgba(195,177,250,.16),transparent 70%) no-repeat,
+    linear-gradient(to bottom,rgba(0,0,0,.58),rgba(0,0,0,.12) 30%,transparent 45%,transparent 58%,rgba(34,16,78,.62));
+  background-size:0 0,100% 100%;
 }
+.proj-card:hover::after{background-size:100% 100%,100% 100%}
 .proj-top,.proj-bot{position:absolute;left:20px;right:20px;z-index:2;display:flex;justify-content:space-between;gap:1rem;text-shadow:0 1px 10px rgba(0,0,0,.35)}
 .proj-top{top:18px;align-items:flex-start}
 .proj-bot{bottom:16px;align-items:flex-end}
 .proj-top b{display:block;font-size:.95rem;font-weight:500;line-height:1.3}
 .proj-top small{display:block;margin-top:.1rem;font-size:.82rem;color:rgba(255,255,255,.78)}
-.proj-award{flex:none;padding:.1rem .5rem;border-radius:999px;background:rgba(255,255,255,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.72rem;font-weight:500;text-shadow:none}
+.proj-award{flex:none;padding:.1rem .5rem;border-radius:999px;background:rgba(195,177,250,.24);box-shadow:inset 0 0 0 1px rgba(214,200,255,.35);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:.72rem;font-weight:500;text-shadow:none}
 .proj-tags{font:400 .7rem/1.4 var(--font-mono);color:rgba(255,255,255,.8)}
 .proj-go{
   flex:none;padding:.3rem .7rem;border-radius:999px;
@@ -417,7 +519,7 @@ em{font-style:normal}
 .proj-card:hover{color:#fff}
 .proj-card:hover img,.proj-card:hover video{transform:scale(1.035)}
 .proj-card:hover .proj-go,.proj-card:focus-visible .proj-go{opacity:1;transform:none}
-.proj-card:hover .proj-go{background:var(--accent);color:var(--on-ink)}
+.proj-card:hover .proj-go{background:linear-gradient(100deg,#b9a3ff,#e8cbf8);color:#0a0a0a;box-shadow:0 4px 18px -4px rgba(185,163,255,.7)}
 
 /* ---------- skills ---------- */
 
@@ -440,15 +542,19 @@ em{font-style:normal}
   transition:border-color .15s ease,color .15s ease,background-color .15s ease;
 }
 button.skill{cursor:pointer;-webkit-tap-highlight-color:transparent}
-button.skill:hover{color:var(--ink);background:var(--surface-2)}
-.skill.is-on{border-color:var(--accent);background:var(--accent-soft);color:var(--ink)}
+button.skill:not(.is-on):hover{color:var(--ink);background:var(--surface-2);border-color:var(--accent-line)}
+/* the chosen skill: a soft purple fill inside a gradient edge */
+.skill.is-on,.upcoming .skill.is-on{
+  border:1px solid transparent;
+  background:var(--grad-soft) padding-box,linear-gradient(var(--bg),var(--bg)) padding-box,var(--grad) border-box;
+  color:var(--ink);
+  box-shadow:0 0 18px -6px var(--glow-card);
+}
 .skill .n{font:400 .68rem/1 var(--font-mono);color:var(--ink-4)}
 .skill.is-on .n{color:var(--accent)}
 .upcoming .skill{background:transparent;border:1px dashed var(--line-3)}
-.upcoming .skill.is-on{border-style:solid;border-color:var(--accent)}
 .skill-used{margin:.4rem 0 0;min-height:1.5em;font-size:.84rem;color:var(--ink-3)}
-.skill-used b{font-weight:500;color:var(--ink)}
-.skill-used a{text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
+.skill-used b{font-weight:500;color:var(--accent)}
 
 /* ---------- visitor map ---------- */
 
@@ -459,9 +565,21 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
 
 /* ---------- footer (home): dark, three columns ---------- */
 
-.foot{margin-top:clamp(2rem,6vw,4rem);background:var(--foot);color:#e5e5e5}
-[data-theme="dark"] .foot{border-top:1px solid var(--line)}
-.foot-inner{
+.foot{position:relative;overflow:hidden;margin-top:clamp(2rem,6vw,4rem);background:var(--foot);color:#e5e5e5}
+/* a lilac hairline along the top, and a violet aurora rising from the bottom */
+.foot::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent 5%,rgba(195,177,250,.8) 35%,rgba(235,200,246,.7) 65%,transparent 95%);
+}
+.foot::after{
+  content:"";position:absolute;left:-10%;right:-10%;top:0;bottom:0;pointer-events:none;
+  background:
+    radial-gradient(40% 75% at 26% 100%,rgba(124,95,214,.36),transparent 72%),
+    radial-gradient(36% 65% at 76% 100%,rgba(196,130,230,.2),transparent 72%);
+  transform-origin:50% 100%;
+  animation:halo 14s ease-in-out infinite alternate;
+}
+.foot-inner{position:relative;z-index:1;
   max-width:var(--col);margin:0 auto;padding:clamp(2.5rem,6vw,4rem) var(--pad) clamp(3rem,8vw,5rem);
   display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,.7fr) minmax(0,1.3fr);gap:2rem;
   font-size:.86rem;line-height:1.6;
@@ -472,7 +590,7 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
 .foot li{padding:.12rem 0}
 .foot a,.foot .plain-link{color:#e5e5e5}
 .foot a:hover,.foot .plain-link:hover{color:var(--accent-2)}
-.foot .name{font-weight:500;color:#fff}
+.foot .name{width:fit-content;font-weight:500;background:linear-gradient(100deg,#fff 10%,#c9b6ff 60%,#ebc8f6);-webkit-background-clip:text;background-clip:text;color:transparent}
 .foot .muted{color:#8a8a8a}
 .foot .clock{margin-top:1.4rem;font:400 .74rem/1.5 var(--font-mono);color:#8a8a8a}
 .foot .clock b{font-weight:400;color:var(--accent-2)}
@@ -480,7 +598,7 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
 /* project pages keep a light footer */
 .site-footer{margin-top:clamp(2rem,6vw,3rem)}
 .footer-inner{position:relative}
-.footer-inner::before{content:"";position:absolute;top:0;left:var(--pad);right:var(--pad);border-top:1px solid var(--line)}
+.footer-inner::before{content:"";position:absolute;top:0;left:var(--pad);right:var(--pad);height:1px;background:linear-gradient(90deg,var(--line),var(--accent-line) 50%,var(--line))}
 .footer-inner{
   display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:.75rem 1.5rem;
   padding-block:1.1rem 2rem;
@@ -532,7 +650,17 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
 
 .project-card{margin:.75rem auto 0}
 
-.eyebrow{margin:0 0 .7rem;font:400 .74rem/1.6 var(--font-mono);color:var(--ink-3)}
+/* a violet haze at the top of each project page, like the one behind the home hero */
+.case-page::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:720px;z-index:-1;pointer-events:none;
+  background:
+    radial-gradient(40% 60% at 30% 6%,var(--glow),transparent 70%),
+    radial-gradient(34% 46% at 72% 20%,var(--glow-2),transparent 70%);
+  animation:breathe 12s ease-in-out infinite alternate;
+}
+@keyframes breathe{from{opacity:.7}to{opacity:1}}
+
+.eyebrow{margin:0 0 .7rem;font:400 .74rem/1.6 var(--font-mono);color:var(--accent)}
 .case-head{padding-block:1rem clamp(1.4rem,3vw,2rem)}
 .case-head h1{
   margin:0;
@@ -541,6 +669,9 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
   font-weight:500;
   line-height:1.1;
   letter-spacing:-.03em;
+  width:fit-content;
+  background:linear-gradient(100deg,var(--ink) 30%,var(--accent) 80%,var(--accent-3));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
 }
 .lede{margin:1rem 0 0;max-width:62ch;font-size:clamp(1rem,1.5vw,1.0625rem);line-height:1.65;color:var(--ink-2)}
 
@@ -560,7 +691,8 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
   border-radius:50%;
   font-size:.8rem;font-weight:500;
   color:var(--on-ink);
-  background:var(--ink);
+  background:var(--grad);
+  box-shadow:0 0 22px -6px var(--glow-card);
 }
 .award p{margin:0;font-size:.92rem;line-height:1.5;color:var(--ink-2)}
 .award b{color:var(--ink)}
@@ -570,6 +702,7 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
   margin-bottom:clamp(1.3rem,3vw,1.8rem);
   border-radius:var(--r);
   background:var(--dark);
+  box-shadow:0 30px 90px -50px var(--glow-card);
 }
 .case-media video,.case-media img{width:100%;height:auto;aspect-ratio:16/9;object-fit:contain;display:block}
 .media-note{margin:-.6rem 0 clamp(1.5rem,4vw,2.2rem);font-size:.86rem;color:var(--ink-3)}
@@ -584,7 +717,7 @@ button.skill:hover{color:var(--ink);background:var(--surface-2)}
   border-bottom:1px solid var(--line);
 }
 .stat-row .stat{display:block;padding:1rem 1.1rem 1rem 0}
-.stat-row .stat b{display:block;font-size:1.5rem;font-weight:500;letter-spacing:-.03em;line-height:1.15;color:var(--ink)}
+.stat-row .stat b{display:block;width:fit-content;font-size:1.5rem;font-weight:500;letter-spacing:-.03em;line-height:1.15;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .stat-row .stat span{display:block;margin-top:.3rem;font-size:.84rem;line-height:1.4;color:var(--ink-3)}
 
 .case-section-head{margin:0 0 1rem;font-size:1.05rem}
@@ -654,8 +787,6 @@ img.plot{background:#fff}
 }
 .case-body pre code{padding:0;background:none;font-size:.8rem;line-height:1.7;color:var(--ink-2);overflow-wrap:normal}
 .case-body li,.case-body p{overflow-wrap:break-word}
-.case-body>div a:not(.btn){color:var(--ink);text-decoration:underline;text-decoration-color:var(--accent-line);text-underline-offset:3px}
-.case-body>div a:not(.btn):hover{color:var(--accent);text-decoration-color:var(--accent)}
 
 /* a script walk-through: the part on the left, what it does on the right */
 .walk{
@@ -671,11 +802,14 @@ img.plot{background:#fff}
 .walk dt:last-of-type,.walk dd:last-of-type{border-bottom:0}
 
 .hard{
+  position:relative;overflow:hidden;
   margin:1.7rem 0;
-  padding:1.05rem 1.25rem;
+  padding:1.05rem 1.25rem 1.05rem 1.45rem;
   border-radius:12px;
-  background:var(--surface);
+  background:linear-gradient(100deg,var(--accent-soft),var(--surface) 55%);
 }
+/* a purple gradient edge down the left side */
+.hard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--grad-v)}
 .hard-label{display:block;margin-bottom:.4rem;font-size:.86rem;font-weight:500;color:var(--ink)}
 .hard-label::before{content:"";display:inline-block;width:6px;height:6px;margin-right:.5rem;border-radius:50%;background:var(--accent);vertical-align:2px}
 .hard p:last-child,.hard ul:last-child,.hard li:last-child{margin-bottom:0}
@@ -684,8 +818,12 @@ img.plot{background:#fff}
   position:sticky;
   top:calc(var(--nav-h) + 1.25rem);
   padding:1.1rem 1.2rem 1.2rem;
+  border:1px solid transparent;
   border-radius:var(--r);
-  background:var(--surface);
+  /* a gradient edge: lilac at the top left, orchid at the bottom right */
+  background:
+    linear-gradient(var(--surface),var(--surface)) padding-box,
+    linear-gradient(150deg,var(--accent-line),transparent 35%,transparent 70%,var(--glow-2)) border-box;
 }
 .facts dl{margin:0}
 .facts dt{margin-top:.95rem;font-size:.8rem;color:var(--ink-4)}
