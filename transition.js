@@ -1,19 +1,16 @@
 /* =========================================================
-   Max Yuan · "imagining the future"
-   Opening a project plays a small world-action-model act:
+   Max Yuan · "imagining the future" (flow matching)
+   Opening a project plays one continuous flow-matching sample:
 
-     1. the card you clicked grows to fill the screen and dissolves
-        into noise (the forward process: the present, encoded)
-     2. a fan of imagined trajectories grows from your cursor
-     3. in the dark, the model samples a few rollouts and denoises
-        each one's next frames together, coarse to fine. They all
-        start from the same present; the wrong ones drift towards
-        other projects, the right one towards the page you asked for
-     4. the rollouts are scored; the losers fade, the winner replays
-     5. its last frame grows to fill the screen and sharpens, and the
-        real page comes into focus underneath it
+     1. the card you clicked breaks into particles that scatter into
+        a Gaussian cloud: the present, pushed back to noise
+     2. each particle travels a straight line from its noise sample to
+        its pixel in the page you asked for, x_t = (1 - t) x_0 + t x_1,
+        the way π₀ samples its actions (rectified flow)
+     3. the sample sharpens into the real frame, and the page comes
+        into focus underneath it
 
-   Neutral greys and one pastel purple, the same as the rest of the site.
+   Drawn with WebGL points. Neutral greys and one pastel purple.
    Click, Esc or Enter skips. Reduced motion goes straight there.
    Shared by every page. window.wamImagine(href, opts) starts it.
    ========================================================= */
@@ -25,7 +22,6 @@
   const ROOT = document.documentElement.dataset.root || '';
   const KEY = 'wam-arrive';
   const ACCENT = '#c3b1fa';
-  const accentA = a => `rgba(195,177,250,${a})`;
 
   // where each project lives, and the frame its future resolves to
   const FUTURES = {
@@ -57,63 +53,14 @@
   style.textContent = `
   .wam{position:fixed;inset:0;z-index:2147483000;pointer-events:auto;cursor:progress;
     font-family:"Geist","Geist Fallback",system-ui,sans-serif;color:#fafafa;-webkit-font-smoothing:antialiased}
-  .wam canvas{display:block}
-  .wam-bg{position:fixed;overflow:hidden;background:#0a0a0a;border-radius:16px;
-    transition:left .45s cubic-bezier(.7,0,.2,1),top .45s cubic-bezier(.7,0,.2,1),width .45s cubic-bezier(.7,0,.2,1),height .45s cubic-bezier(.7,0,.2,1),border-radius .45s cubic-bezier(.7,0,.2,1)}
-  .wam-bg::after{content:"";position:absolute;inset:-20%;opacity:0;transition:opacity 1s ease;
-    background:radial-gradient(45% 40% at 50% 46%,rgba(124,95,214,.17),transparent 70%),radial-gradient(30% 30% at 70% 70%,rgba(195,177,250,.07),transparent 70%);
-    animation:wam-drift 9s ease-in-out infinite alternate}
-  .wam.is-dark .wam-bg::after{opacity:1}
-  .wam-enc{position:absolute;inset:0;width:100%;height:100%;transition:opacity .5s ease}
-  .wam-trace{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-  .wam-panel{position:absolute;left:50%;top:50%;width:min(980px,calc(100vw - 32px));transform:translate(-50%,-48%);opacity:0;transition:opacity .3s ease,transform .4s cubic-bezier(.2,.7,.2,1)}
-  .wam.is-dark .wam-panel{opacity:1;transform:translate(-50%,-50%)}
-  .wam-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;margin-bottom:20px}
-  .wam-title{margin:0 0 12px;font-size:clamp(24px,3.6vw,36px);font-weight:500;line-height:1.1;letter-spacing:-.025em;color:#fafafa}
-  .wam-title i{font-style:normal;display:inline-block;color:${ACCENT};animation:wam-dot 1.2s ease-in-out infinite}
-  .wam-title i:nth-child(2){animation-delay:.15s}
-  .wam-title i:nth-child(3){animation-delay:.3s}
-  .wam-log{margin:0;min-height:8em;font:12px/1.6 "Geist Mono",ui-monospace,monospace;color:#8a8a8a;white-space:pre-wrap}
-  .wam-log b{font-weight:500;color:${ACCENT}}
-  .wam-z{display:grid;grid-template-columns:repeat(16,6px);gap:4px}
-  .wam-z i{width:6px;height:6px;border-radius:50%;background:#222;transition:background-color .25s,box-shadow .25s}
-  .wam-z i.h{background:#3a3a3d}
-  .wam-z i.on{background:${ACCENT};box-shadow:0 0 6px ${accentA(0.7)}}
-  .wam-cap{margin:8px 0 0;font:10px/1.4 "Geist Mono",ui-monospace,monospace;color:#525252;text-align:right}
-  .wam-prog{display:flex;align-items:center;gap:14px;margin:0 0 14px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#737373}
-  .wam-prog-bar{flex:1;height:2px;border-radius:2px;background:#1f1f1f;overflow:hidden}
-  .wam-prog-bar i{display:block;height:100%;width:0;border-radius:2px;background:linear-gradient(90deg,#7c5fd6,${ACCENT});box-shadow:0 0 10px ${accentA(0.7)}}
-  .wam-prog-txt{min-width:10em;text-align:right}
-  .wam-row{display:grid;grid-template-columns:72px repeat(var(--F),minmax(0,1fr)) 92px;gap:8px;align-items:center;margin-bottom:8px;transition:opacity .5s ease,filter .5s ease}
-  .wam-row>label{font:11px/1 "Geist Mono",ui-monospace,monospace;color:#737373}
-  .wam-cell canvas{width:100%;height:auto;aspect-ratio:16/10;border-radius:6px;background:#141414;opacity:0;transform:scale(.94);
-    transition:opacity .25s ease,transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .3s ease}
-  .wam-cell.on canvas{opacity:1;transform:none}
-  .wam-score{display:flex;align-items:center;justify-content:flex-end;gap:8px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#737373}
-  .wam-meter{width:38px;height:3px;border-radius:2px;background:#222;overflow:hidden}
-  .wam-meter i{display:block;height:100%;width:0;background:#8a8a8a;border-radius:2px}
-  .wam-row.lose{opacity:.26;filter:grayscale(1)}
-  .wam-row.win>label,.wam-row.win .wam-score{color:#fafafa}
-  .wam-row.win .wam-meter i{background:${ACCENT};box-shadow:0 0 8px ${accentA(0.8)}}
-  .wam-row.win .wam-cell canvas{box-shadow:0 0 0 1px ${accentA(0.45)}}
-  .wam-row.win .wam-cell.play canvas{transform:scale(1.07);box-shadow:0 0 0 1.5px ${ACCENT},0 0 26px ${accentA(0.45)}}
-  .wam-axis{margin:4px 0 0}
-  .wam-axis span{font:10px/1 "Geist Mono",ui-monospace,monospace;color:#525252;text-align:center}
-  .wam-grow{position:fixed;z-index:3;border-radius:6px;background:#141414;box-shadow:0 0 0 1.5px ${ACCENT},0 0 40px ${accentA(0.4)};
-    transition:left .4s cubic-bezier(.7,0,.2,1),top .4s cubic-bezier(.7,0,.2,1),width .4s cubic-bezier(.7,0,.2,1),height .4s cubic-bezier(.7,0,.2,1),border-radius .4s ease,box-shadow .4s ease}
+  .wam canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+  .wam-final{opacity:0;transition:opacity .22s ease}
+  .wam-final.on{opacity:1}
+  .wam-tag{position:absolute;left:18px;top:16px;z-index:4;margin:0;display:flex;align-items:center;gap:8px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#fafafa;text-shadow:0 1px 6px rgba(0,0,0,.6);font-variant-numeric:tabular-nums;opacity:0;transition:opacity .3s ease}
+  .wam-tag.on{opacity:1}
+  .wam-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT}}
   .wam-skip{position:absolute;right:18px;bottom:16px;margin:0;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#525252;opacity:0;transition:opacity .3s}
-  .wam.is-dark .wam-skip{opacity:1}
-  .wam-tag{position:absolute;left:18px;top:16px;z-index:4;margin:0;display:flex;align-items:center;gap:8px;font:11px/1 "Geist Mono",ui-monospace,monospace;color:#fafafa;text-shadow:0 1px 6px rgba(0,0,0,.6)}
-  .wam-tag::before{content:"";width:6px;height:6px;border-radius:50%;background:${ACCENT};box-shadow:0 0 8px ${ACCENT}}
-  @keyframes wam-dot{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
-  @keyframes wam-drift{from{transform:translate(-3%,-2%)}to{transform:translate(3%,2%)}}
-  @media (max-width:640px){
-    .wam-head{grid-template-columns:minmax(0,1fr)}
-    .wam-zbox{display:none}
-    .wam-log{font-size:10.5px;min-height:9em}
-    .wam-row{grid-template-columns:24px repeat(var(--F),minmax(0,1fr)) 34px;gap:5px}
-    .wam-meter{display:none}
-  }
+  .wam-skip.on{opacity:1}
   html.wam-arriving,html.wam-arriving body{background:#0a0a0a!important}
   html.wam-arriving body>*:not(.wam){visibility:hidden}
   html.wam-focus body>*:not(.wam){filter:blur(14px);opacity:0}
@@ -124,7 +71,6 @@
   /* ---------- helpers ---------- */
 
   const sleep = ms => new Promise(r => setTimeout(r, ms));
-  const rand = (a, b) => a + Math.random() * (b - a);
   const loadImage = src => new Promise((resolve, reject) => {
     const img = new Image();
     img.decoding = 'async';
@@ -142,169 +88,92 @@
     return Math.sqrt(-2 * Math.log(u)) * Math.cos(6.2831853 * Math.random());
   };
 
-  function cropOf(img, fr, view) {
+  // the part of img that covers a box of aspect fr, like object-fit: cover
+  function cropOf(img, fr) {
     let sw = img.width;
     let sh = img.height;
     if (img.width / img.height > fr) sw = img.height * fr; else sh = img.width / fr;
-    sw /= view.z;
-    sh /= view.z;
-    const sx = Math.max(0, Math.min(img.width - sw, view.cx * img.width - sw / 2));
-    const sy = Math.max(0, Math.min(img.height - sh, view.cy * img.height - sh / 2));
-    return [sx, sy, sw, sh];
+    return [(img.width - sw) / 2, (img.height - sh) / 2, sw, sh];
   }
-  const FULL = { cx: 0.5, cy: 0.5, z: 1 };
 
-  // a table of Gaussian samples, read at a random stride so every frame gets fresh noise quickly
-  const GN = 1 << 18;
-  const GMASK = GN - 1;
-  const GT = new Float32Array(GN);
-  for (let i = 0; i < GN; i += 1) GT[i] = gauss();
-
-  /* ---------- one frame of a diffusion sample ----------
-     level 0 is pure noise, 1 is the picture. The picture is drawn
-     small and scaled up smoothly (so it comes back coarse to fine),
-     then every output pixel gets its own Gaussian noise as in the
-     forward process with a cosine schedule, with a little colour of
-     its own in each channel; the picture under it drifts towards a
-     lavender grey as it gets noisier.                                         */
-
-  const scratch = document.createElement('canvas');
-  const sctx = scratch.getContext('2d');
-
-  function paint(canvas, o) {
-    const { W, H } = o;
-    const level = Math.max(0, Math.min(1, o.level));
-    if (canvas.width !== W) canvas.width = W;
-    if (canvas.height !== H) canvas.height = H;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true });
-    const t = 1 - level;
-    const scale = Math.max(0.035, level ** 2.3);
-    const w = Math.max(3, Math.round(W * scale));
-    const h = Math.max(2, Math.round(H * scale));
-    scratch.width = w;
-    scratch.height = h;
-    sctx.globalAlpha = 1;
-    sctx.fillStyle = '#26272b';
-    sctx.fillRect(0, 0, w, h);
-    sctx.imageSmoothingQuality = 'high';
-    if (o.img) sctx.drawImage(o.img, ...cropOf(o.img, W / H, o.view || FULL), 0, 0, w, h);
-    if (o.alt && o.mix > 0) {
-      sctx.globalAlpha = o.mix;
-      sctx.drawImage(o.alt, ...cropOf(o.alt, W / H, o.altView || FULL), 0, 0, w, h);
-      sctx.globalAlpha = 1;
-    }
-    ctx.imageSmoothingEnabled = true;
+  // the image's colours on a cols x rows grid, cropped to aspect fr
+  function sample(img, cols, rows, fr) {
+    const c = document.createElement('canvas');
+    c.width = cols;
+    c.height = rows;
+    const ctx = c.getContext('2d', { willReadFrequently: true });
     ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(scratch, 0, 0, W, H);
-    if (t < 0.001) return;
-    // x_t = sqrt(a) x_0 + sqrt(1 - a) eps, per pixel, mostly grey noise with a little colour
-    const a = Math.cos(t * Math.PI / 2) ** 2;
-    const sa = Math.sqrt(a);
-    const sn = Math.sqrt(1 - a) * 0.5;
-    const grey = Math.min(0.85, t * 0.8);
-    const data = ctx.getImageData(0, 0, W, H);
-    const d = data.data;
-    let k = Math.floor(Math.random() * GN);
-    const stride = (Math.floor(Math.random() * 2000) * 2 + 7919) & GMASK;
-    for (let i = 0; i < d.length; i += 4) {
-      k = (k + stride) & GMASK;
-      const e = GT[k];
-      let r = d[i] / 127.5 - 1;
-      let g = d[i + 1] / 127.5 - 1;
-      let b = d[i + 2] / 127.5 - 1;
-      const l = 0.299 * r + 0.587 * g + 0.114 * b;
-      r += (l * 0.99 - r) * grey;
-      g += (l * 0.96 - g) * grey;
-      b += (l * 1.06 - b) * grey;
-      d[i] = (sa * r + sn * (e + GT[(k + 104729) & GMASK] * 0.12) + 1) * 127.5;
-      d[i + 1] = (sa * g + sn * (e + GT[(k + 7919) & GMASK] * 0.12) + 1) * 127.5;
-      d[i + 2] = (sa * b + sn * (e + GT[(k + 31337) & GMASK] * 0.12) + 1) * 127.5;
-    }
-    ctx.putImageData(data, 0, 0);
+    ctx.drawImage(img, ...cropOf(img, fr), 0, 0, cols, rows);
+    return ctx.getImageData(0, 0, cols, rows).data;
   }
 
-  // imagined trajectories: a fan of smooth noisy paths from the cursor towards the goal
-  function drawTraces(canvas, from, to, dur, K = 14) {
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    canvas.width = Math.round(window.innerWidth * dpr);
-    canvas.height = Math.round(window.innerHeight * dpr);
-    const ctx = canvas.getContext('2d');
-    ctx.scale(dpr, dpr);
-    const pick = Math.floor(K / 2);
-    const paths = Array.from({ length: K }, (_, k) => {
-      const pts = [];
-      const spread = k === pick ? 0 : rand(-1, 1);
-      let x = from.x;
-      let y = from.y;
-      let vx = (to.x - from.x) / 40 + spread * rand(2, 10);
-      let vy = (to.y - from.y) / 40 + spread * rand(-9, 9);
-      for (let s = 0; s < 54; s += 1) {
-        const tt = s / 53;
-        const pull = k === pick ? 1 : 0.3;
-        vx += ((to.x - x) * 0.012 * pull) + rand(-1.1, 1.1) * (1 - tt * pull);
-        vy += ((to.y - y) * 0.012 * pull) + rand(-1.1, 1.1) * (1 - tt * pull);
-        vx *= 0.9;
-        vy *= 0.9;
-        x += vx;
-        y += vy;
-        pts.push([x, y]);
-      }
-      if (k === pick) pts.push([to.x, to.y]);
-      return pts;
-    });
-    const t0 = performance.now();
-    return new Promise(resolve => {
-      const step = now => {
-        const k = Math.min(1, (now - t0) / dur);
-        const e = 1 - (1 - k) ** 3;
-        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-        paths.forEach((pts, i) => {
-          const n = Math.max(2, Math.floor(pts.length * e));
-          const chosen = i === pick;
-          ctx.beginPath();
-          ctx.moveTo(from.x, from.y);
-          for (let j = 0; j < n; j += 1) ctx.lineTo(pts[j][0], pts[j][1]);
-          ctx.strokeStyle = chosen ? '#ffffff' : accentA(0.38);
-          ctx.lineWidth = chosen ? 2 : 1.2;
-          ctx.shadowColor = chosen ? accentA(1) : accentA(0.5);
-          ctx.shadowBlur = chosen ? 14 : 6;
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          const [ex, ey] = pts[n - 1];
-          ctx.fillStyle = chosen ? '#ffffff' : accentA(0.7);
-          ctx.beginPath();
-          ctx.arc(ex, ey, chosen ? 3 : 2, 0, Math.PI * 2);
-          ctx.fill();
-        });
-        ctx.strokeStyle = accentA(0.9);
-        ctx.lineWidth = 1.2;
-        ctx.beginPath();
-        ctx.arc(from.x, from.y, 6 + 10 * e, 0, Math.PI * 2);
-        ctx.globalAlpha = 1 - e;
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-        if (k < 1) requestAnimationFrame(step); else resolve();
-      };
-      requestAnimationFrame(step);
-    });
-  }
+  /* ---------- the particle renderer ---------- */
 
-  function typeLine(el, html, perChar = 4) {
-    const line = document.createElement('span');
-    el.append(line, '\n');
-    const tmp = document.createElement('span');
-    tmp.innerHTML = html;                 // type the text, then swap in the markup
-    const text = tmp.textContent;
-    return (async () => {
-      for (let i = 1; i <= text.length; i += 3) {
-        line.textContent = text.slice(0, i);
-        await sleep(perChar);
-      }
-      line.innerHTML = html;
-      return line;
-    })();
+  const VS = `
+  attribute vec2 aSrc;
+  attribute vec2 aNoise;
+  attribute vec2 aDst;
+  attribute vec3 aCol0;
+  attribute vec3 aCol1;
+  attribute vec2 aSeed;
+  uniform vec2 uRes;
+  uniform float uA;      // 0..1: the present scatters into noise
+  uniform float uB;      // 0..1: the flow from noise to the future
+  uniform float uCell;   // grid cell, in device pixels
+  varying vec3 vCol;
+  varying float vAlpha;
+  varying float vShape;
+  void main(){
+    float eA = 1.0 - pow(1.0 - uA, 3.0);
+    // every particle runs the same straight path, a little early or late
+    float t = clamp(uB * 1.3 - aSeed.x * 0.3, 0.0, 1.0);
+    float eB = t * t * (3.0 - 2.0 * t);
+    vec2 x0 = mix(aSrc, aNoise, eA);
+    vec2 p = mix(x0, aDst, eB);
+    // noise: grey with a faint lilac, its own brightness per particle
+    vec3 nz = vec3(0.50, 0.48, 0.58) + (aSeed.y - 0.5) * 0.5;
+    vec3 col = mix(mix(aCol0, nz, eA), aCol1, pow(eB, 1.4));
+    vCol = col;
+    vAlpha = mix(mix(1.0, 0.55, eA), 1.0, eB);
+    vShape = eB * eB;
+    float size = uCell * mix(mix(1.15, 1.9, eA), 1.25, eB);
+    gl_PointSize = size;
+    vec2 clip = p / uRes * 2.0 - 1.0;
+    gl_Position = vec4(clip.x, -clip.y, 0.0, 1.0);
+  }`;
+  const FS = `
+  precision mediump float;
+  varying vec3 vCol;
+  varying float vAlpha;
+  varying float vShape;
+  void main(){
+    vec2 c = gl_PointCoord - 0.5;
+    float d = mix(length(c), max(abs(c.x), abs(c.y)), vShape) * 2.0;
+    float a = (1.0 - smoothstep(mix(0.15, 0.85, vShape), 1.0, d)) * vAlpha;
+    gl_FragColor = vec4(vCol * a, a);
+  }`;
+
+  function makeGL(canvas) {
+    const gl = canvas.getContext('webgl', { premultipliedAlpha: true, antialias: false, alpha: true });
+    if (!gl) return null;
+    const sh = (type, src) => {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+    };
+    const vs = sh(gl.VERTEX_SHADER, VS);
+    const fs = sh(gl.FRAGMENT_SHADER, FS);
+    if (!vs || !fs) return null;
+    const prog = gl.createProgram();
+    gl.attachShader(prog, vs);
+    gl.attachShader(prog, fs);
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+    gl.useProgram(prog);
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+    return { gl, prog };
   }
 
   /* ---------- the act ---------- */
@@ -317,206 +186,138 @@
     if (reduce) { location.href = fut.href; return; }
     busy = true;
     const title = opts.title || fut.title;
-    const imgP = getImage(fut.poster);
-    // the wrong rollouts drift towards the other projects
-    const others = ALL_KEYS.filter(k => k !== fut.key).sort(() => Math.random() - 0.5);
-    const altP = Promise.all(others.map(k => getImage(posterOf(k))));
     const VW = window.innerWidth;
     const VH = window.innerHeight;
     const from = opts.from || { x: VW / 2, y: VH / 2 };
-    const src = opts.rect || { left: from.x - 4, top: from.y - 4, width: 8, height: 8 };
+    const card = opts.rect && opts.rect.width > 40 ? opts.rect : null;
 
-    const narrow = VW < 640;
-    const F = narrow ? 4 : 8;                          // frames per rollout
-    const R = narrow || VH < 640 ? 3 : 4;             // rollouts
-    const STEPS = 3;                                   // denoising steps per frame
-    const win = Math.floor(Math.random() * R);
+    const go = () => {
+      try { sessionStorage.setItem(KEY, JSON.stringify({ poster: fut.poster, title, t: Date.now() })); } catch (e) { /* private mode */ }
+      location.href = fut.href;
+    };
+
+    const img = await Promise.race([getImage(fut.poster), sleep(600).then(() => null)]);
+    if (!img) { go(); return; }
 
     const root = document.createElement('div');
     root.className = 'wam';
     root.setAttribute('role', 'status');
     root.setAttribute('aria-live', 'assertive');
-    const cells = Array.from({ length: F }, () => '<span class="wam-cell"><canvas></canvas></span>').join('');
     root.innerHTML = `
-      <div class="wam-bg" aria-hidden="true"><canvas class="wam-enc"></canvas></div>
-      <canvas class="wam-trace" aria-hidden="true"></canvas>
-      <div class="wam-panel">
-        <div class="wam-head">
-          <div>
-            <p class="wam-title">Imagining the future<i>.</i><i>.</i><i>.</i></p>
-            <pre class="wam-log"></pre>
-          </div>
-          <div class="wam-zbox" aria-hidden="true"><div class="wam-z">${'<i></i>'.repeat(96)}</div><p class="wam-cap">z_t · 96 tokens</p></div>
-        </div>
-        <div class="wam-prog" aria-hidden="true"><span class="wam-prog-bar"><i></i></span><span class="wam-prog-txt">denoising 0/${F * STEPS}</span></div>
-        <div class="wam-grid" aria-hidden="true">
-          ${Array.from({ length: R }, (_, r) => `<div class="wam-row" style="--F:${F}"><label>${narrow ? '' : 'rollout '}${r + 1}</label>${cells}<span class="wam-score"><span class="wam-meter"><i></i></span><span class="num">—</span></span></div>`).join('')}
-          <div class="wam-row wam-axis" style="--F:${F}"><span></span>${Array.from({ length: F }, (_, f) => `<span>t+${f + 1}</span>`).join('')}<span></span></div>
-        </div>
-      </div>
+      <canvas class="wam-flow" aria-hidden="true"></canvas>
+      <canvas class="wam-final" aria-hidden="true"></canvas>
+      <p class="wam-tag">flow matching · t 0.00</p>
       <p class="wam-skip">click to skip</p>`;
+    const canvas = root.querySelector('.wam-flow');
+    const finalC = root.querySelector('.wam-final');
+    const tag = root.querySelector('.wam-tag');
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = finalC.width = Math.round(VW * dpr);
+    canvas.height = finalC.height = Math.round(VH * dpr);
+    const G = makeGL(canvas);
+    if (!G) { go(); return; }
     document.body.append(root);
     document.documentElement.classList.add('wam-on');   // the home page's hero stops drawing underneath
 
     let skipped = false;
-    const go = () => {
-      try { sessionStorage.setItem(KEY, JSON.stringify({ poster: fut.poster, title, t: Date.now() })); } catch (e) { /* private mode */ }
-      location.href = fut.href;
-    };
     const skip = () => { if (skipped) return; skipped = true; go(); };
     root.addEventListener('click', skip);
     const onKey = e => { if (e.key === 'Escape' || e.key === 'Enter') skip(); };
     window.addEventListener('keydown', onKey);
 
-    const bg = root.querySelector('.wam-bg');
-    const enc = root.querySelector('.wam-enc');
-    const traceCanvas = root.querySelector('.wam-trace');
-    const logEl = root.querySelector('.wam-log');
-    const rows = [...root.querySelectorAll('.wam-row:not(.wam-axis)')];
-    const grid = rows.map(row => [...row.querySelectorAll('.wam-cell')]);
-    const progBar = root.querySelector('.wam-prog-bar i');
-    const progTxt = root.querySelector('.wam-prog-txt');
-    const name = title.replace(/</g, '&lt;');
+    // the grid: about 40k particles on a big screen, fewer on a phone
+    const cell = Math.max(4, Math.sqrt((VW * VH) / 40000));
+    const cols = Math.ceil(VW / cell);
+    const rows = Math.ceil(VH / cell);
+    const N = cols * rows;
+    const dst = sample(img, cols, rows, VW / VH);
+    const srcCols = card ? sample(img, cols, rows, card.width / card.height) : null;
 
-    // 1. the clicked card grows to fill the screen, and the present dissolves into noise
-    Object.assign(bg.style, { left: `${src.left}px`, top: `${src.top}px`, width: `${src.width}px`, height: `${src.height}px` });
-    const img = await Promise.race([imgP, sleep(250).then(() => null)]) || null;
-    const encode = (async () => {
-      if (!img || src.width < 40) { enc.style.opacity = '0'; return; }
-      const EW = VW;
-      const EH = VH;
-      for (const level of [1, 0.84, 0.66, 0.48, 0.32, 0.18]) {
-        paint(enc, { W: EW, H: EH, img, level });
-        await sleep(30);
-      }
-      enc.style.opacity = '0';
-    })();
-    bg.getBoundingClientRect();
-    Object.assign(bg.style, { left: '0px', top: '0px', width: `${VW}px`, height: `${VH}px`, borderRadius: '0px' });
-
-    // 2. a few futures, sampled from where the visitor acted
-    if (!opts.skipTraces) await drawTraces(traceCanvas, from, { x: VW * 0.5, y: VH * 0.58 }, 480);
-    else await sleep(400);
-    await encode;
-    if (skipped) return;
-
-    // 3. the latent space: encode, then sample
-    root.classList.add('is-dark');
-    traceCanvas.style.transition = 'opacity .5s';
-    traceCanvas.style.opacity = '0.18';
-    await typeLine(logEl, `&gt; imagine(action: <b>open "${name}"</b>)`);
-    const tokens = [...root.querySelectorAll('.wam-z i')].sort(() => Math.random() - 0.5);
-    const tok = (async () => {
-      for (let i = 0; i < tokens.length; i += 4) {
-        tokens.slice(i, i + 4).forEach(t => t.classList.add('h'));
-        if (i >= 8) tokens.slice(i - 8, i - 4).forEach(t => t.classList.add(Math.random() < 0.55 ? 'on' : 'h'));
-        await sleep(6);
-      }
-    })();
-    await typeLine(logEl, '&gt; encode o_t → z_t ............ 96 tokens');
-    await tok;
-    if (skipped) return;
-    await typeLine(logEl, `&gt; sample ${R} rollouts · ${F} frames · ${F * STEPS} denoising steps`);
-    const [image, alts] = await Promise.all([imgP, Promise.race([altP, sleep(500).then(() => [])])]);
-    if (skipped) return;
-
-    const v0 = { cx: rand(0.3, 0.7), cy: rand(0.35, 0.65), z: rand(1.9, 2.5) };    // the shared present
-    const plans = rows.map((_, r) => {
-      if (r === win) return { end: FULL, alt: null, top: 1 };
-      return {
-        end: { cx: rand(0.15, 0.85), cy: rand(0.2, 0.8), z: rand(1.3, 2.3) },
-        alt: alts[r % Math.max(1, alts.length)] || null,
-        altView: { cx: rand(0.3, 0.7), cy: rand(0.3, 0.7), z: rand(1, 1.5) },
-        top: rand(0.62, 0.8),
-      };
-    });
-    const total = F * STEPS;
-    for (let f = 0; f < F; f += 1) {
-      const u = F > 1 ? f / (F - 1) : 1;
-      for (let s = 1; s <= STEPS; s += 1) {
-        if (skipped) return;
-        rows.forEach((row, r) => {
-          const p = plans[r];
-          const e = u ** 1.2;
-          const view = {
-            cx: v0.cx + (p.end.cx - v0.cx) * e,
-            cy: v0.cy + (p.end.cy - v0.cy) * e,
-            z: v0.z + (p.end.z - v0.z) * e,
-          };
-          const level = (0.32 + (p.top - 0.32) * u) * (0.45 + 0.55 * (s / STEPS));
-          const cell = grid[r][f];
-          cell.classList.add('on');
-          paint(cell.querySelector('canvas'), {
-            W: 192, H: 120, img: image, view, level,
-            alt: p.alt, altView: p.altView, mix: p.alt ? 0.85 * u ** 1.4 : 0,
-          });
-        });
-        const done = f * STEPS + s;
-        progBar.style.width = `${(done / total) * 100}%`;
-        progTxt.textContent = `denoising ${done}/${total}`;
-        await sleep(20);
+    const aSrc = new Float32Array(N * 2);
+    const aNoise = new Float32Array(N * 2);
+    const aDst = new Float32Array(N * 2);
+    const aCol0 = new Float32Array(N * 3);
+    const aCol1 = new Float32Array(N * 3);
+    const aSeed = new Float32Array(N * 2);
+    const sx = VW * 0.26;
+    const sy = VH * 0.26;
+    const L = [0.76, 0.69, 0.98];   // the lilac a plain link starts from
+    for (let j = 0, i = 0; j < rows; j += 1) {
+      for (let c = 0; c < cols; c += 1, i += 1) {
+        const u = (c + 0.5) / cols;
+        const v = (j + 0.5) / rows;
+        aDst[i * 2] = u * VW;
+        aDst[i * 2 + 1] = v * VH;
+        if (card) {
+          aSrc[i * 2] = card.left + u * card.width;
+          aSrc[i * 2 + 1] = card.top + v * card.height;
+        } else {
+          aSrc[i * 2] = from.x + gauss() * 3;
+          aSrc[i * 2 + 1] = from.y + gauss() * 3;
+        }
+        aNoise[i * 2] = VW / 2 + gauss() * sx;
+        aNoise[i * 2 + 1] = VH / 2 + gauss() * sy;
+        for (let k = 0; k < 3; k += 1) {
+          aCol1[i * 3 + k] = dst[i * 4 + k] / 255;
+          aCol0[i * 3 + k] = srcCols ? srcCols[i * 4 + k] / 255 : L[k];
+        }
+        aSeed[i * 2] = Math.random();
+        aSeed[i * 2 + 1] = Math.random();
       }
     }
-    if (skipped) return;
+    const { gl, prog } = G;
+    const bind = (name, data, size) => {
+      const b = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, b);
+      gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, name);
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
+    };
+    bind('aSrc', aSrc, 2);
+    bind('aNoise', aNoise, 2);
+    bind('aDst', aDst, 2);
+    bind('aCol0', aCol0, 3);
+    bind('aCol1', aCol1, 3);
+    bind('aSeed', aSeed, 2);
+    const U = name => gl.getUniformLocation(prog, name);
+    gl.viewport(0, 0, canvas.width, canvas.height);
+    gl.uniform2f(U('uRes'), VW, VH);
+    gl.uniform1f(U('uCell'), cell * dpr);
+    const uA = U('uA');
+    const uB = U('uB');
 
-    // 4. score the rollouts against the goal; the losers fade, the winner replays
-    await typeLine(logEl, '&gt; score p(goal | rollout) ......... done');
-    const scores = plans.map((p, r) => (r === win ? 0.97 : rand(0.05, 0.46)));
-    const nums = rows.map(row => row.querySelector('.num'));
-    const bars = rows.map(row => row.querySelector('.wam-meter i'));
+    const fctx = finalC.getContext('2d');
+    fctx.imageSmoothingQuality = 'high';
+    fctx.drawImage(img, ...cropOf(img, finalC.width / finalC.height), 0, 0, finalC.width, finalC.height);
+
+    // timings: scatter, flow, settle
+    const TA = 380;
+    const TB = 1050;
     const t0 = performance.now();
-    while (!skipped) {
-      const k = Math.min(1, (performance.now() - t0) / 300);
-      const e = 1 - (1 - k) ** 3;
-      nums.forEach((el, r) => { el.textContent = (scores[r] * e).toFixed(2); });
-      bars.forEach((el, r) => { el.style.width = `${scores[r] * e * 100}%`; });
-      if (k >= 1) break;
-      await sleep(30);
-    }
-    if (skipped) return;
-    rows.forEach((row, r) => row.classList.add(r === win ? 'win' : 'lose'));
-    await typeLine(logEl, `&gt; rollout ${win + 1} · p(goal) 0.97 · <b>chosen</b>`);
-    for (let f = 0; f < F; f += 1) {
-      if (skipped) return;
-      grid[win].forEach((c, i) => c.classList.toggle('play', i === f));
-      await sleep(narrow ? 70 : 45);
-    }
+    await new Promise(resolve => {
+      const frame = now => {
+        if (skipped) { resolve(); return; }
+        const e = now - t0;
+        const a = Math.min(1, e / TA);
+        const b = Math.max(0, Math.min(1, (e - TA * 0.7) / TB));
+        const bg = Math.min(1, e / (TA * 0.8));
+        gl.clearColor(0.039 * bg, 0.039 * bg, 0.039 * bg, bg);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(uA, a);
+        gl.uniform1f(uB, b);
+        gl.drawArrays(gl.POINTS, 0, N);
+        if (e > 120) { tag.classList.add('on'); root.querySelector('.wam-skip').classList.add('on'); }
+        tag.textContent = b < 1 ? `flow matching · t ${b.toFixed(2)}` : `t 1.00 · ${title}`;
+        if (b >= 1) resolve(); else requestAnimationFrame(frame);
+      };
+      requestAnimationFrame(frame);
+    });
     if (skipped) return;
 
-    // 5. the last predicted frame becomes the page: it grows, then sharpens
-    const lastCanvas = grid[win][F - 1].querySelector('canvas');
-    const rect = lastCanvas.getBoundingClientRect();
-    const big = document.createElement('canvas');
-    big.className = 'wam-grow';
-    big.width = lastCanvas.width;
-    big.height = lastCanvas.height;
-    big.getContext('2d').drawImage(lastCanvas, 0, 0);
-    Object.assign(big.style, { left: `${rect.left}px`, top: `${rect.top}px`, width: `${rect.width}px`, height: `${rect.height}px` });
-    root.append(big);
-    big.getBoundingClientRect();
-    Object.assign(big.style, { left: '0px', top: '0px', width: `${VW}px`, height: `${VH}px`, borderRadius: '0px', boxShadow: 'none' });
-    root.querySelector('.wam-panel').style.opacity = '0';
-    await sleep(410);
-    if (skipped) return;
-    const tag = document.createElement('p');
-    tag.className = 'wam-tag';
-    tag.textContent = `t+${F} · denoising`;
-    root.append(tag);
-    const W = VW;
-    const H = VH;
-    for (const level of [0.66, 0.79, 0.88, 0.94, 0.98]) {
-      if (skipped) return;
-      paint(big, { W, H, img: image, level });
-      await sleep(24);
-    }
-    if (image) {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      big.width = Math.round(VW * dpr);
-      big.height = Math.round(VH * dpr);
-      big.getContext('2d').drawImage(image, ...cropOf(image, big.width / big.height, FULL), 0, 0, big.width, big.height);
-    }
-    tag.textContent = `t+${F} · future reached`;
-    await sleep(110);
+    // the sample sharpens into the real frame
+    finalC.classList.add('on');
+    await sleep(240);
     window.removeEventListener('keydown', onKey);
     if (!skipped) go();
   }
@@ -530,7 +331,7 @@
     if (!a || (a.target && a.target !== '_self') || a.hasAttribute('download')) return;
     if (!futureOf(a.href)) return;
     e.preventDefault();
-    // grow from the card if a card was clicked
+    // start from the card if a card was clicked
     const box = a.closest('.proj-card, .ht');
     const r = box ? box.getBoundingClientRect() : null;
     imagine(a.href, {
@@ -559,22 +360,19 @@
     const root = document.createElement('div');
     root.className = 'wam';
     root.style.cursor = 'auto';
-    root.innerHTML = '<canvas aria-hidden="true"></canvas><p class="wam-tag">future reached · observing</p>';
+    root.innerHTML = '<canvas aria-hidden="true"></canvas><p class="wam-tag on">t 1.00 · observing</p>';
     document.body.append(root);
     const canvas = root.querySelector('canvas');
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const W = window.innerWidth;
-    const H = window.innerHeight;
-    canvas.width = Math.round(W * dpr);
-    canvas.height = Math.round(H * dpr);
-    Object.assign(canvas.style, { position: 'absolute', inset: '0', width: '100%', height: '100%' });
+    canvas.width = Math.round(window.innerWidth * dpr);
+    canvas.height = Math.round(window.innerHeight * dpr);
     const ctx = canvas.getContext('2d');
     ctx.fillStyle = '#0a0a0a';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     html.classList.add('wam-focus');
     html.classList.remove('wam-arriving');
     getImage(data.poster).then(img => {
-      if (img) ctx.drawImage(img, ...cropOf(img, canvas.width / canvas.height, FULL), 0, 0, canvas.width, canvas.height);
+      if (img) ctx.drawImage(img, ...cropOf(img, canvas.width / canvas.height), 0, 0, canvas.width, canvas.height);
       setTimeout(() => {
         html.classList.add('wam-focusing');
         requestAnimationFrame(() => html.classList.remove('wam-focus'));
