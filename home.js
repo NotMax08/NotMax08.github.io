@@ -189,15 +189,14 @@
     return textureLod(uI5, uv, lod).rgb;
   }
 
-  // the intro tile's picture: a dark purple field that drifts slowly
+  // the intro tile's picture: a dark field with a faint violet drift
   vec3 latent(vec2 p){
     float s = uTime * 0.07;
     float a = sin(p.x * 2.6 + s * 1.9 + sin(p.y * 2.1 - s));
     float b = sin(p.y * 3.1 - s * 1.4 + sin(p.x * 1.7 + s * 1.2));
     vec3 c = vec3(0.045, 0.042, 0.06);
-    c += vec3(0.42, 0.30, 0.85) * smoothstep(-0.1, 1.0, a) * 0.2;
-    c += vec3(0.70, 0.50, 0.90) * smoothstep(0.35, 1.0, b) * 0.1;
-    c += vec3(0.25, 0.20, 0.60) * smoothstep(0.45, 1.0, a * b) * 0.12;
+    c += vec3(0.42, 0.36, 0.62) * smoothstep(-0.1, 1.0, a) * 0.11;
+    c += vec3(0.60, 0.54, 0.72) * smoothstep(0.35, 1.0, b) * 0.06;
     return c;
   }
 
@@ -222,7 +221,7 @@
       float s = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - uRad;
       if (s < 1.0) { idx = i; sd = s; R = r; break; }
     }
-    vec3 bg = uBg + LILAC * ring * 0.06;
+    vec3 bg = uBg + LILAC * ring * 0.02;
     if (idx < 0) { o = vec4(bg, 1.0); return; }
     float m = clamp(0.5 - sd, 0.0, 1.0);
     vec4 P = uTile[idx];
@@ -233,7 +232,7 @@
     t = clamp(t + ring * 0.4, 0.0, 1.0);
 
     // the picture: blurrier where it is noisy (coarse to fine), and a little split into R, G and B
-    vec2 ca = (luv - 0.5) * (0.003 + t * 0.012 + ring * 0.035);
+    vec2 ca = (luv - 0.5) * (0.001 + t * 0.004 + ring * 0.01);
     vec3 x0;
     if (idx == 0) {
       vec2 p = vec2(luv.x * R.z / R.w, luv.y);
@@ -265,23 +264,22 @@
                     mix(hash3(ki + vec2(0.0, 1.0) + st), hash3(ki + vec2(1.0, 1.0) + st), kf.x), kf.y) - 0.5;
     vec2 cell = floor(fc);
     vec3 fine = vec3(gauss(cell + uStep * 2.11), gauss(cell + uStep * 3.07 + 9.1), gauss(cell + uStep * 4.13 + 21.3));
-    fine = mix(vec3(fine.g), fine, 0.5);
-    vec3 eps = vec3(soft) * 0.7 + tint * 0.6 + fine * 0.55;
-    eps += step(0.997, hash(cell * 0.71 + uStep * 7.3)) * LILAC * 2.6;
+    fine = mix(vec3(fine.g), fine, 0.12);
+    vec3 eps = vec3(soft) * 0.75 + tint * 0.14 + fine * 0.5;
 
     // the forward process with a cosine schedule: x_t = sqrt(a) x_0 + sqrt(1 - a) eps
     float a = cos(t * 1.5707963);
     a *= a;
-    float amp = idx == 0 ? 0.3 : 0.42;
+    float amp = idx == 0 ? 0.24 : 0.34;
     vec3 xt = sqrt(a) * (x0 * 2.0 - 1.0) + sqrt(1.0 - a) * eps * amp;
     vec3 c = clamp(xt * 0.5 + 0.5, 0.0, 1.0);
 
     // where the clean patch meets the noise, a thin lilac contour
     float rim = smoothstep(0.12, 0.2, t) * (1.0 - smoothstep(0.24, 0.36, t));
-    c += LILAC * rim * 0.26 * edgeW;
+    c += LILAC * rim * 0.07 * edgeW;
 
     // the ripple catches the light as it passes
-    c += LILAC * ring * 0.14;
+    c += LILAC * ring * 0.04;
 
     o = vec4(mix(bg, c, m), 1.0);
   }`;
@@ -595,7 +593,7 @@
     gl.uniform4fv(U.uTile, params);
     gl.uniform1f(U.uRad, 12 * dprX);
     gl.uniform1f(U.uDpr, dprX);
-    gl.uniform1f(U.uStep, Math.floor(now / 83));
+    gl.uniform1f(U.uStep, Math.floor(now / 140));
     gl.uniform1f(U.uTime, now / 1000);
     gl.uniform4f(U.uRip, rip.x * dprX, (H - rip.y) * dprY, age, now < rip.t0 ? 0 : rip.s);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -661,12 +659,6 @@
   markHere();
   const hovered = new Map();
   document.querySelectorAll(".proj-card").forEach(a => {
-    // where the cursor is on the card: the purple edge light follows it
-    a.addEventListener('pointermove', e => {
-      const r = a.getBoundingClientRect();
-      a.style.setProperty('--mx', `${e.clientX - r.left}px`);
-      a.style.setProperty('--my', `${e.clientY - r.top}px`);
-    });
     a.addEventListener('mouseenter', () => {
       const now = performance.now();
       if (now - (hovered.get(a) || -1e9) < 4000) return;

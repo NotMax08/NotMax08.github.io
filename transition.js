@@ -216,9 +216,9 @@
       r += (l * 0.99 - r) * grey;
       g += (l * 0.96 - g) * grey;
       b += (l * 1.06 - b) * grey;
-      d[i] = (sa * r + sn * (e + GT[(k + 104729) & GMASK] * 0.38) + 1) * 127.5;
-      d[i + 1] = (sa * g + sn * (e + GT[(k + 7919) & GMASK] * 0.38) + 1) * 127.5;
-      d[i + 2] = (sa * b + sn * (e + GT[(k + 31337) & GMASK] * 0.38) + 1) * 127.5;
+      d[i] = (sa * r + sn * (e + GT[(k + 104729) & GMASK] * 0.12) + 1) * 127.5;
+      d[i + 1] = (sa * g + sn * (e + GT[(k + 7919) & GMASK] * 0.12) + 1) * 127.5;
+      d[i + 2] = (sa * b + sn * (e + GT[(k + 31337) & GMASK] * 0.12) + 1) * 127.5;
     }
     ctx.putImageData(data, 0, 0);
   }
