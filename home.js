@@ -179,7 +179,7 @@
     return sqrt(-2.0 * log(u1)) * cos(6.2831853 * u2);
   }
   vec3 hash3(vec2 p){ return vec3(hash(p), hash(p + 31.7), hash(p + 63.1)); }
-  const vec3 LILAC = vec3(0.80, 0.72, 1.0);   // the site's pastel purple
+  const vec3 LILAC = vec3(0.78, 0.75, 0.90);   // the site's pastel purple
 
   vec3 tap(int i, vec2 uv, float lod){
     if (i == 1) return textureLod(uI1, uv, lod).rgb;
@@ -195,8 +195,8 @@
     float a = sin(p.x * 2.6 + s * 1.9 + sin(p.y * 2.1 - s));
     float b = sin(p.y * 3.1 - s * 1.4 + sin(p.x * 1.7 + s * 1.2));
     vec3 c = vec3(0.045, 0.042, 0.06);
-    c += vec3(0.42, 0.36, 0.62) * smoothstep(-0.1, 1.0, a) * 0.11;
-    c += vec3(0.60, 0.54, 0.72) * smoothstep(0.35, 1.0, b) * 0.06;
+    c += vec3(0.40, 0.38, 0.50) * smoothstep(-0.1, 1.0, a) * 0.08;
+    c += vec3(0.58, 0.56, 0.64) * smoothstep(0.35, 1.0, b) * 0.05;
     return c;
   }
 
@@ -221,7 +221,7 @@
       float s = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0) - uRad;
       if (s < 1.0) { idx = i; sd = s; R = r; break; }
     }
-    vec3 bg = uBg + LILAC * ring * 0.02;
+    vec3 bg = uBg + LILAC * ring * 0.01;
     if (idx < 0) { o = vec4(bg, 1.0); return; }
     float m = clamp(0.5 - sd, 0.0, 1.0);
     vec4 P = uTile[idx];
@@ -247,7 +247,7 @@
       x0 = vec3(0.11, 0.12, 0.14);
     }
     float l = dot(x0, vec3(0.299, 0.587, 0.114));
-    x0 = mix(x0, vec3(l) * vec3(0.99, 0.96, 1.05), t * 0.45);
+    x0 = mix(x0, vec3(l) * vec3(1.0, 0.99, 1.02), t * 0.4);
 
     // Gaussian noise, a new draw every sampling step: soft 2 px blotches, a slightly
     // coarser RGB tint, per-pixel grain with some colour, and a rare lilac speck
@@ -265,21 +265,21 @@
     vec2 cell = floor(fc);
     vec3 fine = vec3(gauss(cell + uStep * 2.11), gauss(cell + uStep * 3.07 + 9.1), gauss(cell + uStep * 4.13 + 21.3));
     fine = mix(vec3(fine.g), fine, 0.12);
-    vec3 eps = vec3(soft) * 0.75 + tint * 0.14 + fine * 0.5;
+    vec3 eps = vec3(soft) * 0.6 + tint * 0.08 + fine * 0.36;
 
     // the forward process with a cosine schedule: x_t = sqrt(a) x_0 + sqrt(1 - a) eps
     float a = cos(t * 1.5707963);
     a *= a;
-    float amp = idx == 0 ? 0.24 : 0.34;
+    float amp = idx == 0 ? 0.18 : 0.26;
     vec3 xt = sqrt(a) * (x0 * 2.0 - 1.0) + sqrt(1.0 - a) * eps * amp;
     vec3 c = clamp(xt * 0.5 + 0.5, 0.0, 1.0);
 
     // where the clean patch meets the noise, a thin lilac contour
     float rim = smoothstep(0.12, 0.2, t) * (1.0 - smoothstep(0.24, 0.36, t));
-    c += LILAC * rim * 0.07 * edgeW;
+    c += LILAC * rim * 0.035 * edgeW;
 
     // the ripple catches the light as it passes
-    c += LILAC * ring * 0.04;
+    c += LILAC * ring * 0.02;
 
     o = vec4(mix(bg, c, m), 1.0);
   }`;
