@@ -448,21 +448,22 @@
   }
 
   // on load: one ripple from the top-left corner, and every tile resolves as it passes
-  const LOAD = performance.now() + 200;
-  const SPEED = 0.9;          // css px per ms, the same as the ripple in the shader
+  const LOAD = performance.now() + 100;
+  const FAST = 2;             // the load plays at 2x
+  const SPEED = 0.9 * FAST;   // css px per ms, the shader ripple (0.9) sped up by rip.k
   tiles.forEach(t => {
     t.delay = Math.hypot(t.x + t.w / 2, t.y + t.h / 2) / SPEED;
-    if (t.label) resolve(t.label, t.title, 900, 200 + t.delay);
+    if (t.label) resolve(t.label, t.title, 900 / FAST, 100 + t.delay);
   });
-  rip = { x: 0, y: 0, t0: LOAD, s: 0.9 };
-  const SWEEP = 1100;
+  rip = { x: 0, y: 0, t0: LOAD, s: 0.9, k: FAST };
+  const SWEEP = 1100 / FAST;
   const ease = k => (k < 0.5 ? 4 * k * k * k : 1 - (-2 * k + 2) ** 3 / 2);
   const sweepOf = (t, now) => 1 - ease(clamp((now - LOAD - t.delay) / SWEEP, 0, 1));
-  const loaded = Math.max(...tiles.map(t => t.delay)) + SWEEP + 500;
+  const loaded = Math.max(...tiles.map(t => t.delay)) + SWEEP + 250;
 
   // with nobody pointing, the projects take turns
   const ORDER = [1, 4, 2, 5, 3].filter(i => i < tiles.length);
-  let autoAt = performance.now() + 200 + loaded;
+  let autoAt = performance.now() + 100 + loaded;
   let autoK = 0;
   const AUTO = 2600;
 
@@ -586,7 +587,7 @@
       crops.set([sx, sy, clamp(tile.fx - sx / 2, 0, 1 - sx), clamp(1 - tile.fy - sy / 2, 0, 1 - sy)], i * 4);
     });
 
-    const age = Math.max(0, (now - rip.t0) / 1000);
+    const age = Math.max(0, (now - rip.t0) / 1000) * (rip.k || 1);
     gl.uniform2f(U.uRes, canvas.width, canvas.height);
     gl.uniform4fv(U.uRect, rects);
     gl.uniform4fv(U.uCrop, crops);
