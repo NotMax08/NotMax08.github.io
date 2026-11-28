@@ -1612,7 +1612,7 @@ function showCard(st) {
   tags.replaceChildren(...st.tags.map(t => Object.assign(document.createElement('li'), { textContent: t })));
   const go = card.querySelector('.w-card-go');
   go.href = st.href;
-  go.textContent = st.external ? 'Open on Devpost ↗' : 'Imagine it →';
+  go.textContent = st.external ? 'Open on Devpost ↗' : 'See more →';
   go.title = st.external ? '' : 'Opens the project page';
   if (st.external) { go.target = '_blank'; go.rel = 'noopener'; } else { go.removeAttribute('target'); go.removeAttribute('rel'); }
   card.hidden = false;
